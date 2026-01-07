@@ -27,7 +27,7 @@ linters:
     - lll # unclear added value
     - nestif # temporary
     - nonamedreturns # unclear added value
-    - nlreturn # unclear added value
+    - nlreturn # unclear added valueß
     - noinlineerr # unclear added value
     - paralleltest # unclear added value
     - recvcheck  # disagree
