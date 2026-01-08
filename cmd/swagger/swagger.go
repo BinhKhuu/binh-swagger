@@ -9,6 +9,18 @@ import (
 )
 
 func main() {
+	parser, err := BuildParser()
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	_, err = parser.Parse()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func BuildParser() (*flags.Parser, error) {
 	parser := flags.NewParser(nil, flags.Default)
 
 	_, err := parser.AddCommand(
@@ -18,7 +30,7 @@ func main() {
 		&commands.HelpCommand{Out: os.Stdout},
 	)
 	if err != nil {
-		log.Fatalf("%v", err)
+		return nil, err
 	}
 	_, err = parser.AddCommand(
 		"version",
@@ -27,7 +39,7 @@ func main() {
 		&commands.VersionCommand{Out: os.Stdout},
 	)
 	if err != nil {
-		log.Fatalf("%v", err)
+		return nil, err
 	}
 
 	_, err = parser.AddCommand(
@@ -37,11 +49,8 @@ func main() {
 		&commands.EnvCommand{Out: os.Stdout},
 	)
 	if err != nil {
-		log.Fatalf("%v", err)
+		return nil, err
 	}
 
-	_, err = parser.Parse()
-	if err != nil {
-		os.Exit(1)
-	}
+	return parser, nil
 }
