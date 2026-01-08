@@ -29,6 +29,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	_, err = parser.AddCommand(
+		"env",
+		"Shows version",
+		"Prints Version information",
+		&commands.EnvCommand{Out: os.Stdout},
+	)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	_, err = parser.Parse()
 	if err != nil {
 		os.Exit(1)
