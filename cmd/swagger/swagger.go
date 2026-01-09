@@ -52,5 +52,15 @@ func BuildParser() (*flags.Parser, error) {
 		return nil, err
 	}
 
+	_, err = parser.AddCommand(
+		"echo",
+		"repeats arguments",
+		"Prints arguments",
+		&commands.EchoCommand{Out: os.Stdout},
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return parser, nil
 }

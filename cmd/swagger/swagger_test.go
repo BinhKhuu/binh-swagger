@@ -12,6 +12,7 @@ var ExpectedCommandNames = []string{
 	"help",
 	"version",
 	"env",
+	"echo",
 }
 
 func Test_SwaggerCommandsRegistered_HasName(t *testing.T) {
@@ -37,7 +38,7 @@ func Test_SwaggerCommandsRegistered_HasName(t *testing.T) {
 	}
 }
 
-// Duplicated test but i want to document how to compare and test something by name
+// Duplicated test but i want to document how to compare and test something by name.
 func Test_SwaggerCommandAllRegistered_ByName(t *testing.T) {
 	parser, err := makeParser()
 	if err != nil {
