@@ -58,6 +58,13 @@ func BuildParser() (*flags.Parser, error) {
 		"Prints arguments",
 		&commands.EchoCommand{Out: os.Stdout},
 	)
+
+	_, err = parser.AddCommand(
+		"config",
+		"loads config",
+		"loads config and reads it",
+		&commands.ConfigCommand{Out: os.Stdout},
+	)
 	if err != nil {
 		return nil, err
 	}

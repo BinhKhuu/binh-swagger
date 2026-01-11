@@ -13,6 +13,7 @@ var ExpectedCommandNames = []string{
 	"version",
 	"env",
 	"echo",
+	"config",
 }
 
 func Test_SwaggerCommandsRegistered_HasName(t *testing.T) {

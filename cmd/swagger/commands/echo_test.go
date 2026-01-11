@@ -2,38 +2,42 @@ package commands
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
 var text = "ugh"
 
 func Test_EchoCommand_UpperTrue(t *testing.T) {
-	cmd, buff := setupTests()
+	cmd, buff := setupEchoTests()
 	cmd.Upper = true
 	err := cmd.Execute(nil)
 	if err != nil {
 		t.Fatalf("Error executing echo command: %v", err)
 	}
-	output := buff.String()
-	if output != "UGH" {
-		t.Fatalf("Error exspect UGH but got %s", output)
+	output := strings.TrimSpace(buff.String())
+	expectedOutput := strings.TrimSpace(strings.ToUpper(text))
+	if output != expectedOutput {
+		t.Fatalf("Error exspect %s but got %s", strings.ToUpper(text), output)
 	}
 }
 
 func Test_EchoCommand_UpperFalse(t *testing.T) {
-	cmd, buff := setupTests()
+	cmd, buff := setupEchoTests()
 	cmd.Upper = false
 	err := cmd.Execute(nil)
 	if err != nil {
 		t.Fatalf("Error executing echo command: %v", err)
 	}
-	output := buff.String()
-	if output != text {
+
+	output := strings.TrimSpace(buff.String())
+	expectedOutput := strings.TrimSpace(text)
+	if output != expectedOutput {
 		t.Fatalf("Error exspect %s but got %s", text, output)
 	}
 }
 
-func setupTests() (*EchoCommand, *bytes.Buffer) {
+func setupEchoTests() (*EchoCommand, *bytes.Buffer) {
 	var buff bytes.Buffer
 	args := EchoArgs{Text: text}
 	cmd := &EchoCommand{

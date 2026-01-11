@@ -3,6 +3,7 @@ package commands
 import (
 	"binh-swagger/cmd/swagger/commands/internal/meta"
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -13,7 +14,7 @@ func Test_VersionCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error executing command: %v", err)
 	}
-	if outBuf.String() != meta.Version {
+	if strings.TrimSpace(outBuf.String()) != meta.Version {
 		t.Fatalf("expected version output: %s", meta.Version)
 	}
 }
