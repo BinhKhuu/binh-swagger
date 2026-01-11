@@ -18,27 +18,26 @@ type ConfigArgs struct {
 }
 
 func (c *ConfigCommand) Execute(_ []string) error {
-	fileInfo, err := getFileInfo(c)
+	f, err := getFile(c)
 	if err != nil {
-		fmt.Fprintf(c.Out, "error file does not exist: %v", err)
+		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v", err)
 		return err
 	}
-
-	fmt.Fprintf(c.Out, "fileinfo %v", fileInfo)
+	defer f.Close()
 
 	return nil
 }
 
-func getFileInfo(c *ConfigCommand) (os.FileInfo, error) {
-	sanitisedFilePath, err := getSantiseFilePath(c.Args)
+// probably should rename to validate file since the file info object is not going to be used passed this point
+func getFile(c *ConfigCommand) (*os.File, error) {
+	sanitisedFilePath, err := getSanitiseFilePath(c.Args)
 	if err != nil {
-		fmt.Fprintf(c.Out, "Error sanitising file path: %v", err)
 		return nil, err
 	}
 
 	err = checkSymlinks(sanitisedFilePath)
 	if err != nil {
-		fmt.Fprintf(c.Out, "Error : %v", err)
+		return nil, err
 	}
 
 	fileInfo, err := os.Stat(sanitisedFilePath)
@@ -47,8 +46,7 @@ func getFileInfo(c *ConfigCommand) (os.FileInfo, error) {
 		if os.IsNotExist(err) {
 			message = "config file not found %v"
 		}
-		fmt.Fprintf(c.Out, message, err)
-		return nil, err
+		return nil, fmt.Errorf(message, err)
 	}
 
 	err = validateFileInfo(fileInfo)
@@ -58,7 +56,13 @@ func getFileInfo(c *ConfigCommand) (os.FileInfo, error) {
 	}
 
 	fmt.Fprintf(c.Out, "found file: %s", fileInfo.Name())
-	return fileInfo, nil
+
+	f, err := os.Open(sanitisedFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
 
 func validateFileInfo(fileInfo os.FileInfo) error {
@@ -68,7 +72,7 @@ func validateFileInfo(fileInfo os.FileInfo) error {
 	return nil
 }
 
-func getSantiseFilePath(args ConfigArgs) (string, error) {
+func getSanitiseFilePath(args ConfigArgs) (string, error) {
 	cleanPath := filepath.Clean(args.Filepath)
 	cleanFile := filepath.Clean(args.Filename)
 	cleanFilePath := filepath.Join(cleanPath, cleanFile)
