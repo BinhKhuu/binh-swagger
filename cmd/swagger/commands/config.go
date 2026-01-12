@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/goccy/go-yaml"
 )
 
 type ConfigCommand struct {
@@ -17,19 +19,63 @@ type ConfigArgs struct {
 	Filename string `positional-arg-name:"filename"`
 }
 
+type Config struct {
+	Name    string `yaml:"name"`
+	Version int    `yaml:"version"`
+	Enabled bool   `yaml:"enabled"`
+
+	Metadata struct {
+		Author  string   `yaml:"author"`
+		Created string   `yaml:"created"`
+		Tags    []string `yaml:"tags"`
+	} `yaml:"metadata"`
+
+	Config struct {
+		Retries        int `yaml:"retries"`
+		TimeoutSeconds int `yaml:"timeout_seconds"`
+		Paths          struct {
+			Input  string `yaml:"input"`
+			Output string `yaml:"output"`
+		} `yaml:"paths"`
+	} `yaml:"config"`
+
+	Items []struct {
+		ID    int    `yaml:"id"`
+		Value string `yaml:"value"`
+	} `yaml:"items"`
+}
+
 func (c *ConfigCommand) Execute(_ []string) error {
-	f, err := getFile(c)
+	f, err := validateAndOpenFile(c)
 	if err != nil {
 		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v", err)
 		return err
 	}
 	defer f.Close()
 
+	config, err := parseFile(f)
+	if err != nil {
+		fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
+	}
+	fmt.Fprintf(c.Out, "%+v\n", config)
 	return nil
 }
 
-// probably should rename to validate file since the file info object is not going to be used passed this point
-func getFile(c *ConfigCommand) (*os.File, error) {
+func parseFile(file *os.File) (*Config, error) {
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	config := &Config{}
+	err = yaml.Unmarshal(data, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 	sanitisedFilePath, err := getSanitiseFilePath(c.Args)
 	if err != nil {
 		return nil, err

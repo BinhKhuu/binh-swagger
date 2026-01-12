@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -35,17 +36,6 @@ func Test_InvalidFilePath(t *testing.T) {
 	}
 }
 
-func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.Buffer) {
-	var buff bytes.Buffer
-	args := ConfigArgs{Filepath: filePath, Filename: filename}
-	cmd := &ConfigCommand{
-		Out:  &buff,
-		Args: args,
-	}
-
-	return cmd, &buff
-}
-
 func Test_DirectoryFilePath(t *testing.T) {
 	cmd, _ := setupConfigTests(invalidFilename, invalidDirectory)
 	err := cmd.Execute(nil)
@@ -56,4 +46,52 @@ func Test_DirectoryFilePath(t *testing.T) {
 	if !strings.Contains(err.Error(), "directory") {
 		t.Fatalf("expected directory error, got: %v", err)
 	}
+}
+
+func Test_ParseFile(t *testing.T) {
+	filepath := fmt.Sprintf("%s/%s", validFilePath, validFilename)
+	f, err := os.Open(filepath)
+	if err != nil {
+		t.Fatalf("Unexpected error when opening test file: %v", err)
+	}
+
+	cfg, err := parseFile(f)
+	if err != nil {
+		t.Fatalf("Error parsing test file: %v", err)
+	}
+
+	if cfg.Name != "sample-test" {
+		t.Errorf("expected Name 'sample-test', got %q", cfg.Name)
+	}
+
+	if cfg.Version != 1 {
+		t.Errorf("expected Version 1, got %d", cfg.Version)
+	}
+
+	if !cfg.Enabled {
+		t.Errorf("expected Enabled true")
+	}
+
+	if cfg.Metadata.Author != "test-user" {
+		t.Errorf("expected author 'test-user', got %q", cfg.Metadata.Author)
+	}
+
+	if len(cfg.Items) != 3 {
+		t.Errorf("expected 3 items, got %d", len(cfg.Items))
+	}
+
+	if cfg.Items[0].Value != "alpha" {
+		t.Errorf("expected first item value 'alpha', got %q", cfg.Items[0].Value)
+	}
+}
+
+func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.Buffer) {
+	var buff bytes.Buffer
+	args := ConfigArgs{Filepath: filePath, Filename: filename}
+	cmd := &ConfigCommand{
+		Out:  &buff,
+		Args: args,
+	}
+
+	return cmd, &buff
 }
