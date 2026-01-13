@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -76,12 +77,9 @@ func parseFile(file *os.File) (*Config, error) {
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
-	sanitisedFilePath, err := getSanitiseFilePath(c.Args)
-	if err != nil {
-		return nil, err
-	}
+	sanitisedFilePath := getSanitiseFilePath(c.Args)
 
-	err = checkSymlinks(sanitisedFilePath)
+	err := checkSymlinks(sanitisedFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -118,14 +116,14 @@ func validateFileInfo(fileInfo os.FileInfo) error {
 	return nil
 }
 
-func getSanitiseFilePath(args ConfigArgs) (string, error) {
+func getSanitiseFilePath(args ConfigArgs) string {
 	cleanPath := filepath.Clean(args.Filepath)
 	cleanFile := filepath.Clean(args.Filename)
 	cleanFilePath := filepath.Join(cleanPath, cleanFile)
 	if !filepath.IsAbs(cleanFilePath) {
 		cleanFilePath, _ = filepath.Abs(cleanFilePath)
 	}
-	return cleanFilePath, nil
+	return cleanFilePath
 }
 
 func checkSymlinks(absFilePath string) error {
@@ -134,7 +132,7 @@ func checkSymlinks(absFilePath string) error {
 		return err
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
-		return fmt.Errorf("symlinks not allowed")
+		return errors.New("symlinks not allowed")
 	}
 	return nil
 }
