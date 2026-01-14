@@ -12,6 +12,8 @@ import (
 
 type ConfigCommand struct {
 	Out  io.Writer
+	API  bool       `description:"validate the configuration against the api model" long:"api" optional:"true"`
+	CMD  bool       `description:"validate against the command model"               long:"cmd"`
 	Args ConfigArgs `positional-args:"true"`
 }
 
@@ -47,6 +49,12 @@ type Config struct {
 }
 
 func (c *ConfigCommand) Execute(_ []string) error {
+	err := validateConfigFlags(c)
+	if err != nil {
+		fmt.Fprintf(c.Out, "there was an error with the provided flags: %v", err)
+		return err
+	}
+
 	f, err := validateAndOpenFile(c)
 	if err != nil {
 		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v", err)
@@ -54,11 +62,37 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	}
 	defer f.Close()
 
+	if c.API {
+		fmt.Fprintf(c.Out, "API validation is not yet implemented\n")
+		return nil
+	}
+
 	config, err := parseFile(f)
 	if err != nil {
 		fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
 	}
 	fmt.Fprintf(c.Out, "%+v\n", config)
+	return nil
+}
+
+func validateConfigFlags(c *ConfigCommand) error {
+	count := 0
+	if c.API {
+		count++
+	}
+
+	if c.CMD {
+		count++
+	}
+
+	if count > 1 {
+		return errors.New("only one of --api or --cmd can be specified")
+	}
+
+	if count == 0 {
+		return errors.New("one of --api or --cmd must be specified")
+	}
+
 	return nil
 }
 

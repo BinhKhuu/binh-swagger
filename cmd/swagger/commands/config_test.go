@@ -85,11 +85,38 @@ func Test_ParseFile(t *testing.T) {
 	}
 }
 
+func Test_ValidateConfigFlags(t *testing.T) {
+	cmd := &ConfigCommand{API: true, CMD: true}
+	err := validateConfigFlags(cmd)
+	if err == nil {
+		t.Fatalf("Expected error for both flags set, got nil")
+	}
+
+	cmd = &ConfigCommand{API: false, CMD: false}
+	err = validateConfigFlags(cmd)
+	if err == nil {
+		t.Fatalf("Expected error for no flags set, got nil")
+	}
+
+	cmd = &ConfigCommand{API: true, CMD: false}
+	err = validateConfigFlags(cmd)
+	if err != nil {
+		t.Fatalf("Did not expect error for valid flag set, got: %v", err)
+	}
+
+	cmd = &ConfigCommand{API: false, CMD: true}
+	err = validateConfigFlags(cmd)
+	if err != nil {
+		t.Fatalf("Did not expect error for valid flag set, got: %v", err)
+	}
+}
+
 func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.Buffer) {
 	var buff bytes.Buffer
 	args := ConfigArgs{Filepath: filePath, Filename: filename}
 	cmd := &ConfigCommand{
 		Out:  &buff,
+		API:  true,
 		Args: args,
 	}
 
