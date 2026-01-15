@@ -49,6 +49,28 @@ type Config struct {
 	} `yaml:"items"`
 }
 
+type APIConfig struct {
+	Version string      `yaml:"version"`
+	Models  []ModelSpec `yaml:"models"`
+	Routes  []RouteSpec `yaml:"routes"`
+}
+
+type ModelSpec struct {
+	Name   string      `yaml:"name"`
+	Fields []FieldSpec `yaml:"fields"`
+}
+
+type FieldSpec struct {
+	Name string `yaml:"name"`
+	Type string `yaml:"type"`
+}
+
+type RouteSpec struct {
+	Path   string `yaml:"path"`
+	Method string `yaml:"method"`
+	Model  string `yaml:"model"`
+}
+
 func (c *ConfigCommand) Execute(_ []string) error {
 	err := validateConfigFlags(c)
 	if err != nil {
@@ -64,15 +86,13 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	defer f.Close()
 
 	if c.API {
-		fmt.Fprintf(c.Out, "API validation is not yet implemented\n")
-		return nil
+		config, err := parseFile[APIConfig](f)
+		if err != nil {
+			fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
+		}
+		fmt.Fprintf(c.Out, "%+v\n", config)
 	}
 
-	config, err := parseFile(f)
-	if err != nil {
-		fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
-	}
-	fmt.Fprintf(c.Out, "%+v\n", config)
 	return nil
 }
 
@@ -97,18 +117,58 @@ func validateConfigFlags(c *ConfigCommand) error {
 	return nil
 }
 
-func parseFile(file *os.File) (*Config, error) {
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
+func parseFile[T any](file *os.File) (*T, error) {
+	var zero T
+
+	if _, ok := any(zero).(Config); ok {
+		return parseYAML[T](file)
 	}
-	config := &Config{}
-	err = yaml.Unmarshal(data, config)
+
+	if _, ok := any(zero).(APIConfig); ok {
+		return parseYAML[T](file)
+	}
+
+	return nil, fmt.Errorf("unsupported type %T", zero)
+}
+
+// Alternative implementation using type switch
+func parseFile2[T any](file *os.File) (*T, error) {
+	var (
+		err    error
+		v      T
+		result any
+	)
+
+	switch any(v).(type) {
+	case APIConfig:
+		result, err = parseYAML[APIConfig](file)
+	case Config:
+		result, err = parseYAML[Config](file)
+	default:
+
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return config, nil
+	typed, ok := result.(*T)
+	if !ok {
+		return nil, fmt.Errorf("type mismatch: expected %T", *new(T))
+	}
+
+	return typed, nil
+}
+
+func parseYAML[T any](file *os.File) (*T, error) {
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	var v T
+	if err := yaml.Unmarshal(data, &v); err != nil {
+		return nil, err
+	}
+	return &v, nil
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {

@@ -55,7 +55,7 @@ func Test_ParseFile(t *testing.T) {
 		t.Fatalf("Unexpected error when opening test file: %v", err)
 	}
 
-	cfg, err := parseFile(f)
+	cfg, err := parseFile[Config](f)
 	if err != nil {
 		t.Fatalf("Error parsing test file: %v", err)
 	}

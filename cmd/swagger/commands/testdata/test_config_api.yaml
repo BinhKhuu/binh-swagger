@@ -1,0 +1,45 @@
+version: "1.0"
+
+info:
+  name: "ExampleService"
+  description: "Test API specification for generator development"
+
+models:
+  - name: User
+    fields:
+      - name: id
+        type: uuid
+      - name: email
+        type: string
+      - name: created_at
+        type: datetime
+
+  - name: Post
+    fields:
+      - name: id
+        type: uuid
+      - name: title
+        type: string
+      - name: body
+        type: string
+      - name: author_id
+        type: uuid
+
+routes:
+  - path: "/users"
+    method: GET
+    returns: User
+
+  - path: "/users"
+    method: POST
+    body: User
+    returns: User
+
+  - path: "/posts"
+    method: GET
+    returns: Post
+
+  - path: "/posts"
+    method: POST
+    body: Post
+    returns: Post
