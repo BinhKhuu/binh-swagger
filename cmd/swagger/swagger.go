@@ -22,7 +22,7 @@ func main() {
 
 func BuildParser() (*flags.Parser, error) {
 	parser := flags.NewParser(nil, flags.Default)
-
+	baseCommand := &commands.BaseCommand{Out: os.Stdout}
 	_, err := parser.AddCommand(
 		"help",
 		"Show help",
@@ -66,7 +66,7 @@ func BuildParser() (*flags.Parser, error) {
 		"config",
 		"loads config",
 		"loads config and reads it",
-		&commands.ConfigCommand{Out: os.Stdout},
+		&commands.ConfigCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err

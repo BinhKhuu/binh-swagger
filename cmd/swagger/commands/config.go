@@ -11,7 +11,7 @@ import (
 )
 
 type ConfigCommand struct {
-	Out  io.Writer
+	BaseCommand
 	API  bool       `description:"validate the configuration against the api model" long:"api" optional:"true"`
 	CMD  bool       `description:"validate against the command model"               long:"cmd"`
 	Args ConfigArgs `positional-args:"true"`

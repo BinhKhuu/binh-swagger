@@ -113,11 +113,12 @@ func Test_ValidateConfigFlags(t *testing.T) {
 
 func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.Buffer) {
 	var buff bytes.Buffer
+	baseCommand := SetupBaseCommand(&buff)
 	args := ConfigArgs{Filepath: filePath, Filename: filename}
 	cmd := &ConfigCommand{
-		Out:  &buff,
-		API:  true,
-		Args: args,
+		BaseCommand: *baseCommand,
+		API:         true,
+		Args:        args,
 	}
 
 	return cmd, &buff
