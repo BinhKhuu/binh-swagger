@@ -6,11 +6,22 @@ import (
 )
 
 type HelpCommand struct {
-	Out io.Writer
+	BaseCommand
+}
+
+func writeLines(w io.Writer, lines []string) error {
+	for _, l := range lines {
+		if _, err := fmt.Fprintln(w, l); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (h *HelpCommand) Execute(_ []string) error {
-	fmt.Fprintln(h.Out, "Available commands:")
-	fmt.Fprintln(h.Out, "  help    Show this help message")
-	return nil
+	lines := []string{
+		"Available commands:",
+		"  help    Show this help message",
+	}
+	return writeLines(h.Out, lines)
 }

@@ -2,12 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"io"
 	"runtime"
 )
 
 type EnvCommand struct {
-	Out io.Writer
+	BaseCommand
 }
 
 func (e *EnvCommand) Execute(_ []string) error {
