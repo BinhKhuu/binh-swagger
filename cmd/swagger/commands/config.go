@@ -58,7 +58,8 @@ type APIConfig struct {
 
 type ModelSpec struct {
 	PackageName string      `yaml:"package_name"`
-	OutputPath  string      `yaml:"outputPath"`
+	OutputPath  string      `yaml:"output_path"`
+	OutputFile  string      `yaml:"output_file"`
 	Name        string      `yaml:"name"`
 	Fields      []FieldSpec `yaml:"fields"`
 }
@@ -100,17 +101,6 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	return nil
 }
 
-func generateAPIFromConfig(config APIConfig) error {
-	for _, model := range config.Models {
-		for _, field := range model.Fields {
-			// call generate.GenerateModel
-			fmt.Printf("Model: %s, Field: %s, Type: %s\n", model.Name, field.Name, field.Type)
-		}
-	}
-
-	return nil
-}
-
 func validateConfigFlags(c *ConfigCommand) error {
 	count := 0
 	if c.API {
@@ -146,33 +136,32 @@ func parseFile[T any](file *os.File) (*T, error) {
 	return nil, fmt.Errorf("unsupported type %T", zero)
 }
 
-// Alternative implementation using type switch
-func parseFile2[T any](file *os.File) (*T, error) {
-	var (
-		err    error
-		v      T
-		result any
-	)
+// Alternative implementation using type switch.
+// func parseFile2[T any](file *os.File) (*T, error) {
+// 	var (
+// 		err    error
+// 		v      T
+// 		result any
+// 	)
 
-	switch any(v).(type) {
-	case APIConfig:
-		result, err = parseYAML[APIConfig](file)
-	case Config:
-		result, err = parseYAML[Config](file)
-	default:
+// 	switch any(v).(type) {
+// 	case APIConfig:
+// 		result, err = parseYAML[APIConfig](file)
+// 	case Config:
+// 		result, err = parseYAML[Config](file)
+// 	default:
+// 	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	}
-	if err != nil {
-		return nil, err
-	}
+// 	typed, ok := result.(*T)
+// 	if !ok {
+// 		return nil, fmt.Errorf("type mismatch: expected %T", *new(T))
+// 	}
 
-	typed, ok := result.(*T)
-	if !ok {
-		return nil, fmt.Errorf("type mismatch: expected %T", *new(T))
-	}
-
-	return typed, nil
-}
+// 	return typed, nil
+// }
 
 func parseYAML[T any](file *os.File) (*T, error) {
 	data, err := io.ReadAll(file)

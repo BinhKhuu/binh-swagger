@@ -9,10 +9,8 @@ import (
 )
 
 var (
-	validFilePath    = "testdata"
-	validFilename    = "testconfig.yaml"
-	invalidFilename  = "ugh.txt"
-	invalidDirectory = "testdirectory"
+	validFilePath = "testdata"
+	validFilename = "testconfig.yaml"
 )
 
 func Test_GetSantisedFilePath(t *testing.T) {

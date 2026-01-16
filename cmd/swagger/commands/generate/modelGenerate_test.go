@@ -12,6 +12,8 @@ func Test_GenerateModel(t *testing.T) {
 	config := commands.ModelSpec{
 		PackageName: "TestUser",
 		Name:        "User",
+		OutputPath:  filepath.Join("..", "testdata", "output"),
+		OutputFile:  "models.go",
 		Fields: []commands.FieldSpec{
 			{Name: "ID", Type: "int", JSON: "id"},
 			{Name: "Name", Type: "string", JSON: "name"},
@@ -19,7 +21,7 @@ func Test_GenerateModel(t *testing.T) {
 	}
 
 	// Call GenerateModel
-	err := GenerateModel(config)
+	err := Model(config)
 	if err != nil {
 		t.Fatalf("GenerateModel failed: %v", err)
 	}
@@ -27,7 +29,7 @@ func Test_GenerateModel(t *testing.T) {
 	// Verify output file exists
 	outputDir := filepath.Join("..", "testdata/output")
 	outputFile := filepath.Join(outputDir, "models.go")
-	if _, err := os.Stat(outputFile); os.IsNotExist(err) {
+	if _, err = os.Stat(outputFile); os.IsNotExist(err) {
 		t.Fatalf("Output file %s does not exist", outputFile)
 	}
 

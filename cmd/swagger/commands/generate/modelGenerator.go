@@ -8,7 +8,12 @@ import (
 	"path/filepath"
 )
 
-func GenerateModel(config commands.ModelSpec) error {
+const (
+	// filePermOwnerReadWrite is the file permission for owner read/write only (rw-------).
+	filePermOwnerReadWrite = 0o600
+)
+
+func Model(config commands.ModelSpec) error {
 	var buf bytes.Buffer
 	tmpl, err := loadModelTemplate()
 	if err != nil {
@@ -19,9 +24,8 @@ func GenerateModel(config commands.ModelSpec) error {
 	if err != nil {
 		return err
 	}
-	outputDir := filepath.Join("..", "testdata/output")
-	outputFile := filepath.Join(outputDir, "models.go")
-	return os.WriteFile(outputFile, buf.Bytes(), 0o644)
+	outputFile := filepath.Join(config.OutputPath, config.OutputFile)
+	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
 }
 
 func loadModelTemplate() (*template.Template, error) {
