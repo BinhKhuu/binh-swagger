@@ -57,6 +57,7 @@ type APIConfig struct {
 
 type ModelSpec struct {
 	PackageName string      `yaml:"package_name"`
+	OutputPath  string      `yaml:"outputPath"`
 	Name        string      `yaml:"name"`
 	Fields      []FieldSpec `yaml:"fields"`
 }
