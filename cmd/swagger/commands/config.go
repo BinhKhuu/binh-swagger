@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"binh-swagger/cmd/swagger/commands/helpers"
 	"errors"
 	"fmt"
 	"io"
@@ -186,9 +187,11 @@ func parseYAML[T any](file *os.File) (*T, error) {
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
-	sanitisedFilePath := getSanitiseFilePath(c.Args)
+	cleanPath := filepath.Clean(c.Args.Filepath)
+	cleanFile := filepath.Clean(c.Args.Filename)
+	sanitisedFilePath := helpers.GetSanitiseFilePath(cleanPath, cleanFile)
 
-	err := checkSymlinks(sanitisedFilePath)
+	err := helpers.CheckSymlinks(sanitisedFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +205,7 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 		return nil, fmt.Errorf(message, err)
 	}
 
-	err = validateFileInfo(fileInfo)
+	err = helpers.ValidateFileInfo(fileInfo)
 	if err != nil {
 		fmt.Fprintf(c.Out, "file info validation error: %v", err)
 		return nil, err
@@ -216,32 +219,4 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 	}
 
 	return f, nil
-}
-
-func validateFileInfo(fileInfo os.FileInfo) error {
-	if fileInfo.IsDir() {
-		return fmt.Errorf("expected a file but got directory: %s", fileInfo.Name())
-	}
-	return nil
-}
-
-func getSanitiseFilePath(args ConfigArgs) string {
-	cleanPath := filepath.Clean(args.Filepath)
-	cleanFile := filepath.Clean(args.Filename)
-	cleanFilePath := filepath.Join(cleanPath, cleanFile)
-	if !filepath.IsAbs(cleanFilePath) {
-		cleanFilePath, _ = filepath.Abs(cleanFilePath)
-	}
-	return cleanFilePath
-}
-
-func checkSymlinks(absFilePath string) error {
-	info, err := os.Lstat(absFilePath)
-	if err != nil {
-		return err
-	}
-	if info.Mode()&os.ModeSymlink != 0 {
-		return errors.New("symlinks not allowed")
-	}
-	return nil
 }

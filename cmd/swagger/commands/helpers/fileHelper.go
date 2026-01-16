@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func validateFileInfo(fileInfo os.FileInfo) error {
+func ValidateFileInfo(fileInfo os.FileInfo) error {
 	if fileInfo.IsDir() {
 		return fmt.Errorf("expected a file but got directory: %s", fileInfo.Name())
 	}
@@ -15,7 +15,7 @@ func validateFileInfo(fileInfo os.FileInfo) error {
 }
 
 // getSanitiseFilePath constructs a sanitized absolute file path
-func getSanitiseFilePath(filelocation string, filename string) string {
+func GetSanitiseFilePath(filelocation string, filename string) string {
 	cleanPath := filepath.Clean(filelocation)
 	cleanFile := filepath.Clean(filename)
 	cleanFilePath := filepath.Join(cleanPath, cleanFile)
@@ -25,7 +25,7 @@ func getSanitiseFilePath(filelocation string, filename string) string {
 	return cleanFilePath
 }
 
-func checkSymlinks(absFilePath string) error {
+func CheckSymlinks(absFilePath string) error {
 	info, err := os.Lstat(absFilePath)
 	if err != nil {
 		return err

@@ -28,7 +28,7 @@ func Test_GetSantisedFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s_%s", tt.filelocation, tt.filename), func(t *testing.T) {
-			result := getSanitiseFilePath(tt.filelocation, tt.filename)
+			result := GetSanitiseFilePath(tt.filelocation, tt.filename)
 			if result != tt.expected {
 				t.Errorf("Expected %s but got %s", tt.expected, result)
 			}
@@ -43,7 +43,7 @@ func Test_ValidateFileInfo(t *testing.T) {
 		t.Fatalf("Failed to stat file before running real tests: %v", err)
 	}
 
-	err = validateFileInfo(fileInfo)
+	err = ValidateFileInfo(fileInfo)
 	if err != nil {
 		t.Errorf("Expected no error for valid file, but got: %v", err)
 	}
@@ -56,7 +56,7 @@ func Test_DirectoryFilePath(t *testing.T) {
 		t.Fatalf("Failed to stat file before running real tests: %v", err)
 	}
 
-	err = validateFileInfo(fileInfo)
+	err = ValidateFileInfo(fileInfo)
 	if err == nil {
 		t.Fatalf("Expected Error but got nil")
 	}
