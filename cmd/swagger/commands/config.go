@@ -56,13 +56,15 @@ type APIConfig struct {
 }
 
 type ModelSpec struct {
-	Name   string      `yaml:"name"`
-	Fields []FieldSpec `yaml:"fields"`
+	PackageName string      `yaml:"package_name"`
+	Name        string      `yaml:"name"`
+	Fields      []FieldSpec `yaml:"fields"`
 }
 
 type FieldSpec struct {
 	Name string `yaml:"name"`
 	Type string `yaml:"type"`
+	JSON string `yaml:"json,omitempty"`
 }
 
 type RouteSpec struct {
@@ -91,6 +93,17 @@ func (c *ConfigCommand) Execute(_ []string) error {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
 		}
 		fmt.Fprintf(c.Out, "%+v\n", config)
+	}
+
+	return nil
+}
+
+func generateAPIFromConfig(config APIConfig) error {
+	for _, model := range config.Models {
+		for _, field := range model.Fields {
+			// call generate.GenerateModel
+			fmt.Printf("Model: %s, Field: %s, Type: %s\n", model.Name, field.Name, field.Type)
+		}
 	}
 
 	return nil
