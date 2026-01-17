@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
+	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"errors"
 	"fmt"
 	"io"
@@ -51,29 +53,9 @@ type Config struct {
 }
 
 type APIConfig struct {
-	Version string      `yaml:"version"`
-	Models  []ModelSpec `yaml:"models"`
-	Routes  []RouteSpec `yaml:"routes"`
-}
-
-type ModelSpec struct {
-	PackageName string      `yaml:"package_name"`
-	OutputPath  string      `yaml:"output_path"`
-	OutputFile  string      `yaml:"output_file"`
-	Name        string      `yaml:"name"`
-	Fields      []FieldSpec `yaml:"fields"`
-}
-
-type FieldSpec struct {
-	Name string `yaml:"name"`
-	Type string `yaml:"type"`
-	JSON string `yaml:"json,omitempty"`
-}
-
-type RouteSpec struct {
-	Path   string `yaml:"path"`
-	Method string `yaml:"method"`
-	Model  string `yaml:"model"`
+	Version string           `yaml:"version"`
+	Models  []spec.ModelSpec `yaml:"models"`
+	Routes  []spec.RouteSpec `yaml:"routes"`
 }
 
 func (c *ConfigCommand) Execute(_ []string) error {
@@ -95,10 +77,27 @@ func (c *ConfigCommand) Execute(_ []string) error {
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
 		}
-		fmt.Fprintf(c.Out, "%+v\n", config)
+		fmt.Fprintf(c.Out, "## config loaded %#v\n", config.Models)
+		fmt.Fprintf(c.Out, "## config loaded %d\n", len(config.Models))
+		err = generateFromAPIConfig(config)
+		if err != nil {
+			fmt.Fprintf(c.Out, "there was an error generating from api config: %v", err)
+		}
 	}
 
 	return nil
+}
+
+// todo loop through api config => generate models.
+func generateFromAPIConfig(cfg *APIConfig) error {
+	var err error
+	for _, model := range cfg.Models {
+		err = generate.Model(model)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }
 
 func validateConfigFlags(c *ConfigCommand) error {
@@ -178,7 +177,7 @@ func parseYAML[T any](file *os.File) (*T, error) {
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 	cleanPath := filepath.Clean(c.Args.Filepath)
 	cleanFile := filepath.Clean(c.Args.Filename)
-	sanitisedFilePath := helpers.GetSanitiseFilePath(cleanPath, cleanFile)
+	sanitisedFilePath := helpers.GetAbsoluteSanitiseFilePath(cleanPath, cleanFile)
 
 	err := helpers.CheckSymlinks(sanitisedFilePath)
 	if err != nil {

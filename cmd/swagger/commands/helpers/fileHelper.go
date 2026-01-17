@@ -14,8 +14,8 @@ func ValidateFileInfo(fileInfo os.FileInfo) error {
 	return nil
 }
 
-// GetSanitiseFilePath constructs a sanitized absolute file path from the given location and filename.
-func GetSanitiseFilePath(filelocation string, filename string) string {
+// GetAbsoluteSanitiseFilePath constructs a sanitized absolute file path from the given location and filename.
+func GetAbsoluteSanitiseFilePath(filelocation string, filename string) string {
 	cleanPath := filepath.Clean(filelocation)
 	cleanFile := filepath.Clean(filename)
 	cleanFilePath := filepath.Join(cleanPath, cleanFile)

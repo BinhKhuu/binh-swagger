@@ -1,0 +1,41 @@
+version: "1.0"
+
+models:
+  - package_name: "user"
+    output_path: "./testdata/output"
+    output_file: "user.go"
+    name: "User"
+    fields:
+      - name: "id"
+        type: "string"
+        json: "id"
+      - name: "email"
+        type: "string"
+        json: "email"
+      - name: "created_at"
+        type: "time.Time"
+        json: "created_at"
+
+  - package_name: "product"
+    output_path: "./testdata/output"
+    output_file: "product.go"
+    name: "Product"
+    fields:
+      - name: "id"
+        type: "string"
+        json: "id"
+      - name: "title"
+        type: "string"
+        json: "title"
+      - name: "price"
+        type: "float64"
+        json: "price"
+
+routes:
+  - path: "/users"
+    method: "GET"
+    model: "User"
+
+  - path: "/products"
+    method: "POST"
+    model: "Product"

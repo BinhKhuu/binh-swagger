@@ -26,7 +26,7 @@ func Test_GetSantisedFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s_%s", tt.filelocation, tt.filename), func(t *testing.T) {
-			result := GetSanitiseFilePath(tt.filelocation, tt.filename)
+			result := GetAbsoluteSanitiseFilePath(tt.filelocation, tt.filename)
 			if result != tt.expected {
 				t.Errorf("Expected %s but got %s", tt.expected, result)
 			}

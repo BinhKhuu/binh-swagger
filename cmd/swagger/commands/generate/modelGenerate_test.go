@@ -1,20 +1,21 @@
 package generate
 
 import (
-	"binh-swagger/cmd/swagger/commands"
+	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
+// todo use temp dir for output it will be cleaned up after test.
 func Test_GenerateModel(t *testing.T) {
-	config := commands.ModelSpec{
+	config := spec.ModelSpec{
 		PackageName: "TestUser",
 		Name:        "User",
 		OutputPath:  filepath.Join("..", "testdata", "output"),
 		OutputFile:  "models.go",
-		Fields: []commands.FieldSpec{
+		Fields: []spec.FieldSpec{
 			{Name: "ID", Type: "int", JSON: "id"},
 			{Name: "Name", Type: "string", JSON: "name"},
 		},
