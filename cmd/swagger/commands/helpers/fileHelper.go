@@ -1,10 +1,18 @@
 package helpers
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
+)
+
+const (
+	filePermOwnerReadWrite = 0o600
+	fileModeExecutable     = 0o755
 )
 
 func ValidateFileInfo(fileInfo os.FileInfo) error {
@@ -34,4 +42,29 @@ func CheckSymlinks(absFilePath string) error {
 		return errors.New("symlinks not allowed")
 	}
 	return nil
+}
+
+func EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error) {
+	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		if !promptCreateDirectory(outputPath, output, input) {
+			return true, errors.New("directory creation cancelled by user")
+		}
+		if err := os.MkdirAll(outputPath, fileModeExecutable); err != nil {
+			return true, fmt.Errorf("failed to create directory: %w", err)
+		}
+	}
+	return false, nil
+}
+
+func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool {
+	reader := bufio.NewReader(input)
+	fmt.Fprintf(output, "Directory %s does not exist. Create it? it will be made in the directory relative to where you ran the command [y/N]: ", path)
+
+	response, err := reader.ReadString('\n')
+	if err != nil {
+		return false
+	}
+
+	response = strings.ToLower(strings.TrimSpace(response))
+	return response == "y" || response == "yes"
 }

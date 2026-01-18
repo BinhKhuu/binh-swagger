@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -61,5 +62,59 @@ func Test_DirectoryFilePath(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "directory") {
 		t.Fatalf("expected directory error, got: %v", err)
+	}
+}
+
+func Test_EnsureOutputDirectoryExists_CreateAndSucceeds(t *testing.T) {
+	newDir := filepath.Join(t.TempDir(), "newdir")
+	var outBuf bytes.Buffer
+	input := strings.NewReader("y\n")
+
+	shouldReturn, err := EnsureOutputDirectoryExists(newDir, &outBuf, input)
+	if shouldReturn {
+		t.Errorf("Expected shouldReturn to be false, but got true with error: %v", err)
+	}
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	if _, statErr := os.Stat(newDir); os.IsNotExist(statErr) {
+		t.Error("Directory was not created after user said yes.")
+	}
+}
+
+func Test_EnsureOutputDirectoryExists_CancelCreation(t *testing.T) {
+	newDir := filepath.Join(t.TempDir(), "newdir")
+	var outBuf bytes.Buffer
+	input := strings.NewReader("n\n")
+
+	shouldReturn, err := EnsureOutputDirectoryExists(newDir, &outBuf, input)
+	if !shouldReturn {
+		t.Errorf("Expected shouldReturn to be true, but got false with error: %v", err)
+	}
+	if err == nil {
+		t.Error("Expected error when user cancels directory creation, but got nil")
+	}
+	if _, statErr := os.Stat(newDir); !os.IsNotExist(statErr) {
+		t.Error("Directory was created despite user cancelling creation.")
+	}
+}
+
+func Test_promptCreateDirectory_Yes(t *testing.T) {
+	var outBuf bytes.Buffer
+	input := strings.NewReader("y\n")
+
+	result := promptCreateDirectory("somedir", &outBuf, input)
+	if !result {
+		t.Error("Expected promptCreateDirectory to return true for 'y' input, but got false")
+	}
+}
+
+func Test_promptCreateDirectory_No(t *testing.T) {
+	var outBuf bytes.Buffer
+	input := strings.NewReader("n\n")
+
+	result := promptCreateDirectory("somedir", &outBuf, input)
+	if result {
+		t.Error("Expected promptCreateDirectory to return false for 'n' input, but got true")
 	}
 }
