@@ -61,13 +61,13 @@ type APIConfig struct {
 func (c *ConfigCommand) Execute(_ []string) error {
 	err := validateConfigFlags(c)
 	if err != nil {
-		fmt.Fprintf(c.Out, "there was an error with the provided flags: %v", err)
+		fmt.Fprintf(c.Out, "there was an error with the provided flags: %v\n", err)
 		return err
 	}
 
 	f, err := validateAndOpenFile(c)
 	if err != nil {
-		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v", err)
+		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v\n", err)
 		return err
 	}
 	defer f.Close()
@@ -75,14 +75,14 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	if c.API {
 		config, err := parseFile[APIConfig](f)
 		if err != nil {
-			fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
+			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
-		fmt.Fprintf(c.Out, "## config loaded %#v\n", config.Models)
-		fmt.Fprintf(c.Out, "## config loaded %d\n", len(config.Models))
 		err = generateFromAPIConfig(config)
 		if err != nil {
-			fmt.Fprintf(c.Out, "there was an error generating from api config: %v", err)
+			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}
+
+		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.Filename)
 	}
 
 	return nil
@@ -195,11 +195,11 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 
 	err = helpers.ValidateFileInfo(fileInfo)
 	if err != nil {
-		fmt.Fprintf(c.Out, "file info validation error: %v", err)
+		fmt.Fprintf(c.Out, "file info validation error: %v\n", err)
 		return nil, err
 	}
 
-	fmt.Fprintf(c.Out, "found file: %s", fileInfo.Name())
+	fmt.Fprintf(c.Out, "found file: %s\n", fileInfo.Name())
 
 	f, err := os.Open(sanitisedFilePath)
 	if err != nil {

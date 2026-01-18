@@ -58,7 +58,7 @@ func EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.R
 
 func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool {
 	reader := bufio.NewReader(input)
-	fmt.Fprintf(output, "Directory %s does not exist. Create it? it will be made in the directory relative to where you ran the command [y/N]: ", path)
+	fmt.Fprintf(output, "\nDirectory %s does not exist. Create it? it will be made in the directory relative to where you ran the command [y/N]: ", path)
 
 	response, err := reader.ReadString('\n')
 	if err != nil {

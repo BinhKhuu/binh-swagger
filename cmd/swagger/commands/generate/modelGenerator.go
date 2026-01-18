@@ -51,12 +51,11 @@ func loadModelTemplate() (*template.Template, error) {
 	return template.New("model").Parse(string(tmpl))
 }
 
-// todo add tests
-// todo move this to helpers package.
+// getCurrentFileDir returns the directory of the current file needs to be here to get templates based on relative path.
 func getCurrentFileDir() (string, error) {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		return "", errors.New("failed to create directory")
+		return "", errors.New("failed to create directory\n")
 	}
 	return filepath.Dir(file), nil
 }

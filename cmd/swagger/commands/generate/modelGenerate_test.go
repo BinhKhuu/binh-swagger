@@ -31,13 +31,13 @@ func Test_GenerateModel(t *testing.T) {
 	outputDir := filepath.Join("..", "testdata/output")
 	outputFile := filepath.Join(outputDir, "models.go")
 	if _, err = os.Stat(outputFile); os.IsNotExist(err) {
-		t.Fatalf("Output file %s does not exist", outputFile)
+		t.Fatalf("Output file %s does not exist\n", outputFile)
 	}
 
 	// Optionally, read and verify contents of the output file
 	content, err := os.ReadFile(outputFile)
 	if err != nil {
-		t.Fatalf("Failed to read output file: %v", err)
+		t.Fatalf("Failed to read output file: %v\n", err)
 	}
 
 	expectedStrings := []string{
@@ -48,7 +48,7 @@ func Test_GenerateModel(t *testing.T) {
 
 	for _, str := range expectedStrings {
 		if !bytes.Contains(content, []byte(str)) {
-			t.Errorf("Expected string %q not found in output", str)
+			t.Errorf("Expected string %q not found in output\n", str)
 		}
 	}
 }
