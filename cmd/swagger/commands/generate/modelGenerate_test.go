@@ -1,6 +1,7 @@
 package generate
 
 import (
+	HelperAdapter "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"os"
@@ -10,19 +11,20 @@ import (
 
 // todo use temp dir for output it will be cleaned up after test.
 func Test_GenerateModel(t *testing.T) {
+	newDir := filepath.Join(t.TempDir(), "newdir")
 	config := spec.ModelSpec{
 		PackageName: "TestUser",
 		Name:        "User",
-		OutputPath:  filepath.Join("..", "testdata", "output"),
+		OutputPath:  newDir,
 		OutputFile:  "models.go",
 		Fields: []spec.FieldSpec{
 			{Name: "ID", Type: "int", JSON: "id"},
 			{Name: "Name", Type: "string", JSON: "name"},
 		},
 	}
-
+	helperAdapter := &HelperAdapter.DefaultFileHelper{}
 	// Call GenerateModel
-	err := Model(config)
+	err := Model(config, helperAdapter)
 	if err != nil {
 		t.Fatalf("GenerateModel failed: %v", err)
 	}

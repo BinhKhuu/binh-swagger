@@ -1,6 +1,7 @@
 package commands
 
 import (
+	HelperAdapter "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -91,8 +92,9 @@ func (c *ConfigCommand) Execute(_ []string) error {
 // todo loop through api config => generate models.
 func generateFromAPIConfig(cfg *APIConfig) error {
 	var err error
+	helper := &HelperAdapter.DefaultFileHelper{}
 	for _, model := range cfg.Models {
-		err = generate.Model(model)
+		err = generate.Model(model, helper)
 		if err != nil {
 			return err
 		}

@@ -1,7 +1,7 @@
 package generate
 
 import (
-	"binh-swagger/cmd/swagger/commands/helpers"
+	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"errors"
@@ -15,9 +15,9 @@ const (
 	filePermOwnerReadWrite = 0o600
 )
 
-func Model(config spec.ModelSpec) error {
+func Model(config spec.ModelSpec, fileHefileHelper fileHelper.FileHelper) error {
 	var buf bytes.Buffer
-	tmpl, err := loadModelTemplate()
+	tmpl, err := loadModelTemplate(fileHefileHelper)
 	if err != nil {
 		return err
 	}
@@ -27,8 +27,8 @@ func Model(config spec.ModelSpec) error {
 		return err
 	}
 
-	outputFile := helpers.GetAbsoluteSanitiseFilePath(config.OutputPath, config.OutputFile)
-	shouldReturn, err := helpers.EnsureOutputDirectoryExists(config.OutputPath, os.Stdout, os.Stdin)
+	outputFile := fileHefileHelper.GetAbsoluteSanitiseFilePath(config.OutputPath, config.OutputFile)
+	shouldReturn, err := fileHefileHelper.EnsureOutputDirectoryExists(config.OutputPath, os.Stdout, os.Stdin)
 	if shouldReturn {
 		return err
 	}
@@ -36,13 +36,13 @@ func Model(config spec.ModelSpec) error {
 	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
 }
 
-func loadModelTemplate() (*template.Template, error) {
+func loadModelTemplate(fileHefileHelper fileHelper.FileHelper) (*template.Template, error) {
 	currentDir, err := getCurrentFileDir()
 	if err != nil {
 		return nil, err
 	}
 
-	templatePath := helpers.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "templates"), "model_template.tmpl")
+	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "templates"), "model_template.tmpl")
 	tmpl, err := os.ReadFile(templatePath)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func loadModelTemplate() (*template.Template, error) {
 func getCurrentFileDir() (string, error) {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		return "", errors.New("failed to create directory\n")
+		return "", errors.New("failed to create directory")
 	}
 	return filepath.Dir(file), nil
 }
