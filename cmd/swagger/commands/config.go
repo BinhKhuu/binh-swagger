@@ -1,7 +1,6 @@
 package commands
 
 import (
-	HelperAdapter "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -16,7 +15,7 @@ import (
 
 type ConfigCommand struct {
 	BaseCommand
-
+	Helpers
 	API  bool       `description:"validate the configuration against the api model" long:"api" optional:"true"`
 	CMD  bool       `description:"validate against the command model"               long:"cmd"`
 	Args ConfigArgs `positional-args:"true"`
@@ -78,7 +77,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
-		err = generateFromAPIConfig(config)
+		err = generateFromAPIConfig(config, c)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}
@@ -90,11 +89,10 @@ func (c *ConfigCommand) Execute(_ []string) error {
 }
 
 // todo loop through api config => generate models.
-func generateFromAPIConfig(cfg *APIConfig) error {
+func generateFromAPIConfig(cfg *APIConfig, command *ConfigCommand) error {
 	var err error
-	helper := &HelperAdapter.DefaultFileHelper{}
 	for _, model := range cfg.Models {
-		err = generate.Model(model, helper)
+		err = generate.Model(model, command.Helpers.File)
 		if err != nil {
 			return err
 		}
