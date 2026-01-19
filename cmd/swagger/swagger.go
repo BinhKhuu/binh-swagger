@@ -2,6 +2,7 @@ package main
 
 import (
 	"binh-swagger/cmd/swagger/commands"
+	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"log"
 	"os"
 
@@ -20,10 +21,17 @@ func main() {
 	}
 }
 
+func configureHelpers() *commands.Helpers {
+	fileHelper := &filehelper.DefaultFileHelper{}
+	return &commands.Helpers{
+		File: fileHelper,
+	}
+}
+
 func BuildParser() (*flags.Parser, error) {
 	parser := flags.NewParser(nil, flags.Default)
 	baseCommand := &commands.BaseCommand{Out: os.Stdout}
-
+	helpers := configureHelpers()
 	_, err := parser.AddCommand(
 		"help",
 		"Show help",
@@ -64,7 +72,10 @@ func BuildParser() (*flags.Parser, error) {
 		"config",
 		"loads config",
 		"loads config and reads it",
-		&commands.ConfigCommand{BaseCommand: *baseCommand},
+		&commands.ConfigCommand{
+			BaseCommand: *baseCommand,
+			Helpers:     *helpers,
+		},
 	)
 	if err != nil {
 		return nil, err
