@@ -16,6 +16,7 @@ import (
 type ConfigCommand struct {
 	BaseCommand
 	Helpers
+
 	API  bool       `description:"validate the configuration against the api model" long:"api" optional:"true"`
 	CMD  bool       `description:"validate against the command model"               long:"cmd"`
 	Args ConfigArgs `positional-args:"true"`
@@ -92,7 +93,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 func generateFromAPIConfig(cfg *APIConfig, command *ConfigCommand) error {
 	var err error
 	for _, model := range cfg.Models {
-		err = generate.Model(model, command.Helpers.File)
+		err = generate.Model(model, command.File)
 		if err != nil {
 			return err
 		}
