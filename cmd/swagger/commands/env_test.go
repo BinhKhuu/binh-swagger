@@ -8,7 +8,8 @@ import (
 
 func Test_GoCommand(t *testing.T) {
 	var buf bytes.Buffer
-	cmd := &EnvCommand{Out: &buf}
+	baseCommand := SetupBaseCommand(&buf)
+	cmd := &EnvCommand{BaseCommand: *baseCommand}
 	err := cmd.Execute(nil)
 	if err != nil {
 		t.Fatalf("error executing command: %v", err)

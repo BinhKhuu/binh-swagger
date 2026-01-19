@@ -22,12 +22,13 @@ func main() {
 
 func BuildParser() (*flags.Parser, error) {
 	parser := flags.NewParser(nil, flags.Default)
+	baseCommand := &commands.BaseCommand{Out: os.Stdout}
 
 	_, err := parser.AddCommand(
 		"help",
 		"Show help",
 		"Displays help information",
-		&commands.HelpCommand{Out: os.Stdout},
+		&commands.HelpCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err
@@ -36,37 +37,34 @@ func BuildParser() (*flags.Parser, error) {
 		"version",
 		"Shows version",
 		"Prints Version information",
-		&commands.VersionCommand{Out: os.Stdout},
+		&commands.VersionCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err
 	}
-
 	_, err = parser.AddCommand(
 		"env",
 		"Shows version",
 		"Prints Version information",
-		&commands.EnvCommand{Out: os.Stdout},
+		&commands.EnvCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err
 	}
-
 	_, err = parser.AddCommand(
 		"echo",
 		"repeats arguments",
 		"Prints arguments",
-		&commands.EchoCommand{Out: os.Stdout},
+		&commands.EchoCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err
 	}
-
 	_, err = parser.AddCommand(
 		"config",
 		"loads config",
 		"loads config and reads it",
-		&commands.ConfigCommand{Out: os.Stdout},
+		&commands.ConfigCommand{BaseCommand: *baseCommand},
 	)
 	if err != nil {
 		return nil, err

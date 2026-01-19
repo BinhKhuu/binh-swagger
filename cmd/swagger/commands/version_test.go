@@ -9,7 +9,8 @@ import (
 
 func Test_VersionCommand(t *testing.T) {
 	var outBuf bytes.Buffer
-	cmd := &VersionCommand{Out: &outBuf}
+	baseCommand := SetupBaseCommand(&outBuf)
+	cmd := &VersionCommand{BaseCommand: *baseCommand}
 	err := cmd.Execute(nil)
 	if err != nil {
 		t.Fatalf("error executing command: %v", err)

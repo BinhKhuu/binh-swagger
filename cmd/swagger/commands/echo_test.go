@@ -40,10 +40,11 @@ func Test_EchoCommand_UpperFalse(t *testing.T) {
 func setupEchoTests() (*EchoCommand, *bytes.Buffer) {
 	var buff bytes.Buffer
 	args := EchoArgs{Text: text}
+	baseCommand := SetupBaseCommand(&buff)
 	cmd := &EchoCommand{
-		Out:   &buff,
-		Upper: true,
-		Args:  args,
+		BaseCommand: *baseCommand,
+		Upper:       true,
+		Args:        args,
 	}
 
 	return cmd, &buff

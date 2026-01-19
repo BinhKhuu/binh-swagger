@@ -3,11 +3,10 @@ package commands
 import (
 	"binh-swagger/cmd/swagger/commands/internal/meta"
 	"fmt"
-	"io"
 )
 
 type VersionCommand struct {
-	Out io.Writer
+	BaseCommand
 }
 
 func (v *VersionCommand) Execute(_ []string) error {

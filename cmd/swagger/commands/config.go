@@ -1,6 +1,10 @@
 package commands
 
 import (
+	HelperAdapter "binh-swagger/cmd/swagger/commands/adaptor"
+	"binh-swagger/cmd/swagger/commands/generate"
+	"binh-swagger/cmd/swagger/commands/helpers"
+	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"errors"
 	"fmt"
 	"io"
@@ -11,7 +15,10 @@ import (
 )
 
 type ConfigCommand struct {
-	Out  io.Writer
+	BaseCommand
+
+	API  bool       `description:"validate the configuration against the api model" long:"api" optional:"true"`
+	CMD  bool       `description:"validate against the command model"               long:"cmd"`
 	Args ConfigArgs `positional-args:"true"`
 }
 
@@ -46,40 +53,135 @@ type Config struct {
 	} `yaml:"items"`
 }
 
+type APIConfig struct {
+	Version string           `yaml:"version"`
+	Models  []spec.ModelSpec `yaml:"models"`
+	Routes  []spec.RouteSpec `yaml:"routes"`
+}
+
 func (c *ConfigCommand) Execute(_ []string) error {
+	err := validateConfigFlags(c)
+	if err != nil {
+		fmt.Fprintf(c.Out, "there was an error with the provided flags: %v\n", err)
+		return err
+	}
+
 	f, err := validateAndOpenFile(c)
 	if err != nil {
-		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v", err)
+		fmt.Fprintf(c.Out, "there was an error retrieving the file: %v\n", err)
 		return err
 	}
 	defer f.Close()
 
-	config, err := parseFile(f)
-	if err != nil {
-		fmt.Fprintf(c.Out, "there was an error prasing the file: %v", err)
+	if c.API {
+		config, err := parseFile[APIConfig](f)
+		if err != nil {
+			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
+		}
+		err = generateFromAPIConfig(config)
+		if err != nil {
+			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
+		}
+
+		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.Filename)
 	}
-	fmt.Fprintf(c.Out, "%+v\n", config)
+
 	return nil
 }
 
-func parseFile(file *os.File) (*Config, error) {
+// todo loop through api config => generate models.
+func generateFromAPIConfig(cfg *APIConfig) error {
+	var err error
+	helper := &HelperAdapter.DefaultFileHelper{}
+	for _, model := range cfg.Models {
+		err = generate.Model(model, helper)
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+func validateConfigFlags(c *ConfigCommand) error {
+	count := 0
+	if c.API {
+		count++
+	}
+
+	if c.CMD {
+		count++
+	}
+
+	if count > 1 {
+		return errors.New("only one of --api or --cmd can be specified")
+	}
+
+	if count == 0 {
+		return errors.New("one of --api or --cmd must be specified")
+	}
+
+	return nil
+}
+
+func parseFile[T any](file *os.File) (*T, error) {
+	var zero T
+
+	if _, ok := any(zero).(Config); ok {
+		return parseYAML[T](file)
+	}
+
+	if _, ok := any(zero).(APIConfig); ok {
+		return parseYAML[T](file)
+	}
+
+	return nil, fmt.Errorf("unsupported type %T", zero)
+}
+
+// Alternative implementation using type switch.
+// func parseFile2[T any](file *os.File) (*T, error) {
+// 	var (
+// 		err    error
+// 		v      T
+// 		result any
+// 	)
+
+// 	switch any(v).(type) {
+// 	case APIConfig:
+// 		result, err = parseYAML[APIConfig](file)
+// 	case Config:
+// 		result, err = parseYAML[Config](file)
+// 	default:
+// 	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	typed, ok := result.(*T)
+// 	if !ok {
+// 		return nil, fmt.Errorf("type mismatch: expected %T", *new(T))
+// 	}
+
+// 	return typed, nil
+// }
+
+func parseYAML[T any](file *os.File) (*T, error) {
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
-	config := &Config{}
-	err = yaml.Unmarshal(data, config)
-	if err != nil {
+	var v T
+	if err := yaml.Unmarshal(data, &v); err != nil {
 		return nil, err
 	}
-
-	return config, nil
+	return &v, nil
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
-	sanitisedFilePath := getSanitiseFilePath(c.Args)
+	cleanPath := filepath.Clean(c.Args.Filepath)
+	cleanFile := filepath.Clean(c.Args.Filename)
+	sanitisedFilePath := helpers.GetAbsoluteSanitiseFilePath(cleanPath, cleanFile)
 
-	err := checkSymlinks(sanitisedFilePath)
+	err := helpers.CheckSymlinks(sanitisedFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -93,13 +195,13 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 		return nil, fmt.Errorf(message, err)
 	}
 
-	err = validateFileInfo(fileInfo)
+	err = helpers.ValidateFileInfo(fileInfo)
 	if err != nil {
-		fmt.Fprintf(c.Out, "file info validation error: %v", err)
+		fmt.Fprintf(c.Out, "file info validation error: %v\n", err)
 		return nil, err
 	}
 
-	fmt.Fprintf(c.Out, "found file: %s", fileInfo.Name())
+	fmt.Fprintf(c.Out, "found file: %s\n", fileInfo.Name())
 
 	f, err := os.Open(sanitisedFilePath)
 	if err != nil {
@@ -107,32 +209,4 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 	}
 
 	return f, nil
-}
-
-func validateFileInfo(fileInfo os.FileInfo) error {
-	if fileInfo.IsDir() {
-		return fmt.Errorf("expected a file but got directory: %s", fileInfo.Name())
-	}
-	return nil
-}
-
-func getSanitiseFilePath(args ConfigArgs) string {
-	cleanPath := filepath.Clean(args.Filepath)
-	cleanFile := filepath.Clean(args.Filename)
-	cleanFilePath := filepath.Join(cleanPath, cleanFile)
-	if !filepath.IsAbs(cleanFilePath) {
-		cleanFilePath, _ = filepath.Abs(cleanFilePath)
-	}
-	return cleanFilePath
-}
-
-func checkSymlinks(absFilePath string) error {
-	info, err := os.Lstat(absFilePath)
-	if err != nil {
-		return err
-	}
-	if info.Mode()&os.ModeSymlink != 0 {
-		return errors.New("symlinks not allowed")
-	}
-	return nil
 }
