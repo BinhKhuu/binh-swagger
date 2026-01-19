@@ -59,12 +59,3 @@ func getCurrentFileDir() (string, error) {
 	}
 	return filepath.Dir(file), nil
 }
-
-// todo use this when creating the output path and saving files
-// func executableDir() (string, error) {
-// 	exePath, err := os.Executable()
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return filepath.Dir(exePath), nil
-// }
