@@ -15,9 +15,9 @@ const (
 	filePermOwnerReadWrite = 0o600
 )
 
-func Model(config spec.ModelSpec, fileHefileHelper fileHelper.FileHelper) error {
+func Model(config spec.ModelSpec, fHelper fileHelper.FileHelper) error {
 	var buf bytes.Buffer
-	tmpl, err := loadModelTemplate(fileHefileHelper)
+	tmpl, err := loadModelTemplate(fHelper)
 	if err != nil {
 		return err
 	}
@@ -27,8 +27,8 @@ func Model(config spec.ModelSpec, fileHefileHelper fileHelper.FileHelper) error 
 		return err
 	}
 
-	outputFile := fileHefileHelper.GetAbsoluteSanitiseFilePath(config.OutputPath, config.OutputFile)
-	shouldReturn, err := fileHefileHelper.EnsureOutputDirectoryExists(config.OutputPath, os.Stdout, os.Stdin)
+	outputFile := fHelper.GetAbsoluteSanitiseFilePath(config.OutputPath, config.OutputFile)
+	shouldReturn, err := fHelper.EnsureOutputDirectoryExists(config.OutputPath, os.Stdout, os.Stdin)
 	if shouldReturn {
 		return err
 	}

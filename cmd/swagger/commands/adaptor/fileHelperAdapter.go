@@ -11,6 +11,7 @@ type FileHelper interface {
 	GetAbsoluteSanitiseFilePath(filelocation string, filename string) string
 	CheckSymlinks(absFilePath string) error
 	EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error)
+	CreateDirectory(rootPath string) (string, error)
 }
 
 type DefaultFileHelper struct{}
@@ -29,4 +30,8 @@ func (f *DefaultFileHelper) CheckSymlinks(absFilePath string) error {
 
 func (f *DefaultFileHelper) EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error) {
 	return helpers.EnsureOutputDirectoryExists(outputPath, output, input)
+}
+
+func (f *DefaultFileHelper) CreateDirectory(rootPath string) (string, error) {
+	return helpers.CreateDirectory(rootPath)
 }

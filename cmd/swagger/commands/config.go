@@ -53,12 +53,6 @@ type Config struct {
 	} `yaml:"items"`
 }
 
-type APIConfig struct {
-	Version string           `yaml:"version"`
-	Models  []spec.ModelSpec `yaml:"models"`
-	Routes  []spec.RouteSpec `yaml:"routes"`
-}
-
 func (c *ConfigCommand) Execute(_ []string) error {
 	err := validateConfigFlags(c)
 	if err != nil {
@@ -74,7 +68,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	defer f.Close()
 
 	if c.API {
-		config, err := parseFile[APIConfig](f)
+		config, err := parseFile[spec.APIConfig](f)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
@@ -89,9 +83,16 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	return nil
 }
 
-// todo loop through api config => generate models.
-func generateFromAPIConfig(cfg *APIConfig, command *ConfigCommand) error {
+func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 	var err error
+
+	// todo: generate.Project
+	generate.Project(cfg, command.File)
+	// todo: generate.Server
+
+	// todo: generate.Routes
+
+	// todo: generate.Docs
 	for _, model := range cfg.Models {
 		err = generate.Model(model, command.File)
 		if err != nil {
@@ -129,7 +130,7 @@ func parseFile[T any](file *os.File) (*T, error) {
 		return parseYAML[T](file)
 	}
 
-	if _, ok := any(zero).(APIConfig); ok {
+	if _, ok := any(zero).(spec.APIConfig); ok {
 		return parseYAML[T](file)
 	}
 

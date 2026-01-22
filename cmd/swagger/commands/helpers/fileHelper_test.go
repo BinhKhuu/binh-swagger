@@ -118,3 +118,18 @@ func Test_promptCreateDirectory_No(t *testing.T) {
 		t.Error("Expected promptCreateDirectory to return false for 'n' input, but got true")
 	}
 }
+
+func Test_CreateDirectory_ReturnsSuccess(t *testing.T) {
+	newDir := filepath.Join(t.TempDir(), "createdir")
+
+	createdPath, err := CreateDirectory(newDir)
+	if err != nil {
+		t.Errorf("Expected no error creating directory, but got: %v", err)
+	}
+	if createdPath != newDir {
+		t.Errorf("Expected created path to be %s, but got %s", newDir, createdPath)
+	}
+	if _, statErr := os.Stat(newDir); os.IsNotExist(statErr) {
+		t.Error("Directory was not created.")
+	}
+}

@@ -44,12 +44,16 @@ func CheckSymlinks(absFilePath string) error {
 	return nil
 }
 
-func EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error) {
-	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-		if !promptCreateDirectory(outputPath, output, input) {
+func EnsureOutputDirectoryExists(dirPath string, output io.Writer, input io.Reader) (bool, error) {
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		if !promptCreateDirectory(dirPath, output, input) {
 			return true, errors.New("directory creation cancelled by user")
 		}
-		if err := os.MkdirAll(outputPath, fileModeExecutable); err != nil {
+		if _, err := CreateDirectory(dirPath); err != nil {
+			return true, err
+		}
+
+		if err := os.MkdirAll(dirPath, fileModeExecutable); err != nil {
 			return true, fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
@@ -67,4 +71,14 @@ func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool 
 
 	response = strings.ToLower(strings.TrimSpace(response))
 	return response == "y" || response == "yes"
+}
+
+func CreateDirectory(rootPath string) (string, error) {
+	dirPath := filepath.Clean(rootPath)
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(dirPath, fileModeExecutable); err != nil {
+			return "", fmt.Errorf("failed to create directory: %w", err)
+		}
+	}
+	return dirPath, nil
 }
