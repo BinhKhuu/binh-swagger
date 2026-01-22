@@ -87,7 +87,10 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 	var err error
 
 	// todo: generate.Project
-	generate.Project(cfg, command.File)
+	err = generate.Project(cfg, command.File)
+	if err != nil {
+		return err
+	}
 	// todo: generate.Server
 
 	// todo: generate.Routes
