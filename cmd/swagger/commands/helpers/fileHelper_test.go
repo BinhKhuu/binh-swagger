@@ -133,3 +133,34 @@ func Test_CreateDirectory_ReturnsSuccess(t *testing.T) {
 		t.Error("Directory was not created.")
 	}
 }
+
+func Test_ReadAllChildDirectories(t *testing.T) {
+	testDir := t.TempDir()
+	expectedDirs := map[string]bool{
+		filepath.Join(testDir, "dir1"):            true,
+		filepath.Join(testDir, "dir2"):            true,
+		filepath.Join(testDir, "dir1", "subdir1"): true,
+	}
+
+	for key := range expectedDirs {
+		if err := os.MkdirAll(key, fileModeExecutable); err != nil {
+			t.Errorf("error setting up test directory: %v", err)
+		}
+	}
+
+	dirs, err := ReadAllChildDirectoriesRecursive(testDir)
+	if err != nil {
+		t.Fatalf("Expected no error reading directories, but got: %v", err)
+	}
+
+	dirSet := make(map[string]bool)
+	for _, dir := range dirs {
+		dirSet[dir] = true
+	}
+
+	for expectedDir := range expectedDirs {
+		if !dirSet[expectedDir] {
+			t.Errorf("Expected directory %s not found in results", expectedDir)
+		}
+	}
+}

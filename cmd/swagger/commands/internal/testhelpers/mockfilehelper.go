@@ -7,11 +7,12 @@ import (
 )
 
 type MockFileHelper struct {
-	ValidateFileInfoFn            func(os.FileInfo) error
-	GetAbsoluteSanitiseFilePathFn func(string, string) string
-	CheckSymlinksFn               func(string) error
-	EnsureOutputDirectoryExistsFn func(string, io.Writer, io.Reader) (bool, error)
-	CreateDirectoryFn             func(string) (string, error)
+	ValidateFileInfoFn                 func(os.FileInfo) error
+	GetAbsoluteSanitiseFilePathFn      func(string, string) string
+	CheckSymlinksFn                    func(string) error
+	EnsureOutputDirectoryExistsFn      func(string, io.Writer, io.Reader) (bool, error)
+	CreateDirectoryFn                  func(string) (string, error)
+	ReadAllChildDirectoriesRecursiveFn func(string) ([]string, error)
 }
 
 func (m MockFileHelper) ValidateFileInfo(fi os.FileInfo) error {
@@ -32,6 +33,10 @@ func (m MockFileHelper) EnsureOutputDirectoryExists(out string, w io.Writer, r i
 
 func (m MockFileHelper) CreateDirectory(root string) (string, error) {
 	return m.CreateDirectoryFn(root)
+}
+
+func (m MockFileHelper) ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
+	return []string{}, nil
 }
 
 func CreateMockFileHelper() MockFileHelper {

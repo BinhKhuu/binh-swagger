@@ -82,3 +82,28 @@ func CreateDirectory(rootPath string) (string, error) {
 	}
 	return dirPath, nil
 }
+
+func ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
+	var allDirs []string
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			childPath := path + "/" + entry.Name()
+			allDirs = append(allDirs, childPath)
+
+			// Recursively read child directories
+			subDirs, err := ReadAllChildDirectoriesRecursive(childPath)
+			if err != nil {
+				return nil, err
+			}
+			allDirs = append(allDirs, subDirs...)
+		}
+	}
+
+	return allDirs, nil
+}

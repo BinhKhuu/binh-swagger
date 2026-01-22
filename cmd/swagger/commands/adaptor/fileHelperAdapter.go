@@ -12,6 +12,7 @@ type FileHelper interface {
 	CheckSymlinks(absFilePath string) error
 	EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error)
 	CreateDirectory(rootPath string) (string, error)
+	ReadAllChildDirectoriesRecursive(path string) ([]string, error)
 }
 
 type DefaultFileHelper struct{}
@@ -34,4 +35,8 @@ func (f *DefaultFileHelper) EnsureOutputDirectoryExists(outputPath string, outpu
 
 func (f *DefaultFileHelper) CreateDirectory(rootPath string) (string, error) {
 	return helpers.CreateDirectory(rootPath)
+}
+
+func (f *DefaultFileHelper) ReadAllChildDirectoriesRecursive(filePath string) ([]string, error) {
+	return helpers.ReadAllChildDirectoriesRecursive(filePath)
 }
