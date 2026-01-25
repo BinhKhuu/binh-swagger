@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 )
@@ -84,24 +85,38 @@ func (c *ConfigCommand) Execute(_ []string) error {
 }
 
 func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
-	var err error
-
-	// todo: generate.Project
-	err = generate.Project(cfg, command.File)
+	// Generate Project Structure
+	_, err := generate.Project(cfg, command.File)
 	if err != nil {
 		return err
 	}
-	// todo: generate.Server
 
-	// todo: generate.Routes
-
-	// todo: generate.Docs
+	// Generate models
+	projectStructure, err := generate.GetProjectStructure()
+	if err != nil {
+		return err
+	}
 	for _, model := range cfg.Models {
+		model.OutputPath = projectStructure["models"]
+		model.OutputFile = strings.ToLower(model.Name) + ".go"
 		err = generate.Model(model, command.File)
 		if err != nil {
 			return err
 		}
 	}
+
+	// Generate handlers
+	for path, pathSpec := range cfg.Paths {
+		pathSpec.Name = strings.Replace(path, "/", "", 1)
+		err = generate.Path(&pathSpec, command.File)
+		if err != nil {
+			return err
+		}
+	}
+	// Generate Routes
+
+	// Generate main server file
+
 	return err
 }
 

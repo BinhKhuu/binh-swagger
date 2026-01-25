@@ -35,7 +35,7 @@ func (m MockFileHelper) CreateDirectory(root string) (string, error) {
 	return m.CreateDirectoryFn(root)
 }
 
-func (m MockFileHelper) ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
+func (m MockFileHelper) ReadAllChildDirectoriesRecursive(_ string) ([]string, error) {
 	return []string{}, nil
 }
 

@@ -3,18 +3,25 @@ package generate
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"errors"
 	"os"
 )
 
-func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) error {
+var projectStructure map[string]string
+
+func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error) {
 	rootDir, err := fHelper.CreateDirectory(cfg.ProjectRoot)
+	SetProjectStructure(rootDir)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	var createdDirs []string
+	createdDirs := []string{}
 
-	directories := getProjectStructure(rootDir)
+	directories, err := GetProjectStructure()
+	if err != nil {
+		return "", err
+	}
 
 	for _, dir := range directories {
 		if _, err := fHelper.CreateDirectory(dir); err != nil {
@@ -22,23 +29,30 @@ func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) error {
 			for _, createdDir := range createdDirs {
 				_ = os.RemoveAll(createdDir)
 			}
-			return err
+			return "", err
 		}
 		createdDirs = append(createdDirs, dir)
 	}
 
-	return nil
+	return rootDir, nil
 }
 
-func getProjectStructure(rootDir string) []string {
-	return []string{
-		rootDir + "/cmd/server",
-		rootDir + "/internal/handlers",
-		rootDir + "/internal/routes",
-		rootDir + "/services",
-		rootDir + "/repository",
-		rootDir + "/models",
-		rootDir + "/middleware",
-		rootDir + "/config",
+func GetProjectStructure() (map[string]string, error) {
+	if projectStructure == nil {
+		return nil, errors.New("project structure not initialized")
+	}
+	return projectStructure, nil
+}
+
+func SetProjectStructure(rootDir string) {
+	projectStructure = map[string]string{
+		"server":     rootDir + "/cmd/server",
+		"handlers":   rootDir + "/internal/handlers",
+		"routes":     rootDir + "/internal/routes",
+		"services":   rootDir + "/services",
+		"repository": rootDir + "/repository",
+		"models":     rootDir + "/models",
+		"middleware": rootDir + "/middleware",
+		"config":     rootDir + "/config",
 	}
 }

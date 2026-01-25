@@ -1,5 +1,6 @@
 package spec
 
+// ModelSpec todo have an internal model spec an remove outputpath and outputfile currently code will override them in the config command.
 type ModelSpec struct {
 	PackageName string      `yaml:"package_name"`
 	OutputPath  string      `yaml:"output_path"`

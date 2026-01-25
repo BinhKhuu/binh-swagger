@@ -2,9 +2,7 @@ version: "1.0"
 project_root: "./testdata"
 
 models:
-  - package_name: "user"
-    output_path: "./testdata/output"
-    output_file: "user.go"
+  user:
     name: "User"
     fields:
       - name: "id"
@@ -17,9 +15,7 @@ models:
         type: "time.Time"
         json: "created_at"
 
-  - package_name: "product"
-    output_path: "./testdata/output"
-    output_file: "product.go"
+  product: 
     name: "Product"
     fields:
       - name: "id"
@@ -31,6 +27,19 @@ models:
       - name: "price"
         type: "float64"
         json: "price"
+
+paths:
+    /users:
+      get:
+        summary: List all users
+        operationId: listUsers
+        produces:
+          - application/json
+        responses:
+          200:
+            description: A list of users
+            schema:
+              type: array
 
 routes:
   - path: "/users"

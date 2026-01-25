@@ -15,11 +15,11 @@ func Test_Project(t *testing.T) {
 	cfg := &spec.APIConfig{
 		ProjectRoot: rootDir,
 		Version:     "1.0.0",
-		Models:      []spec.ModelSpec{},
-		Routes:      []spec.RouteSpec{},
+		Models:      map[string]spec.ModelSpec{},
+		Paths:       map[string]spec.PathSpec{},
 	}
 
-	err := Project(cfg, fileHelper)
+	_, err := Project(cfg, fileHelper)
 	if err != nil {
 		t.Fatalf("Project generation failed: %v", err)
 	}
@@ -29,8 +29,10 @@ func Test_Project(t *testing.T) {
 		t.Fatalf("Failed to read child directories: %v", err)
 	}
 
-	expectedDirs := getProjectStructure(rootDir)
-
+	expectedDirs, err := GetProjectStructure()
+	if err != nil {
+		t.Fatalf("Failed to get expected project structure: %v", err)
+	}
 	dirSet := make(map[string]bool)
 	for _, dir := range childDirs {
 		dirSet[dir] = true
