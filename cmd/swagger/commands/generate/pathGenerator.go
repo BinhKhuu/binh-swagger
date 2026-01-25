@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func handleOperation(method string, cfg *spec.PathSpec, fHelper fileHelper.FileHelper) error {
+func handleOperation(method string, filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
 	if cfg == nil {
 		return nil
 	}
@@ -16,7 +16,7 @@ func handleOperation(method string, cfg *spec.PathSpec, fHelper fileHelper.FileH
 	}
 
 	// generate handler
-	err = createHandlerFile(projectStructure["handlers"], cfg, fHelper)
+	err = createHandlerFile(projectStructure["handlers"], filename, cfg, fHelper)
 	if err != nil {
 		return err
 	}
@@ -25,8 +25,8 @@ func handleOperation(method string, cfg *spec.PathSpec, fHelper fileHelper.FileH
 	return nil
 }
 
-func createHandlerFile(handlersDir string, cfg *spec.PathSpec, fHelper fileHelper.FileHelper) error {
-	outputFile := fHelper.GetAbsoluteSanitiseFilePath(handlersDir, cfg.Name+"_handler.go")
+func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
+	outputFile := fHelper.GetAbsoluteSanitiseFilePath(handlersDir, filename+"_handler.go")
 	// todo make tmpl file
 	// parse spec into tmp file
 
@@ -47,7 +47,7 @@ func Path(cfg *spec.PathSpec, fHelper fileHelper.FileHelper) error {
 	}
 
 	for _, o := range ops {
-		err := handleOperation(o.method, cfg, fHelper)
+		err := handleOperation(o.method, cfg.Name, o.op, fHelper)
 		if err != nil {
 			return err
 		}

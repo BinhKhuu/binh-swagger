@@ -11,7 +11,11 @@ var projectStructure map[string]string
 
 func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error) {
 	rootDir, err := fHelper.CreateDirectory(cfg.ProjectRoot)
-	SetProjectStructure(rootDir)
+	if err != nil {
+		return "", err
+	}
+
+	err = SetProjectStructure(rootDir)
 	if err != nil {
 		return "", err
 	}
@@ -37,6 +41,7 @@ func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error)
 	return rootDir, nil
 }
 
+// todo write test for this
 func GetProjectStructure() (map[string]string, error) {
 	if projectStructure == nil {
 		return nil, errors.New("project structure not initialized")
@@ -44,7 +49,11 @@ func GetProjectStructure() (map[string]string, error) {
 	return projectStructure, nil
 }
 
-func SetProjectStructure(rootDir string) {
+// todo write test for this
+func SetProjectStructure(rootDir string) error {
+	if projectStructure != nil {
+		return errors.New("project structure already initialized")
+	}
 	projectStructure = map[string]string{
 		"server":     rootDir + "/cmd/server",
 		"handlers":   rootDir + "/internal/handlers",
@@ -55,4 +64,5 @@ func SetProjectStructure(rootDir string) {
 		"middleware": rootDir + "/middleware",
 		"config":     rootDir + "/config",
 	}
+	return nil
 }
