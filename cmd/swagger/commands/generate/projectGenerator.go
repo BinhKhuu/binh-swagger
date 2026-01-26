@@ -41,7 +41,6 @@ func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error)
 	return rootDir, nil
 }
 
-// todo write test for this
 func GetProjectStructure() (map[string]string, error) {
 	if projectStructure == nil {
 		return nil, errors.New("project structure not initialized")
@@ -49,7 +48,6 @@ func GetProjectStructure() (map[string]string, error) {
 	return projectStructure, nil
 }
 
-// todo write test for this
 func SetProjectStructure(rootDir string) error {
 	if projectStructure != nil {
 		return errors.New("project structure already initialized")

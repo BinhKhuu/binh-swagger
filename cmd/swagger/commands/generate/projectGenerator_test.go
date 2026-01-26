@@ -8,6 +8,7 @@ import (
 )
 
 func Test_Project(t *testing.T) {
+	resetProjectStructreForTests()
 	tempDir := t.TempDir()
 	rootDir := path.Join(tempDir, "myproject")
 
@@ -45,4 +46,45 @@ func Test_Project(t *testing.T) {
 			t.Errorf("Expected directory %s not found", dir)
 		}
 	}
+}
+
+func Test_GetProjectStructure_InitReturnsDiretoryStructure(t *testing.T) {
+	resetProjectStructreForTests()
+	tempDir := t.TempDir()
+	err := SetProjectStructure(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to set project structure: %v", err)
+	}
+
+	structure, err := GetProjectStructure()
+	if err != nil {
+		t.Fatalf("Failed to get project structure: %v", err)
+	}
+	if structure == nil {
+		t.Fatalf("Expected non-nil project structure, got nil")
+	}
+
+	expectedDirs := []string{"server", "handlers", "routes", "models"}
+	for _, dirKey := range expectedDirs {
+		if _, exists := structure[dirKey]; !exists {
+			t.Errorf("Expected directory key %s not found in project structure", dirKey)
+		}
+	}
+}
+
+func Test_GetProjectStructure_NoInitThrowsError(t *testing.T) {
+	resetProjectStructreForTests()
+	_, err := GetProjectStructure()
+	if err == nil {
+		t.Fatalf("Expected error when project structure not initialized, got nil")
+	}
+}
+
+func resetProjectStructreForTests() {
+	projectStructure = nil
+}
+
+func TestMain(m *testing.M) {
+	resetProjectStructreForTests()
+	m.Run()
 }
