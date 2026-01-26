@@ -10,19 +10,17 @@ import (
 )
 
 func Test_GenerateModel(t *testing.T) {
-	newDir := filepath.Join(t.TempDir(), "newdir")
+	_ = InitGenerateTests(t)
 	config := spec.ModelSpec{
 		PackageName: "TestUser",
 		Name:        "User",
-		OutputPath:  newDir,
-		OutputFile:  "models.go",
 		Fields: []spec.FieldSpec{
 			{Name: "ID", Type: "int", JSON: "id"},
 			{Name: "Name", Type: "string", JSON: "name"},
 		},
 	}
 	helperAdapter := testhelpers.CreateMockFileHelper()
-	// Call GenerateModel
+
 	err := Model(config, helperAdapter)
 	if err != nil {
 		t.Fatalf("GenerateModel failed: %v", err)

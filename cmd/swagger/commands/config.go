@@ -94,13 +94,11 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 	}
 
 	// Generate models
-	projectStructure, err := generate.GetProjectStructure()
+	_, err = generate.GetProjectStructure()
 	if err != nil {
 		return err
 	}
 	for _, model := range cfg.Models {
-		model.OutputPath = projectStructure["models"]
-		model.OutputFile = strings.ToLower(model.Name) + ".go"
 		err = generate.Model(model, command.File)
 		if err != nil {
 			return err

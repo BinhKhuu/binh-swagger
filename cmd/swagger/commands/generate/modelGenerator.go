@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -27,8 +28,16 @@ func Model(config spec.ModelSpec, fHelper fileHelper.FileHelper) error {
 		return err
 	}
 
-	outputFile := fHelper.GetAbsoluteSanitiseFilePath(config.OutputPath, config.OutputFile)
-	shouldReturn, err := fHelper.EnsureOutputDirectoryExists(config.OutputPath, os.Stdout, os.Stdin)
+	// todo think about coupling to GetProjectStructure here
+	projectStructure, err := GetProjectStructure()
+	if err != nil {
+		return err
+	}
+	outputPath := projectStructure["models"]
+	outFile := strings.ToLower(config.Name) + ".go"
+
+	outputFile := fHelper.GetAbsoluteSanitiseFilePath(outputPath, outFile)
+	shouldReturn, err := fHelper.EnsureOutputDirectoryExists(outputPath, os.Stdout, os.Stdin)
 	if shouldReturn {
 		return err
 	}

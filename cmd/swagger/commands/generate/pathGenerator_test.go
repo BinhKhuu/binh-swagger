@@ -27,25 +27,19 @@ func Test_HnaldeOperation_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 }
 
 func Test_HandleOperation_ShouldIgnoreOmittedOperations(t *testing.T) {
-	resetProjectStructreForTests()
-	tempDir := t.TempDir()
+	InitGenerateTests(t)
 	path := &spec.PathSpec{
 		Name: "testPath",
 	}
 	mockFileHelper := testhelpers.CreateMockFileHelper()
-	err := SetProjectStructure(tempDir)
-	if err != nil {
-		t.Fatalf("Failed to set project structure: %v", err)
-	}
-	err = handleOperation("GET", path.Name, path.Get, mockFileHelper)
+	err := handleOperation("GET", path.Name, path.Get, mockFileHelper)
 	if err != nil {
 		t.Errorf("Expected no error for omitted operation, got: %v", err)
 	}
 }
 
 func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
-	resetProjectStructreForTests()
-	tempDir := t.TempDir()
+	tempDir := InitGenerateTests(t)
 	path := &spec.PathSpec{
 		Name: "testPath",
 		Get: &spec.Operation{
@@ -57,9 +51,6 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 	}
 
 	mockFileHelper := testhelpers.CreateMockFileHelper()
-	if err := SetProjectStructure(tempDir); err != nil {
-		t.Fatalf("Failed to set project structure: %v", err)
-	}
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
 		t.Fatalf("Failed to get project structure: %v", err)

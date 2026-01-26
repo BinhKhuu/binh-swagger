@@ -49,13 +49,7 @@ func Test_Project(t *testing.T) {
 }
 
 func Test_GetProjectStructure_InitReturnsDiretoryStructure(t *testing.T) {
-	resetProjectStructreForTests()
-	tempDir := t.TempDir()
-	err := SetProjectStructure(tempDir)
-	if err != nil {
-		t.Fatalf("Failed to set project structure: %v", err)
-	}
-
+	InitGenerateTests(t)
 	structure, err := GetProjectStructure()
 	if err != nil {
 		t.Fatalf("Failed to get project structure: %v", err)
@@ -78,13 +72,4 @@ func Test_GetProjectStructure_NoInitThrowsError(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Expected error when project structure not initialized, got nil")
 	}
-}
-
-func resetProjectStructreForTests() {
-	projectStructure = nil
-}
-
-func TestMain(m *testing.M) {
-	resetProjectStructreForTests()
-	m.Run()
 }
