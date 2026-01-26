@@ -23,6 +23,8 @@ type ConfigCommand struct {
 	Args ConfigArgs `positional-args:"true"`
 }
 
+// Points to the user configuration file should be renamed userConfigPath, userConfigFileName
+// does not point to the internal template files used generate code.
 type ConfigArgs struct {
 	Filepath string `positional-arg-name:"filepath"`
 	Filename string `positional-arg-name:"filename"`
