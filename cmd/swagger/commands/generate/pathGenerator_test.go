@@ -77,7 +77,7 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 
 	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
 		tempDir+"/internal/handlers",
-		"testPath_handler.go",
+		path.Name+handlerFileSuffix,
 	)
 
 	_, err = os.Stat(expectedFilePath)

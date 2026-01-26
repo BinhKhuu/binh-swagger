@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+const (
+	handlerFileSuffix = "_handler.go"
+)
+
 func handleOperation(method string, filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
 	if cfg == nil {
 		return nil
@@ -26,7 +30,7 @@ func handleOperation(method string, filename string, cfg *spec.Operation, fHelpe
 }
 
 func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
-	outputFile := fHelper.GetAbsoluteSanitiseFilePath(handlersDir, filename+"_handler.go")
+	outputFile := fHelper.GetAbsoluteSanitiseFilePath(handlersDir, filename+handlerFileSuffix)
 	// todo make tmpl file
 	// parse spec into tmp file
 
