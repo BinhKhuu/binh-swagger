@@ -14,7 +14,7 @@ func handleOperation(method string, filename string, cfg *spec.Operation, fHelpe
 	if cfg == nil {
 		return nil
 	}
-	projectStructure, err := GetProjectStructure()
+	_, err := GetProjectStructure()
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation,
 	return os.WriteFile(outputFile, []byte("// Handler code here"), filePermOwnerReadWrite)
 }
 
-func Path(cmd *PathCommand, config GenerateConfig) error {
+func Path(cmd *PathCommand, config Config) error {
 	fHelper := config.FileHelper()
 	ops := []struct {
 		method string

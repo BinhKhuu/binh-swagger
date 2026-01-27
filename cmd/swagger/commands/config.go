@@ -87,7 +87,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 }
 
 func (c *ConfigCommand) FileHelper() filehelper.FileHelper {
-	return c.Helpers.File
+	return c.File
 }
 
 func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
@@ -102,26 +102,27 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 	if err != nil {
 		return err
 	}
+
 	for _, model := range cfg.Models {
-		modelCmd, err := generate.SpecToModelCommand(model)
-		if err != nil {
-			return err
+		modelCmd, modelErr := generate.SpecToModelCommand(model)
+		if modelErr != nil {
+			return modelErr
 		}
-		err = generate.Model(modelCmd, command)
-		if err != nil {
-			return err
+		modelErr = generate.Model(modelCmd, command)
+		if modelErr != nil {
+			return modelErr
 		}
 	}
 
 	// Generate paths
 	for path, pathSpec := range cfg.Paths {
-		generateCommand, err := generate.SpecToPathCommand(pathSpec, path)
-		if err != nil {
-			return err
+		generateCommand, pathErr := generate.SpecToPathCommand(pathSpec, path)
+		if pathErr != nil {
+			return pathErr
 		}
-		err = generate.Path(generateCommand, command)
-		if err != nil {
-			return err
+		pathErr = generate.Path(generateCommand, command)
+		if pathErr != nil {
+			return pathErr
 		}
 	}
 	// Generate Routes

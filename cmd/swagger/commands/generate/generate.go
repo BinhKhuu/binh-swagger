@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type GenerateConfig interface {
+type Config interface {
 	FileHelper() filehelper.FileHelper
 }
 
