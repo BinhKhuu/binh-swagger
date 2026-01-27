@@ -10,7 +10,12 @@ type GenerateConfig interface {
 	FileHelper() filehelper.FileHelper
 }
 
-type GenerateCommand struct {
+type ModelCommand struct {
+	Name   string           `yaml:"name"`
+	Fields []spec.FieldSpec `yaml:"fields"`
+}
+
+type PathCommand struct {
 	Name   string
 	Get    *spec.Operation
 	Post   *spec.Operation
@@ -19,13 +24,20 @@ type GenerateCommand struct {
 	Delete *spec.Operation
 }
 
-func SpecToCommand(cfg spec.PathSpec, pathName string) (*GenerateCommand, error) {
-	return &GenerateCommand{
+func SpecToPathCommand(cfg spec.PathSpec, pathName string) (*PathCommand, error) {
+	return &PathCommand{
 		Name:   strings.Replace(pathName, "/", "", 1),
 		Get:    cfg.Get,
 		Post:   cfg.Post,
 		Put:    cfg.Put,
 		Patch:  cfg.Patch,
 		Delete: cfg.Delete,
+	}, nil
+}
+
+func SpecToModelCommand(cfg spec.ModelSpec) (*ModelCommand, error) {
+	return &ModelCommand{
+		Name:   cfg.Name,
+		Fields: cfg.Fields,
 	}, nil
 }

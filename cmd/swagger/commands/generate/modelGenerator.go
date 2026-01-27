@@ -2,7 +2,6 @@ package generate
 
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"errors"
 	"html/template"
@@ -16,14 +15,15 @@ const (
 	filePermOwnerReadWrite = 0o600
 )
 
-func Model(config spec.ModelSpec, fHelper fileHelper.FileHelper) error {
+func Model(cmd *ModelCommand, generateConfig GenerateConfig) error {
 	var buf bytes.Buffer
+	fHelper := generateConfig.FileHelper()
 	tmpl, err := loadModelTemplate(fHelper)
 	if err != nil {
 		return err
 	}
 
-	err = tmpl.Execute(&buf, config)
+	err = tmpl.Execute(&buf, cmd)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func Model(config spec.ModelSpec, fHelper fileHelper.FileHelper) error {
 		return err
 	}
 	outputPath := projectStructure["models"]
-	outFile := strings.ToLower(config.Name) + ".go"
+	outFile := strings.ToLower(cmd.Name) + ".go"
 
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(outputPath, outFile)
 	shouldReturn, err := fHelper.EnsureOutputDirectoryExists(outputPath, os.Stdout, os.Stdin)

@@ -38,7 +38,7 @@ func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation,
 	return os.WriteFile(outputFile, []byte("// Handler code here"), filePermOwnerReadWrite)
 }
 
-func Path(cmd *GenerateCommand, config GenerateConfig) error {
+func Path(cmd *PathCommand, config GenerateConfig) error {
 	fHelper := config.FileHelper()
 	ops := []struct {
 		method string

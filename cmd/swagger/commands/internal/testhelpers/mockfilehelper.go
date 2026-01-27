@@ -1,6 +1,7 @@
 package testhelpers
 
 import (
+	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"io"
 	"os"
@@ -57,4 +58,15 @@ func CreateMockFileHelper() MockFileHelper {
 	}
 
 	return mock
+}
+
+type MockGenerateConfig struct {
+	FileHelperFunc func() filehelper.FileHelper
+}
+
+func (m *MockGenerateConfig) FileHelper() filehelper.FileHelper {
+	if m.FileHelperFunc != nil {
+		return m.FileHelperFunc()
+	}
+	return CreateMockFileHelper()
 }

@@ -103,7 +103,11 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 		return err
 	}
 	for _, model := range cfg.Models {
-		err = generate.Model(model, command.File)
+		modelCmd, err := generate.SpecToModelCommand(model)
+		if err != nil {
+			return err
+		}
+		err = generate.Model(modelCmd, command)
 		if err != nil {
 			return err
 		}
@@ -111,7 +115,7 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 
 	// Generate paths
 	for path, pathSpec := range cfg.Paths {
-		generateCommand, err := generate.SpecToCommand(pathSpec, path)
+		generateCommand, err := generate.SpecToPathCommand(pathSpec, path)
 		if err != nil {
 			return err
 		}
