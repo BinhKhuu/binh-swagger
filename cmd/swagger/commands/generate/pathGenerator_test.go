@@ -18,7 +18,7 @@ func Test_HnaldeOperation_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 		Get:  &spec.Operation{},
 	}
 	mockFileHelper := testhelpers.CreateMockFileHelper()
-	err := handleOperation("GET", path.Name, path.Get, mockFileHelper)
+	err := handleOperation(path.Name, path.Get, mockFileHelper)
 	if err == nil {
 		t.Error("Expected error when project structure not initialized, got nil")
 	}
@@ -32,7 +32,7 @@ func Test_HandleOperation_ShouldIgnoreOmittedOperations(t *testing.T) {
 		Name: "testPath",
 	}
 	mockFileHelper := testhelpers.CreateMockFileHelper()
-	err := handleOperation("GET", path.Name, path.Get, mockFileHelper)
+	err := handleOperation(path.Name, path.Get, mockFileHelper)
 	if err != nil {
 		t.Errorf("Expected no error for omitted operation, got: %v", err)
 	}
@@ -61,7 +61,7 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = handleOperation("GET", path.Name, path.Get, mockFileHelper)
+	err = handleOperation(path.Name, path.Get, mockFileHelper)
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}

@@ -1,6 +1,7 @@
 package generate
 
 import (
+	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
 	"bytes"
 	"os"
 	"strings"
@@ -13,7 +14,7 @@ const (
 func Model(cmd *ModelCommand, generateConfig Config) error {
 	var buf bytes.Buffer
 	fHelper := generateConfig.FileHelper()
-	tmpl, err := LoadModelTemplate(fHelper, "model")
+	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateHelper.ModelTemplateKey)
 	if err != nil {
 		return err
 	}

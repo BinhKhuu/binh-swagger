@@ -1,4 +1,4 @@
-package generate
+package templateHelper
 
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
@@ -11,9 +11,14 @@ import (
 
 // todo test this file.
 var templatePaths = map[string]string{
-	"model":  "model_template.tmpl",
-	"hander": "handler_template.tmpl",
+	ModelTemplateKey:   "model_template.tmpl",
+	HandlerTemplateKey: "handler_template.tmpl",
 }
+
+const (
+	HandlerTemplateKey = "hander"
+	ModelTemplateKey   = "model"
+)
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
 	templateFilename, err := getTemplatePath(templateName)
@@ -26,7 +31,9 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 		return nil, err
 	}
 
-	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "templates"), templateFilename)
+	// path of template is coupled to the location of this file.
+	// also not propertly tested unit test needs to reflect where this path is
+	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "..", "templates"), templateFilename)
 	tmpl, err := os.ReadFile(templatePath)
 	if err != nil {
 		return nil, err
