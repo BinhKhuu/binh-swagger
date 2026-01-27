@@ -12,8 +12,7 @@ import (
 func Test_GenerateModel(t *testing.T) {
 	_ = InitGenerateTests(t)
 	config := spec.ModelSpec{
-		PackageName: "TestUser",
-		Name:        "User",
+		Name: "User",
 		Fields: []spec.FieldSpec{
 			{Name: "ID", Type: "int", JSON: "id"},
 			{Name: "Name", Type: "string", JSON: "name"},

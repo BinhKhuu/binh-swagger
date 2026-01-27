@@ -1,10 +1,8 @@
 package spec
 
-// ModelSpec todo remove Packagename (will be model) outputpath (will be supplied in command) output file (will be supplied in commands)
 type ModelSpec struct {
-	PackageName string      `yaml:"package_name"`
-	Name        string      `yaml:"name"`
-	Fields      []FieldSpec `yaml:"fields"`
+	Name   string      `yaml:"name"`
+	Fields []FieldSpec `yaml:"fields"`
 }
 
 type FieldSpec struct {
