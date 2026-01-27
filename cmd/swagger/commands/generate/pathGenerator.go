@@ -38,20 +38,21 @@ func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation,
 	return os.WriteFile(outputFile, []byte("// Handler code here"), filePermOwnerReadWrite)
 }
 
-func Path(cfg *spec.PathSpec, fHelper fileHelper.FileHelper) error {
+func Path(cmd *GenerateCommand, config GenerateConfig) error {
+	fHelper := config.FileHelper()
 	ops := []struct {
 		method string
 		op     *spec.Operation
 	}{
-		{"GET", cfg.Get},
-		{"POST", cfg.Post},
-		{"PUT", cfg.Put},
-		{"DELETE", cfg.Delete},
-		{"PATCH", cfg.Patch},
+		{"GET", cmd.Get},
+		{"POST", cmd.Post},
+		{"PUT", cmd.Put},
+		{"DELETE", cmd.Delete},
+		{"PATCH", cmd.Patch},
 	}
 
 	for _, o := range ops {
-		err := handleOperation(o.method, cfg.Name, o.op, fHelper)
+		err := handleOperation(o.method, cmd.Name, o.op, fHelper)
 		if err != nil {
 			return err
 		}

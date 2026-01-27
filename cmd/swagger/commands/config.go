@@ -1,6 +1,7 @@
 package commands
 
 import (
+	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -9,7 +10,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 )
@@ -86,6 +86,10 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	return nil
 }
 
+func (c *ConfigCommand) FileHelper() filehelper.FileHelper {
+	return c.Helpers.File
+}
+
 func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 	// Generate Project Structure
 	_, err := generate.Project(cfg, command.File)
@@ -105,10 +109,13 @@ func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
 		}
 	}
 
-	// Generate handlers
+	// Generate paths
 	for path, pathSpec := range cfg.Paths {
-		pathSpec.Name = strings.Replace(path, "/", "", 1)
-		err = generate.Path(&pathSpec, command.File)
+		generateCommand, err := generate.SpecToCommand(pathSpec, path)
+		if err != nil {
+			return err
+		}
+		err = generate.Path(generateCommand, command)
 		if err != nil {
 			return err
 		}
