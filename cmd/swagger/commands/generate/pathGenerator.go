@@ -39,7 +39,10 @@ func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation,
 		return err
 	}
 
-	err = tmpl.Execute(&buf, cfg)
+	if err = tmpl.Execute(&buf, cfg); err != nil {
+		return err
+	}
+
 	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
 }
 

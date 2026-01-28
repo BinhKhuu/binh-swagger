@@ -41,7 +41,7 @@ func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error)
 	return rootDir, nil
 }
 
-// todo think about the coupling of this, model, handler and route generateor needs this to be set before it can execute and the current setter only allows one set action
+// GetProjectStructure todo think about the coupling of this, model, handler and route generateor needs this to be set before it can execute and the current setter only allows one set action.
 func GetProjectStructure() (map[string]string, error) {
 	if projectStructure == nil {
 		return nil, errors.New("project structure not initialized")
@@ -49,7 +49,7 @@ func GetProjectStructure() (map[string]string, error) {
 	return projectStructure, nil
 }
 
-// todo think if we need to make this setable more than once to avoid coupling in model, handler and route generators
+// SetProjectStructure todo think if we need to make this setable more than once to avoid coupling in model, handler and route generators.
 func SetProjectStructure(rootDir string) error {
 	if projectStructure != nil {
 		return errors.New("project structure already initialized")

@@ -1,4 +1,4 @@
-package templateHelper
+package templatehelper
 
 import (
 	"binh-swagger/cmd/swagger/commands/internal/testhelpers"
