@@ -34,7 +34,7 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 	}
 
 	// path of template is coupled to the location of this file.
-	// also not property tested unit test needs to reflect where this path is
+	// also not properly tested unit test needs to reflect where this path is
 	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "..", "templates"), templateFilename)
 	tmpl, err := os.ReadFile(templatePath)
 	if err != nil {
