@@ -116,7 +116,7 @@ func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.
 	var buff bytes.Buffer
 	baseCommand := SetupBaseCommand(&buff)
 	helpers := Helpers{File: testhelpers.CreateMockFileHelper()}
-	args := ConfigArgs{Filepath: filePath, Filename: filename}
+	args := ConfigArgs{UserConfigPath: filePath, UserConfigFilename: filename}
 	cmd := &ConfigCommand{
 		BaseCommand: *baseCommand,
 		Helpers:     helpers,

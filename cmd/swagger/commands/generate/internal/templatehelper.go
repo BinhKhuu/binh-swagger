@@ -3,13 +3,15 @@ package templateHelper
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"errors"
+	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
 	"runtime"
 )
 
-// todo test this file.
+var ErrTemplateNotFound = errors.New("template not found")
+
 var templatePaths = map[string]string{
 	ModelTemplateKey:   "model_template.tmpl",
 	HandlerTemplateKey: "handler_template.tmpl",
@@ -45,7 +47,7 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 func getTemplatePath(templateName string) (string, error) {
 	path := templatePaths[templateName]
 	if path == "" {
-		return "", errors.New(templateName + " template not found")
+		return "", fmt.Errorf("%w: %s", ErrTemplateNotFound, templateName)
 	}
 	return path, nil
 }
@@ -54,7 +56,7 @@ func getTemplatePath(templateName string) (string, error) {
 func getCurrentFileDir() (string, error) {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		return "", errors.New("failed to create directory")
+		return "", errors.New("failed to get directory")
 	}
 	return filepath.Dir(file), nil
 }

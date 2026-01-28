@@ -23,11 +23,9 @@ type ConfigCommand struct {
 	Args ConfigArgs `positional-args:"true"`
 }
 
-// Points to the user configuration file should be renamed userConfigPath, userConfigFileName
-// does not point to the internal template files used generate code.
 type ConfigArgs struct {
-	Filepath string `positional-arg-name:"filepath"`
-	Filename string `positional-arg-name:"filename"`
+	UserConfigPath     string `positional-arg-name:"filepath"`
+	UserConfigFilename string `positional-arg-name:"filename"`
 }
 
 type Config struct {
@@ -80,7 +78,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}
 
-		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.Filename)
+		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.UserConfigFilename)
 	}
 
 	return nil
@@ -207,8 +205,8 @@ func parseYAML[T any](file *os.File) (*T, error) {
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
-	cleanPath := filepath.Clean(c.Args.Filepath)
-	cleanFile := filepath.Clean(c.Args.Filename)
+	cleanPath := filepath.Clean(c.Args.UserConfigPath)
+	cleanFile := filepath.Clean(c.Args.UserConfigFilename)
 	sanitisedFilePath := helpers.GetAbsoluteSanitiseFilePath(cleanPath, cleanFile)
 
 	err := helpers.CheckSymlinks(sanitisedFilePath)
