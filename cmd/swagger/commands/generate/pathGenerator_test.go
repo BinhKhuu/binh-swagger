@@ -41,7 +41,7 @@ func createMockOperation() (*spec.PathSpec, operation) {
 }
 
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
-	tempDir := InitGenerateTests(t)
+	InitGenerateTests(t)
 	path := &spec.PathSpec{
 		Name: "testPath",
 		Get: &spec.Operation{
@@ -73,7 +73,7 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	}
 
 	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
-		tempDir+"/internal/handlers",
+		handlerDir,
 		path.Name+handlerFileSuffix,
 	)
 
