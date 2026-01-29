@@ -33,11 +33,11 @@ func createMockOperation() (*spec.PathSpec, operation) {
 		Name: "testPath",
 		Get:  &spec.Operation{},
 	}
-	operation := operation{
+	opt := operation{
 		method: "GET",
 		op:     path.Get,
 	}
-	return path, operation
+	return path, opt
 }
 
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
@@ -86,7 +86,6 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 		t.Errorf("Expected handler file to be created at %s, but got error: %v", expectedFilePath, err)
 		return
 	}
-	// todo assert if template has correct content
 	contentStr := string(content)
 	if !strings.Contains(contentStr, "getTestPath") {
 		t.Errorf("Expected handler file to contain operation ID 'getTestPath', got: %s", contentStr)
@@ -118,7 +117,9 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	os.MkdirAll(handlerDir, fileModeExecutable)
+	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
 
 	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
@@ -161,7 +162,9 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	os.MkdirAll(handlerDir, fileModeExecutable)
+	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
 
 	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
@@ -193,11 +196,12 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	os.MkdirAll(handlerDir, fileModeExecutable)
+	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
 
 	err := createHandlers(mockFileHelper, operations, "test_handler.go")
-	// This test depends on your template implementation
-	// Adjust assertion based on expected behavior
+
 	if err == nil {
 		t.Log("Template handled invalid method gracefully")
 	}

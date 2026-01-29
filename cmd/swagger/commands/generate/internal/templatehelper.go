@@ -36,7 +36,7 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 	// also not properly tested unit test needs to reflect where this path is
 	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "..", "templates"), templateFilename)
 
-	template := template.Must(template.ParseFiles(string(templatePath)))
+	template := template.Must(template.ParseFiles(templatePath))
 	return template, nil
 
 	// old code here as an example of reading file content if needed
