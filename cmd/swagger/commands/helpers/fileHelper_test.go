@@ -118,3 +118,49 @@ func Test_promptCreateDirectory_No(t *testing.T) {
 		t.Error("Expected promptCreateDirectory to return false for 'n' input, but got true")
 	}
 }
+
+func Test_CreateDirectory_ReturnsSuccess(t *testing.T) {
+	newDir := filepath.Join(t.TempDir(), "createdir")
+
+	createdPath, err := CreateDirectory(newDir)
+	if err != nil {
+		t.Errorf("Expected no error creating directory, but got: %v", err)
+	}
+	if createdPath != newDir {
+		t.Errorf("Expected created path to be %s, but got %s", newDir, createdPath)
+	}
+	if _, statErr := os.Stat(newDir); os.IsNotExist(statErr) {
+		t.Error("Directory was not created.")
+	}
+}
+
+func Test_ReadAllChildDirectories(t *testing.T) {
+	testDir := t.TempDir()
+	expectedDirs := map[string]bool{
+		filepath.Join(testDir, "dir1"):            true,
+		filepath.Join(testDir, "dir2"):            true,
+		filepath.Join(testDir, "dir1", "subdir1"): true,
+	}
+
+	for key := range expectedDirs {
+		if err := os.MkdirAll(key, fileModeExecutable); err != nil {
+			t.Errorf("error setting up test directory: %v", err)
+		}
+	}
+
+	dirs, err := ReadAllChildDirectoriesRecursive(testDir)
+	if err != nil {
+		t.Fatalf("Expected no error reading directories, but got: %v", err)
+	}
+
+	dirSet := make(map[string]bool)
+	for _, dir := range dirs {
+		dirSet[dir] = true
+	}
+
+	for expectedDir := range expectedDirs {
+		if !dirSet[expectedDir] {
+			t.Errorf("Expected directory %s not found in results", expectedDir)
+		}
+	}
+}

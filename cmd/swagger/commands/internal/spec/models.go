@@ -1,11 +1,8 @@
 package spec
 
 type ModelSpec struct {
-	PackageName string      `yaml:"package_name"`
-	OutputPath  string      `yaml:"output_path"`
-	OutputFile  string      `yaml:"output_file"`
-	Name        string      `yaml:"name"`
-	Fields      []FieldSpec `yaml:"fields"`
+	Name   string      `yaml:"name"`
+	Fields []FieldSpec `yaml:"fields"`
 }
 
 type FieldSpec struct {

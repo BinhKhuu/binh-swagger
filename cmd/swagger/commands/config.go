@@ -1,6 +1,7 @@
 package commands
 
 import (
+	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -23,8 +24,8 @@ type ConfigCommand struct {
 }
 
 type ConfigArgs struct {
-	Filepath string `positional-arg-name:"filepath"`
-	Filename string `positional-arg-name:"filename"`
+	UserConfigPath     string `positional-arg-name:"filepath"`
+	UserConfigFilename string `positional-arg-name:"filename"`
 }
 
 type Config struct {
@@ -53,12 +54,6 @@ type Config struct {
 	} `yaml:"items"`
 }
 
-type APIConfig struct {
-	Version string           `yaml:"version"`
-	Models  []spec.ModelSpec `yaml:"models"`
-	Routes  []spec.RouteSpec `yaml:"routes"`
-}
-
 func (c *ConfigCommand) Execute(_ []string) error {
 	err := validateConfigFlags(c)
 	if err != nil {
@@ -74,7 +69,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 	defer f.Close()
 
 	if c.API {
-		config, err := parseFile[APIConfig](f)
+		config, err := parseFile[spec.APIConfig](f)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
@@ -83,21 +78,55 @@ func (c *ConfigCommand) Execute(_ []string) error {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}
 
-		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.Filename)
+		fmt.Fprintf(c.Out, "api configuration file %s validated successfully and models generated\n", c.Args.UserConfigFilename)
 	}
 
 	return nil
 }
 
-// todo loop through api config => generate models.
-func generateFromAPIConfig(cfg *APIConfig, command *ConfigCommand) error {
-	var err error
+func (c *ConfigCommand) FileHelper() filehelper.FileHelper {
+	return c.File
+}
+
+func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
+	// Generate Project Structure
+	_, err := generate.Project(cfg, command.File)
+	if err != nil {
+		return err
+	}
+
+	// Generate models
+	_, err = generate.GetProjectStructure()
+	if err != nil {
+		return err
+	}
+
 	for _, model := range cfg.Models {
-		err = generate.Model(model, command.File)
-		if err != nil {
-			return err
+		modelCmd, modelErr := generate.SpecToModelCommand(model)
+		if modelErr != nil {
+			return modelErr
+		}
+		modelErr = generate.Model(modelCmd, command)
+		if modelErr != nil {
+			return modelErr
 		}
 	}
+
+	// Generate paths
+	for path, pathSpec := range cfg.Paths {
+		generateCommand, pathErr := generate.SpecToPathCommand(pathSpec, path)
+		if pathErr != nil {
+			return pathErr
+		}
+		pathErr = generate.Path(generateCommand, command)
+		if pathErr != nil {
+			return pathErr
+		}
+	}
+	// Generate Routes
+
+	// Generate main server file
+
 	return err
 }
 
@@ -129,7 +158,7 @@ func parseFile[T any](file *os.File) (*T, error) {
 		return parseYAML[T](file)
 	}
 
-	if _, ok := any(zero).(APIConfig); ok {
+	if _, ok := any(zero).(spec.APIConfig); ok {
 		return parseYAML[T](file)
 	}
 
@@ -176,8 +205,8 @@ func parseYAML[T any](file *os.File) (*T, error) {
 }
 
 func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
-	cleanPath := filepath.Clean(c.Args.Filepath)
-	cleanFile := filepath.Clean(c.Args.Filename)
+	cleanPath := filepath.Clean(c.Args.UserConfigPath)
+	cleanFile := filepath.Clean(c.Args.UserConfigFilename)
 	sanitisedFilePath := helpers.GetAbsoluteSanitiseFilePath(cleanPath, cleanFile)
 
 	err := helpers.CheckSymlinks(sanitisedFilePath)
