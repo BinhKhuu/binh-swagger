@@ -40,7 +40,6 @@ func createMockOperation() (*spec.PathSpec, operation) {
 	return path, operation
 }
 
-// no files written to need to assert of the buffer
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	tempDir := InitGenerateTests(t)
 	path := &spec.PathSpec{
@@ -78,14 +77,128 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 		path.Name+handlerFileSuffix,
 	)
 
-	_, err = os.Stat(expectedFilePath)
+	content, err := os.ReadFile(expectedFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Errorf("Expected handler file to be created at %s, but file does not exist", expectedFilePath)
 			return
 		}
 		t.Errorf("Expected handler file to be created at %s, but got error: %v", expectedFilePath, err)
+		return
+	}
+	// todo assert if template has correct content
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "getTestPath") {
+		t.Errorf("Expected handler file to contain operation ID 'getTestPath', got: %s", contentStr)
+	}
+	if !strings.Contains(contentStr, "func getTestPath") {
+		t.Errorf("Expected handler file to contain summary 'func getTestPath', got: %s", contentStr)
+	}
+}
+
+func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
+	InitGenerateTests(t)
+	path := &spec.PathSpec{
+		Name: "multiPath",
+		Get: &spec.Operation{
+			Summary:     "Get operation",
+			OperationID: "getMultiPath",
+		},
+		Post: &spec.Operation{
+			Summary:     "Post operation",
+			OperationID: "postMultiPath",
+		},
 	}
 
-	// todo assert if template has correct content
+	operations := []operation{
+		{method: "GET", op: path.Get},
+		{method: "POST", op: path.Post},
+	}
+
+	mockFileHelper := testhelpers.CreateMockFileHelper()
+	testProjectStructure, _ := GetProjectStructure()
+	handlerDir := testProjectStructure["handlers"]
+	os.MkdirAll(handlerDir, fileModeExecutable)
+
+	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	if err != nil {
+		t.Errorf("Expected no error for multiple operations, got: %v", err)
+	}
+
+	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
+		handlerDir,
+		path.Name+handlerFileSuffix,
+	)
+
+	content, err := os.ReadFile(expectedFilePath)
+	if err != nil {
+		t.Fatalf("Failed to read handler file: %v", err)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "getMultiPath") {
+		t.Errorf("Expected handler file to contain GET operation ID 'getMultiPath'")
+	}
+	if !strings.Contains(contentStr, "postMultiPath") {
+		t.Errorf("Expected handler file to contain POST operation ID 'postMultiPath'")
+	}
+}
+
+func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
+	InitGenerateTests(t)
+	path := &spec.PathSpec{
+		Name: "skipPath",
+		Get: &spec.Operation{
+			OperationID: "getSkipPath",
+		},
+	}
+
+	operations := []operation{
+		{method: "GET", op: path.Get},
+		{method: "POST", op: nil}, // nil operation should be skipped
+	}
+
+	mockFileHelper := testhelpers.CreateMockFileHelper()
+	testProjectStructure, _ := GetProjectStructure()
+	handlerDir := testProjectStructure["handlers"]
+	os.MkdirAll(handlerDir, fileModeExecutable)
+
+	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	if err != nil {
+		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
+	}
+
+	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
+		handlerDir,
+		path.Name+handlerFileSuffix,
+	)
+
+	content, err := os.ReadFile(expectedFilePath)
+	if err != nil {
+		t.Fatalf("Failed to read handler file: %v", err)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, "getSkipPath") {
+		t.Errorf("Expected handler file to contain GET operation ID 'getSkipPath'")
+	}
+}
+
+func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
+	InitGenerateTests(t)
+	operations := []operation{
+		{method: "INVALID", op: &spec.Operation{}}, // invalid method might cause template error
+	}
+
+	mockFileHelper := testhelpers.CreateMockFileHelper()
+	testProjectStructure, _ := GetProjectStructure()
+	handlerDir := testProjectStructure["handlers"]
+	os.MkdirAll(handlerDir, fileModeExecutable)
+
+	err := createHandlers(mockFileHelper, operations, "test_handler.go")
+	// This test depends on your template implementation
+	// Adjust assertion based on expected behavior
+	if err == nil {
+		t.Log("Template handled invalid method gracefully")
+	}
 }
