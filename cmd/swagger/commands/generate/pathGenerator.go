@@ -5,6 +5,7 @@ import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
+	"html/template"
 	"os"
 )
 
@@ -12,59 +13,63 @@ const (
 	handlerFileSuffix = "_handler.go"
 )
 
-func handleOperation(filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
-	if cfg == nil {
-		return nil
-	}
-	_, err := GetProjectStructure()
-	if err != nil {
-		return err
-	}
-
-	// generate handler
-	err = createHandlerFile(projectStructure["handlers"], filename, cfg, fHelper)
-	if err != nil {
-		return err
-	}
-	// generate route
-
-	return nil
-}
-
-func createHandlerFile(handlersDir string, filename string, cfg *spec.Operation, fHelper fileHelper.FileHelper) error {
-	var buf bytes.Buffer
-	outputFile := fHelper.GetAbsoluteSanitiseFilePath(handlersDir, filename+handlerFileSuffix)
-	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateHelper.HandlerTemplateKey)
-	if err != nil {
-		return err
-	}
-
-	if err = tmpl.Execute(&buf, cfg); err != nil {
-		return err
-	}
-
-	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
+type operation struct {
+	method string
+	op     *spec.Operation
 }
 
 func Path(cmd *PathCommand, config Config) error {
 	fHelper := config.FileHelper()
-	ops := []struct {
-		method string
-		op     *spec.Operation
-	}{
+	ops := []operation{
 		{"GET", cmd.Get},
 		{"POST", cmd.Post},
 		{"PUT", cmd.Put},
 		{"DELETE", cmd.Delete},
 		{"PATCH", cmd.Patch},
 	}
+	return createHandlers(fHelper, ops, cmd.Name+handlerFileSuffix)
+}
 
+func createHandlers(fHelper fileHelper.FileHelper, ops []operation, handlerFilename string) error {
+	if _, err := GetProjectStructure(); err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	tmpl, err := getHandlerTemplate(&buf, fHelper)
+	if err != nil {
+		return err
+	}
 	for _, o := range ops {
-		err := handleOperation(cmd.Name, o.op, fHelper)
+		err := executeHandlerTemplate(tmpl, &buf, o)
 		if err != nil {
 			return err
 		}
 	}
+	outputFile := fHelper.GetAbsoluteSanitiseFilePath(projectStructure["handlers"], handlerFilename)
+	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
+}
 
+func getHandlerTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper) (*template.Template, error) {
+	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateHelper.HandlerTemplateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = tmpl.ExecuteTemplate(buf, "handler", nil); err != nil {
+		return nil, err
+	}
+
+	return tmpl, nil
+}
+
+func executeHandlerTemplate(tmpl *template.Template, buf *bytes.Buffer, cfg operation) error {
+	if cfg.op == nil {
+		return nil
+	}
+
+	if err := tmpl.ExecuteTemplate(buf, cfg.method, cfg.op); err != nil {
+		return err
+	}
 	return nil
 }

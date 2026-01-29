@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"os"
 	"path/filepath"
 	"runtime"
 )
@@ -36,12 +35,16 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 	// path of template is coupled to the location of this file.
 	// also not properly tested unit test needs to reflect where this path is
 	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "..", "templates"), templateFilename)
-	tmpl, err := os.ReadFile(templatePath)
-	if err != nil {
-		return nil, err
-	}
 
-	return template.New("model").Parse(string(tmpl))
+	template := template.Must(template.ParseFiles(string(templatePath)))
+	return template, nil
+
+	// old code here as an example of reading file content if needed
+	// tmpl, err := os.ReadFile(templatePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return template.New(templateName).Parse(string(tmpl))
 }
 
 func getTemplatePath(templateName string) (string, error) {

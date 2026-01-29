@@ -12,33 +12,36 @@ const (
 	fileModeExecutable = 0o755
 )
 
-func Test_HnaldeOperation_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
-	path := &spec.PathSpec{
-		Name: "testPath",
-		Get:  &spec.Operation{},
-	}
+func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
+	resetProjectStructreForTests()
+	path, opt := createMockOperation()
 	mockFileHelper := testhelpers.CreateMockFileHelper()
-	err := handleOperation(path.Name, path.Get, mockFileHelper)
+	operations := []operation{opt}
+	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err == nil {
 		t.Error("Expected error when project structure not initialized, got nil")
 	}
 
-	strings.Contains(err.Error(), "project structure not initialized")
+	// if err is nil and we use err.Error() it will panic
+	if err == nil || !strings.Contains(err.Error(), "project structure not initialized") {
+		t.Errorf("Expected project structure not initialized error, got: %v", err)
+	}
 }
 
-func Test_HandleOperation_ShouldIgnoreOmittedOperations(t *testing.T) {
-	InitGenerateTests(t)
+func createMockOperation() (*spec.PathSpec, operation) {
 	path := &spec.PathSpec{
 		Name: "testPath",
+		Get:  &spec.Operation{},
 	}
-	mockFileHelper := testhelpers.CreateMockFileHelper()
-	err := handleOperation(path.Name, path.Get, mockFileHelper)
-	if err != nil {
-		t.Errorf("Expected no error for omitted operation, got: %v", err)
+	operation := operation{
+		method: "GET",
+		op:     path.Get,
 	}
+	return path, operation
 }
 
-func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
+// no files written to need to assert of the buffer
+func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	tempDir := InitGenerateTests(t)
 	path := &spec.PathSpec{
 		Name: "testPath",
@@ -49,7 +52,11 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 			Responses:   map[int]spec.ResponseSpec{},
 		},
 	}
-
+	opt := operation{
+		method: "GET",
+		op:     path.Get,
+	}
+	operations := []operation{opt}
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
@@ -61,7 +68,7 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = handleOperation(path.Name, path.Get, mockFileHelper)
+	err = createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
@@ -79,4 +86,6 @@ func Test_HandlerOperation_ShouldCreateHandlerFile(t *testing.T) {
 		}
 		t.Errorf("Expected handler file to be created at %s, but got error: %v", expectedFilePath, err)
 	}
+
+	// todo assert if template has correct content
 }

@@ -1,3 +1,4 @@
+{{ define "handler" }}
 package handlers
 
 import (
@@ -7,6 +8,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+{{ end }}
+
+{{ define "GET" }}
 func {{ .OperationID }}(c *gin.Context) {
 
 }
+{{ end }}
+
+{{ define "POST" }}
+func {{ .OperationID }}(c *gin.Context) {
+
+}
+{{ end }}
+
+{{ define "PUT" }}
+func {{ .OperationID }}(c *gin.Context) {
+
+}
+{{ end }}
+
+{{ define "DELETE" }}
+func {{ .OperationID }}(c *gin.Context) {
+
+}
+{{ end }}
+
+{{ define "PATCH" }}
+
+func {{ .OperationID }}(c *gin.Context) {
+
+}
+{{ end }}

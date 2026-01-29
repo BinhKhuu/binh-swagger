@@ -40,6 +40,16 @@ paths:
             description: A list of users
             schema:
               type: array
+      post:
+        summary: Create a new user
+        operationId: createUser
+        produces:
+          - application/json
+        responses:
+          201:
+            description: The created user
+            schema:
+              $ref: "#/definitions/User"
 
 routes:
   - path: "/users"
