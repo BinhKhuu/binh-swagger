@@ -170,8 +170,7 @@ func Test_HasGoModeFile_ReturnsErrorWhenNoGoModFile(t *testing.T) {
 	if err := os.Chdir(tmp); err != nil {
 		t.Fatalf("Failed to change directory to temp: %v", err)
 	}
-	_, err := HasGoModFile()
-	if err == nil {
+	if err := HasGoModFile(); err == nil {
 		t.Errorf("Expected no error checking for go.mod file, but got: %v", err)
 	}
 }
@@ -183,12 +182,9 @@ func Test_HasGoModFile_ReturnsSucess(t *testing.T) {
 		t.Fatalf("Failed to create go.mod file: %v", err)
 	}
 
-	hasMod, err := HasGoModFile()
+	err := HasGoModFile()
 	if err != nil {
 		t.Errorf("Expected no error checking for go.mod file, but got: %v", err)
-	}
-	if !hasMod {
-		t.Error("Expected HasGoModFile to return true, but got false")
 	}
 }
 

@@ -110,10 +110,10 @@ func ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
 	return allDirs, nil
 }
 
-func HasGoModFile() (bool, error) {
+func HasGoModFile() error {
 	_, err := os.Stat("go.mod")
 	if os.IsNotExist(err) {
-		return false, fmt.Errorf("%w", ErrNoGoModFile)
+		return fmt.Errorf("%w", ErrNoGoModFile)
 	}
-	return true, nil
+	return nil
 }
