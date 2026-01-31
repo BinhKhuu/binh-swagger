@@ -1,21 +1,18 @@
 package generate
 
 import (
+	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
-	"binh-swagger/cmd/swagger/commands/internal/testhelpers"
 	"os"
 	"strings"
 	"testing"
 )
 
-const (
-	fileModeExecutable = 0o755
-)
-
 func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
 	path, opt := createMockOperation()
-	mockFileHelper := testhelpers.CreateMockFileHelper()
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	operations := []operation{opt}
 	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err == nil {
@@ -56,14 +53,14 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 		op:     path.Get,
 	}
 	operations := []operation{opt}
-	mockFileHelper := testhelpers.CreateMockFileHelper()
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
 		t.Fatalf("Failed to get project structure: %v", err)
 	}
 
 	handlerDir := testProjectStructure["handlers"]
-	if err = os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,10 +111,10 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 		{method: "POST", op: path.Post},
 	}
 
-	mockFileHelper := testhelpers.CreateMockFileHelper()
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -159,10 +156,10 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		{method: "POST", op: nil}, // nil operation should be skipped
 	}
 
-	mockFileHelper := testhelpers.CreateMockFileHelper()
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -193,10 +190,10 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 		{method: "INVALID", op: &spec.Operation{}}, // invalid method might cause template error
 	}
 
-	mockFileHelper := testhelpers.CreateMockFileHelper()
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 

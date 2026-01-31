@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"bytes"
 	"fmt"
 	"os"
@@ -143,7 +144,7 @@ func Test_ReadAllChildDirectories(t *testing.T) {
 	}
 
 	for key := range expectedDirs {
-		if err := os.MkdirAll(key, fileModeExecutable); err != nil {
+		if err := os.MkdirAll(key, pkg.FileModeExecutable); err != nil {
 			t.Errorf("error setting up test directory: %v", err)
 		}
 	}
@@ -162,5 +163,35 @@ func Test_ReadAllChildDirectories(t *testing.T) {
 		if !dirSet[expectedDir] {
 			t.Errorf("Expected directory %s not found in results", expectedDir)
 		}
+	}
+}
+
+func Test_HasGoModeFile_ReturnsErrorWhenNoGoModFile(t *testing.T) {
+	tmp := changeTestWorkingDirectory(t)
+	t.Chdir(tmp)
+	if err := HasGoModFile(); err == nil {
+		t.Errorf("Expected no error checking for go.mod file, but got: %v", err)
+	}
+}
+
+func Test_HasGoModFile_ReturnsSucess(t *testing.T) {
+	ceateTestGodModFile(t)
+	err := HasGoModFile()
+	if err != nil {
+		t.Errorf("Expected no error checking for go.mod file, but got: %v", err)
+	}
+}
+
+func changeTestWorkingDirectory(t *testing.T) string {
+	tmp := t.TempDir()
+	t.Chdir(tmp)
+	return tmp
+}
+
+func ceateTestGodModFile(t *testing.T) {
+	tmp := changeTestWorkingDirectory(t)
+	goModPath := filepath.Join(tmp, "go.mod")
+	if err := os.WriteFile(goModPath, []byte("module testmodule"), pkg.FileModeExecutable); err != nil {
+		t.Fatalf("Failed to create go.mod file: %v", err)
 	}
 }

@@ -13,6 +13,7 @@ type FileHelper interface {
 	EnsureOutputDirectoryExists(outputPath string, output io.Writer, input io.Reader) (bool, error)
 	CreateDirectory(rootPath string) (string, error)
 	ReadAllChildDirectoriesRecursive(path string) ([]string, error)
+	HasGoModFile() error
 }
 
 type DefaultFileHelper struct{}
@@ -39,4 +40,8 @@ func (f *DefaultFileHelper) CreateDirectory(rootPath string) (string, error) {
 
 func (f *DefaultFileHelper) ReadAllChildDirectoriesRecursive(filePath string) ([]string, error) {
 	return helpers.ReadAllChildDirectoriesRecursive(filePath)
+}
+
+func (f *DefaultFileHelper) HasGoModFile() error {
+	return helpers.HasGoModFile()
 }
