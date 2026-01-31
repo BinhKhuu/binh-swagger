@@ -15,6 +15,8 @@ const (
 	fileModeExecutable     = 0o755
 )
 
+var ErrNoGoModFile = errors.New("no go.mod file found in the current directory")
+
 func ValidateFileInfo(fileInfo os.FileInfo) error {
 	if fileInfo.IsDir() {
 		return fmt.Errorf("expected a file but got directory: %s", fileInfo.Name())
@@ -106,4 +108,12 @@ func ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
 	}
 
 	return allDirs, nil
+}
+
+func HasGoModFile() (bool, error) {
+	_, err := os.Stat("go.mod")
+	if os.IsNotExist(err) {
+		return false, fmt.Errorf("%w", ErrNoGoModFile)
+	}
+	return true, nil
 }
