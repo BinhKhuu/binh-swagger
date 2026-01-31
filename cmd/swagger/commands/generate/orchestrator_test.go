@@ -16,6 +16,7 @@ func (m *mockConfig) FileHelper() filehelper.FileHelper {
 }
 
 func Test_FromAPIConfig_Success(t *testing.T) {
+	resetProjectStructreForTests()
 	tmp := fileHelperMock.ChangeCWDAndCreateGoModFile(t)
 	config := &mockConfig{
 		fileHelper: &filehelper.DefaultFileHelper{},

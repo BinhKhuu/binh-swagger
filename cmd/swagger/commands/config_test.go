@@ -3,7 +3,6 @@ package commands
 import (
 	"binh-swagger/cmd/swagger/commands/generate/mocks"
 	fileHelperMock "binh-swagger/cmd/swagger/commands/helpers/mocks"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"fmt"
 	"os"
@@ -114,16 +113,6 @@ func Test_ValidateConfigFlags(t *testing.T) {
 	}
 }
 
-// func Test_GenerateFromAPIConfig(t *testing.T) {
-// 	tmp := testhelpers.ChangeCWDAndCreateGoModFile(t)
-// 	cmd, _ := setupConfigTests(validFilename, validFilePath)
-// 	cmd.Helpers = Helpers{File: &filehelper.DefaultFileHelper{}}
-// 	apiConfig := createMockAPIConfig(tmp)
-// 	if err := generateFromAPIConfig(apiConfig, cmd); err != nil {
-// 		t.Fatalf("Error generating from API config: %v", err)
-// 	}
-// }
-
 func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.Buffer) {
 	var buff bytes.Buffer
 	baseCommand := SetupBaseCommand(&buff)
@@ -141,37 +130,4 @@ func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.
 	}
 
 	return cmd, &buff
-}
-
-func createMockAPIConfig(root string) *spec.APIConfig {
-	return &spec.APIConfig{
-		ProjectRoot: root,
-		Version:     "1.0.0",
-		Models: map[string]spec.ModelSpec{
-			"User": {
-				Name: "User",
-				Fields: []spec.FieldSpec{
-					{Name: "ID", Type: "int", JSON: "id"},
-					{Name: "Name", Type: "string", JSON: "name"},
-				},
-			},
-			"Product": {
-				Name: "Product",
-				Fields: []spec.FieldSpec{
-					{Name: "ID", Type: "int", JSON: "id"},
-					{Name: "Title", Type: "string", JSON: "title"},
-					{Name: "Price", Type: "float64", JSON: "price"},
-				},
-			},
-		},
-		Paths: map[string]spec.PathSpec{
-			"/users": {
-				Get: &spec.Operation{
-					Summary:     "Get all users",
-					OperationID: "getUsers",
-					Produces:    []string{"application/json"},
-				},
-			},
-		},
-	}
 }
