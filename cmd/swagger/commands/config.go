@@ -2,7 +2,6 @@ package commands
 
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
-	"binh-swagger/cmd/swagger/commands/generate"
 	"binh-swagger/cmd/swagger/commands/helpers"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"errors"
@@ -75,7 +74,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
-		err = generate.FromAPIConfig(config, c)
+		err = c.Generate.FromAPIConfig(config, c)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}

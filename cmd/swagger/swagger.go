@@ -3,6 +3,7 @@ package main
 import (
 	"binh-swagger/cmd/swagger/commands"
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
+	"binh-swagger/cmd/swagger/commands/generate"
 	"log"
 	"os"
 
@@ -23,8 +24,10 @@ func main() {
 
 func configureHelpers() *commands.Helpers {
 	fileHelper := &filehelper.DefaultFileHelper{}
+	generate := &generate.DefaultOrchestrator{}
 	return &commands.Helpers{
-		File: fileHelper,
+		File:     fileHelper,
+		Generate: generate,
 	}
 }
 

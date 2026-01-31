@@ -4,7 +4,17 @@ import (
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 )
 
-func FromAPIConfig(cfg *spec.APIConfig, command Config) error {
+type Orchestrator interface {
+	FromAPIConfig(cfg *spec.APIConfig, command Config) error
+}
+
+type DefaultOrchestrator struct{}
+
+func (o *DefaultOrchestrator) FromAPIConfig(cfg *spec.APIConfig, command Config) error {
+	return fromAPIConfig(cfg, command)
+}
+
+func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	// Check prerequisites
 	fileHelper := command.FileHelper()
 	if err := fileHelper.HasGoModFile(); err != nil {
