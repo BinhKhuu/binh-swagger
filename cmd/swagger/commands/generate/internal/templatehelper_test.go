@@ -1,7 +1,7 @@
 package templatehelper
 
 import (
-	"binh-swagger/cmd/swagger/commands/internal/testhelpers"
+	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"errors"
 	"testing"
 )
@@ -80,7 +80,7 @@ func Test_LoadModelTemplate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockFileHelper := testhelpers.CreateMockFileHelper()
+			mockFileHelper := mockFileHelper.CreateMockFileHelper()
 			tmpl, err := LoadModelTemplate(mockFileHelper, tt.templateKey)
 
 			if tt.expectError {

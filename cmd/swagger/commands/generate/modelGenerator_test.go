@@ -2,8 +2,8 @@ package generate
 
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
+	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
-	"binh-swagger/cmd/swagger/commands/internal/testhelpers"
 	"bytes"
 	"os"
 	"path/filepath"
@@ -23,8 +23,8 @@ func Test_GenerateModel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SpecToModelCommand failed: %v", err)
 	}
-	helperAdapter := testhelpers.CreateMockFileHelper()
-	generateConfig := &testhelpers.MockGenerateConfig{
+	helperAdapter := mockFileHelper.CreateMockFileHelper()
+	generateConfig := &mockFileHelper.MockGenerateConfig{
 		FileHelperFunc: func() filehelper.FileHelper {
 			return helperAdapter
 		},
