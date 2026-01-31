@@ -3,6 +3,7 @@ package generate
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"html/template"
@@ -47,7 +48,7 @@ func createHandlers(fHelper fileHelper.FileHelper, ops []operation, handlerFilen
 		}
 	}
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(projectStructure["handlers"], handlerFilename)
-	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
+	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
 func getHandlerTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper) (*template.Template, error) {

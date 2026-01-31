@@ -2,13 +2,10 @@ package generate
 
 import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"bytes"
 	"os"
 	"strings"
-)
-
-const (
-	filePermOwnerReadWrite = 0o600
 )
 
 func Model(cmd *ModelCommand, generateConfig Config) error {
@@ -38,5 +35,5 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 		return err
 	}
 
-	return os.WriteFile(outputFile, buf.Bytes(), filePermOwnerReadWrite)
+	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }

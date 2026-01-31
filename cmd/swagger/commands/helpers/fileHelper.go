@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"bufio"
 	"errors"
 	"fmt"
@@ -8,11 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-)
-
-const (
-	filePermOwnerReadWrite = 0o600
-	fileModeExecutable     = 0o755
 )
 
 var ErrNoGoModFile = errors.New("no go.mod file found in the current directory")
@@ -55,7 +51,7 @@ func EnsureOutputDirectoryExists(dirPath string, output io.Writer, input io.Read
 			return true, err
 		}
 
-		if err := os.MkdirAll(dirPath, fileModeExecutable); err != nil {
+		if err := os.MkdirAll(dirPath, pkg.FileModeExecutable); err != nil {
 			return true, fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
@@ -78,7 +74,7 @@ func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool 
 func CreateDirectory(rootPath string) (string, error) {
 	dirPath := filepath.Clean(rootPath)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		if err := os.MkdirAll(dirPath, fileModeExecutable); err != nil {
+		if err := os.MkdirAll(dirPath, pkg.FileModeExecutable); err != nil {
 			return "", fmt.Errorf("failed to create directory: %w", err)
 		}
 	}

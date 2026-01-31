@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"binh-swagger/cmd/swagger/commands/internal/testhelpers"
 	"os"
@@ -63,7 +64,7 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	}
 
 	handlerDir := testProjectStructure["handlers"]
-	if err = os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -117,7 +118,7 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -162,7 +163,7 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
@@ -196,7 +197,7 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 	mockFileHelper := testhelpers.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, fileModeExecutable); err != nil {
+	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 

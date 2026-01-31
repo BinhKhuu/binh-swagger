@@ -75,7 +75,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
-		err = generateFromAPIConfig(config, c)
+		err = generate.FromAPIConfig(config, c)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
 		}
@@ -90,47 +90,49 @@ func (c *ConfigCommand) FileHelper() filehelper.FileHelper {
 	return c.File
 }
 
-func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
-	// Generate Project Structure
-	_, err := generate.Project(cfg, command.File)
-	if err != nil {
-		return err
-	}
+// func generateFromAPIConfig(cfg *spec.APIConfig, command *ConfigCommand) error {
+// 	command.File.HasGoModFile()
 
-	// Generate models
-	_, err = generate.GetProjectStructure()
-	if err != nil {
-		return err
-	}
+// 	// Generate Project Structure
+// 	_, err := generate.Project(cfg, command.File)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for _, model := range cfg.Models {
-		modelCmd, modelErr := generate.SpecToModelCommand(model)
-		if modelErr != nil {
-			return modelErr
-		}
-		modelErr = generate.Model(modelCmd, command)
-		if modelErr != nil {
-			return modelErr
-		}
-	}
+// 	// Generate models
+// 	_, err = generate.GetProjectStructure()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// Generate paths
-	for path, pathSpec := range cfg.Paths {
-		generateCommand, pathErr := generate.SpecToPathCommand(pathSpec, path)
-		if pathErr != nil {
-			return pathErr
-		}
-		pathErr = generate.Path(generateCommand, command)
-		if pathErr != nil {
-			return pathErr
-		}
-	}
-	// Generate Routes
+// 	for _, model := range cfg.Models {
+// 		modelCmd, modelErr := generate.SpecToModelCommand(model)
+// 		if modelErr != nil {
+// 			return modelErr
+// 		}
+// 		modelErr = generate.Model(modelCmd, command)
+// 		if modelErr != nil {
+// 			return modelErr
+// 		}
+// 	}
 
-	// Generate main server file
+// 	// Generate paths
+// 	for path, pathSpec := range cfg.Paths {
+// 		generateCommand, pathErr := generate.SpecToPathCommand(pathSpec, path)
+// 		if pathErr != nil {
+// 			return pathErr
+// 		}
+// 		pathErr = generate.Path(generateCommand, command)
+// 		if pathErr != nil {
+// 			return pathErr
+// 		}
+// 	}
+// 	// Generate Routes
 
-	return err
-}
+// 	// Generate main server file
+
+// 	return err
+// }
 
 func validateConfigFlags(c *ConfigCommand) error {
 	count := 0

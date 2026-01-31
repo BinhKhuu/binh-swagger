@@ -3,8 +3,11 @@ package testhelpers
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/helpers"
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"io"
 	"os"
+	"path/filepath"
+	"testing"
 )
 
 type MockFileHelper struct {
@@ -14,6 +17,7 @@ type MockFileHelper struct {
 	EnsureOutputDirectoryExistsFn      func(string, io.Writer, io.Reader) (bool, error)
 	CreateDirectoryFn                  func(string) (string, error)
 	ReadAllChildDirectoriesRecursiveFn func(string) ([]string, error)
+	HasGoModFileFn                     func() error
 }
 
 func (m MockFileHelper) ValidateFileInfo(fi os.FileInfo) error {
@@ -40,6 +44,10 @@ func (m MockFileHelper) ReadAllChildDirectoriesRecursive(_ string) ([]string, er
 	return []string{}, nil
 }
 
+func (m MockFileHelper) HasGoModFile() error {
+	return nil
+}
+
 func CreateMockFileHelper() MockFileHelper {
 	mock := MockFileHelper{
 		ValidateFileInfoFn: func(_ os.FileInfo) error {
@@ -55,6 +63,12 @@ func CreateMockFileHelper() MockFileHelper {
 		CreateDirectoryFn: func(_ string) (string, error) {
 			return "", nil
 		},
+		ReadAllChildDirectoriesRecursiveFn: func(_ string) ([]string, error) {
+			return []string{}, nil
+		},
+		HasGoModFileFn: func() error {
+			return nil
+		},
 	}
 
 	return mock
@@ -69,4 +83,21 @@ func (m *MockGenerateConfig) FileHelper() filehelper.FileHelper {
 		return m.FileHelperFunc()
 	}
 	return CreateMockFileHelper()
+}
+
+func ChangeTestWorkingDirectory(t *testing.T) string {
+	tmp := t.TempDir()
+	if err := os.Chdir(tmp); err != nil {
+		t.Fatalf("Failed to change directory to temp: %v", err)
+	}
+	return tmp
+}
+
+func ChangeCWDAndCreateGoModFile(t *testing.T) string {
+	tmp := ChangeTestWorkingDirectory(t)
+	goModPath := filepath.Join(tmp, "go.mod")
+	if err := os.WriteFile(goModPath, []byte("module testmodule"), pkg.FileModeExecutable); err != nil {
+		t.Fatalf("Failed to create go.mod file: %v", err)
+	}
+	return tmp
 }
