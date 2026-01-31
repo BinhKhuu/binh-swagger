@@ -87,9 +87,7 @@ func (m *MockGenerateConfig) FileHelper() filehelper.FileHelper {
 
 func ChangeTestWorkingDirectory(t *testing.T) string {
 	tmp := t.TempDir()
-	if err := os.Chdir(tmp); err != nil {
-		t.Fatalf("Failed to change directory to temp: %v", err)
-	}
+	t.Chdir(tmp)
 	return tmp
 }
 

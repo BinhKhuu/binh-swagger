@@ -168,9 +168,7 @@ func Test_ReadAllChildDirectories(t *testing.T) {
 
 func Test_HasGoModeFile_ReturnsErrorWhenNoGoModFile(t *testing.T) {
 	tmp := changeTestWorkingDirectory(t)
-	if err := os.Chdir(tmp); err != nil {
-		t.Fatalf("Failed to change directory to temp: %v", err)
-	}
+	t.Chdir(tmp)
 	if err := HasGoModFile(); err == nil {
 		t.Errorf("Expected no error checking for go.mod file, but got: %v", err)
 	}
@@ -186,9 +184,7 @@ func Test_HasGoModFile_ReturnsSucess(t *testing.T) {
 
 func changeTestWorkingDirectory(t *testing.T) string {
 	tmp := t.TempDir()
-	if err := os.Chdir(tmp); err != nil {
-		t.Fatalf("Failed to change directory to temp: %v", err)
-	}
+	t.Chdir(tmp)
 	return tmp
 }
 

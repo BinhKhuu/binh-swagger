@@ -53,7 +53,7 @@ type Config struct {
 	} `yaml:"items"`
 }
 
-// todo validate that the user has called go mod init in the target directory
+// Execute todo validate that the user has called go mod init in the target directory.
 func (c *ConfigCommand) Execute(_ []string) error {
 	err := validateConfigFlags(c)
 	if err != nil {

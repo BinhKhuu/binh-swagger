@@ -9,10 +9,6 @@ import (
 	"testing"
 )
 
-const (
-	fileModeExecutable = 0o755
-)
-
 func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
 	path, opt := createMockOperation()
