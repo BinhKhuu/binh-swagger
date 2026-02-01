@@ -11,7 +11,8 @@ import (
 
 func createImportData() importsStruct {
 	return importsStruct{
-		ModelImportPath: "github.com/example/project/models",
+		ModelImportPath:   "github.com/example/project/models",
+		HandlerImportPath: "github.com/example/project/handlers",
 	}
 }
 
@@ -209,3 +210,8 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 		t.Log("Template handled invalid method gracefully")
 	}
 }
+
+func Test_GenerateRoutes(t *testing.T) {
+}
+
+// todo test imports routes
