@@ -18,6 +18,7 @@ type MockFileHelper struct {
 	CreateDirectoryFn                  func(string) (string, error)
 	ReadAllChildDirectoriesRecursiveFn func(string) ([]string, error)
 	HasGoModFileFn                     func() error
+	GetGoModImportPathFn               func() (string, error)
 }
 
 func (m MockFileHelper) ValidateFileInfo(fi os.FileInfo) error {
@@ -46,6 +47,10 @@ func (m MockFileHelper) ReadAllChildDirectoriesRecursive(_ string) ([]string, er
 
 func (m MockFileHelper) HasGoModFile() error {
 	return nil
+}
+
+func (m MockFileHelper) GetGoModImportPath() (string, error) {
+	return "module/test", nil
 }
 
 func CreateMockFileHelper() MockFileHelper {

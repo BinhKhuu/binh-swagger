@@ -14,6 +14,7 @@ type FileHelper interface {
 	CreateDirectory(rootPath string) (string, error)
 	ReadAllChildDirectoriesRecursive(path string) ([]string, error)
 	HasGoModFile() error
+	GetGoModImportPath() (string, error)
 }
 
 type DefaultFileHelper struct{}
@@ -44,4 +45,8 @@ func (f *DefaultFileHelper) ReadAllChildDirectoriesRecursive(filePath string) ([
 
 func (f *DefaultFileHelper) HasGoModFile() error {
 	return helpers.HasGoModFile()
+}
+
+func (f *DefaultFileHelper) GetGoModImportPath() (string, error) {
+	return helpers.GetGoModImportPath()
 }

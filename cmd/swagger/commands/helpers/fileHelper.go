@@ -117,22 +117,6 @@ func HasGoModFile() error {
 	return nil
 }
 
-func GetGoModImportPath2() (string, error) {
-	data, err := os.ReadFile("go.mod")
-	if err != nil {
-		return "", err
-	}
-
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "module ") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "module ")), nil
-		}
-	}
-
-	return "", fmt.Errorf("module path not found in go.mod")
-}
-
 func GetGoModImportPath() (string, error) {
 	data, err := os.Open("go.mod")
 	if err != nil {
