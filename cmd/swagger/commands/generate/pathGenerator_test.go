@@ -14,7 +14,10 @@ func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	path, opt := createMockOperation()
 	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	operations := []operation{opt}
-	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	importsData := importsStruct{
+		ModelImportPath: "test",
+	}
+	err := createHandlers(importsData, mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err == nil {
 		t.Error("Expected error when project structure not initialized, got nil")
 	}
@@ -63,8 +66,11 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
+	importsData := importsStruct{
+		ModelImportPath: "test",
+	}
 
-	err = createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	err = createHandlers(importsData, mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
@@ -117,8 +123,10 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
-
-	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	importsData := importsStruct{
+		ModelImportPath: "test",
+	}
+	err := createHandlers(importsData, mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
 		t.Errorf("Expected no error for multiple operations, got: %v", err)
 	}
@@ -163,7 +171,11 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(mockFileHelper, operations, path.Name+handlerFileSuffix)
+	importsData := importsStruct{
+		ModelImportPath: "test",
+	}
+
+	err := createHandlers(importsData, mockFileHelper, operations, path.Name+handlerFileSuffix)
 	if err != nil {
 		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
 	}
@@ -196,8 +208,11 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
+	importsData := importsStruct{
+		ModelImportPath: "test",
+	}
 
-	err := createHandlers(mockFileHelper, operations, "test_handler.go")
+	err := createHandlers(importsData, mockFileHelper, operations, "test_handler.go")
 
 	if err == nil {
 		t.Log("Template handled invalid method gracefully")

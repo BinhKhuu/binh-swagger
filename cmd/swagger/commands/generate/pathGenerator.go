@@ -19,6 +19,10 @@ type operation struct {
 	op     *spec.Operation
 }
 
+type importsStruct struct {
+	ModelImportPath string
+}
+
 func Path(cmd *PathCommand, config Config) error {
 	fHelper := config.FileHelper()
 	ops := []operation{
@@ -28,10 +32,13 @@ func Path(cmd *PathCommand, config Config) error {
 		{"DELETE", cmd.Delete},
 		{"PATCH", cmd.Patch},
 	}
-	return createHandlers(fHelper, ops, cmd.Name+handlerFileSuffix)
+	importsData := importsStruct{
+		ModelImportPath: cmd.ModelImportPath,
+	}
+	return createHandlers(importsData, fHelper, ops, cmd.Name+handlerFileSuffix)
 }
 
-func createHandlers(fHelper fileHelper.FileHelper, ops []operation, handlerFilename string) error {
+func createHandlers(importsData importsStruct, fHelper fileHelper.FileHelper, ops []operation, handlerFilename string) error {
 	if _, err := GetProjectStructure(); err != nil {
 		return err
 	}
@@ -39,6 +46,10 @@ func createHandlers(fHelper fileHelper.FileHelper, ops []operation, handlerFilen
 	var buf bytes.Buffer
 	tmpl, err := getHandlerTemplate(&buf, fHelper)
 	if err != nil {
+		return err
+	}
+
+	if err = executeImportsTemplate(importsData, tmpl, &buf); err != nil {
 		return err
 	}
 	for _, o := range ops {
@@ -62,6 +73,13 @@ func getHandlerTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper) (*temp
 	}
 
 	return tmpl, nil
+}
+
+func executeImportsTemplate(importsData importsStruct, tmpl *template.Template, buf *bytes.Buffer) error {
+	if err := tmpl.ExecuteTemplate(buf, "imports", importsData); err != nil {
+		return err
+	}
+	return nil
 }
 
 func executeHandlerTemplate(tmpl *template.Template, buf *bytes.Buffer, cfg operation) error {
