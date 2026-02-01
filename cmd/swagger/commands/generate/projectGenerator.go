@@ -7,9 +7,18 @@ import (
 	"os"
 )
 
-var projectStructure map[string]string
+var (
+	projectStructure  map[string]string
+	projectImportPath string
+)
 
 func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error) {
+	importPath, err := fHelper.GetGoModImportPath()
+	if err != nil {
+		return "", err
+	}
+
+	projectImportPath = importPath
 	rootDir, err := fHelper.CreateDirectory(cfg.ProjectRoot)
 	if err != nil {
 		return "", err
@@ -66,4 +75,11 @@ func SetProjectStructure(rootDir string) error {
 		"config":     rootDir + "/config",
 	}
 	return nil
+}
+
+func GetImportPath() (string, error) {
+	if projectImportPath == "" {
+		return "", errors.New("project import path not initialized")
+	}
+	return projectImportPath, nil
 }

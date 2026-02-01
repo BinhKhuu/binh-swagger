@@ -2,17 +2,23 @@ package generate
 
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
+	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"path"
 	"testing"
 )
 
+// Test_Project test relies on fileHelper real implmementation to create directories and read them back which is not good consider mocking and moving logic to filehelper.
 func Test_Project(t *testing.T) {
 	resetProjectStructreForTests()
+
+	// we should mock this instead of creating the actual file consider refactoring the tests.
+	mockFileHelper.ChangeCWDAndCreateGoModFile(t)
+
 	tempDir := t.TempDir()
 	rootDir := path.Join(tempDir, "myproject")
 
-	fileHelper := &filehelper.DefaultFileHelper{} // testhelpers.CreateMockFileHelper()
+	fileHelper := &filehelper.DefaultFileHelper{}
 	cfg := &spec.APIConfig{
 		ProjectRoot: rootDir,
 		Version:     "1.0.0",
@@ -34,6 +40,7 @@ func Test_Project(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get expected project structure: %v", err)
 	}
+
 	dirSet := make(map[string]bool)
 	for _, dir := range childDirs {
 		dirSet[dir] = true
@@ -45,6 +52,10 @@ func Test_Project(t *testing.T) {
 		if !dirSet[dir] {
 			t.Errorf("Expected directory %s not found", dir)
 		}
+	}
+
+	if projectImportPath != "testmodule" {
+		t.Errorf("Expected project import path 'testmodule', got '%s'", projectImportPath)
 	}
 }
 

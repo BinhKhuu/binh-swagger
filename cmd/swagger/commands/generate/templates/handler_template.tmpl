@@ -1,13 +1,14 @@
 {{ define "handler" }}
 package handlers
+{{ end }}
 
+{{ define "imports" }}
 import (
-	"ugh/models"
+	"{{.ModelImportPath}}/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
 {{ end }}
 
 {{ define "GET" }}

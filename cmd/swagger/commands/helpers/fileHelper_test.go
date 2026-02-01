@@ -195,3 +195,15 @@ func ceateTestGodModFile(t *testing.T) {
 		t.Fatalf("Failed to create go.mod file: %v", err)
 	}
 }
+
+func Test_GoModImportPath_ReturnsImportPath(t *testing.T) {
+	ceateTestGodModFile(t)
+	importPath, err := GetGoModImportPath()
+	if err != nil {
+		t.Errorf("Expected no error getting go.mod import path, but got: %v", err)
+	}
+	expectedPath := "testmodule"
+	if importPath != expectedPath {
+		t.Errorf("Expected import path %s, but got %s", expectedPath, importPath)
+	}
+}

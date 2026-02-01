@@ -11,7 +11,10 @@ import (
 	"strings"
 )
 
-var ErrNoGoModFile = errors.New("no go.mod file found in the current directory")
+var (
+	ErrNoGoModFile    = errors.New("no go.mod file found in the current directory")
+	ErrEmptyGoModFile = errors.New("go.mod file is empty")
+)
 
 func ValidateFileInfo(fileInfo os.FileInfo) error {
 	if fileInfo.IsDir() {
@@ -112,4 +115,21 @@ func HasGoModFile() error {
 		return fmt.Errorf("%w", ErrNoGoModFile)
 	}
 	return nil
+}
+
+func GetGoModImportPath() (string, error) {
+	data, err := os.Open("go.mod")
+	if err != nil {
+		return "", err
+	}
+	reader := bufio.NewReader(data)
+	for {
+		line, err := reader.ReadString('\n')
+		if after, ok := strings.CutPrefix(line, "module "); ok {
+			return strings.TrimSpace(after), nil
+		}
+		if err != nil && err == io.EOF {
+			return "", fmt.Errorf("%w: End of file reached", ErrEmptyGoModFile)
+		}
+	}
 }
