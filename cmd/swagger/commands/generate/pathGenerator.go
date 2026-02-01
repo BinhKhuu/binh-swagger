@@ -35,10 +35,10 @@ func Path(cmd *PathCommand, config Config) error {
 	importsData := importsStruct{
 		ModelImportPath: cmd.ModelImportPath,
 	}
-	return createHandlers(importsData, fHelper, ops, cmd.Name+handlerFileSuffix)
+	return createHandlers(fHelper, importsData, ops, cmd.Name+handlerFileSuffix)
 }
 
-func createHandlers(importsData importsStruct, fHelper fileHelper.FileHelper, ops []operation, handlerFilename string) error {
+func createHandlers(fHelper fileHelper.FileHelper, importsData importsStruct, ops []operation, handlerFilename string) error {
 	if _, err := GetProjectStructure(); err != nil {
 		return err
 	}

@@ -125,8 +125,8 @@ func GetGoModImportPath() (string, error) {
 	reader := bufio.NewReader(data)
 	for {
 		line, err := reader.ReadString('\n')
-		if strings.HasPrefix(line, "module ") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "module ")), nil
+		if after, ok := strings.CutPrefix(line, "module "); ok {
+			return strings.TrimSpace(after), nil
 		}
 		if err != nil && err == io.EOF {
 			return "", fmt.Errorf("%w: End of file reached", ErrEmptyGoModFile)
