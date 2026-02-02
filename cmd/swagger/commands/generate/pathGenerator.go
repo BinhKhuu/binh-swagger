@@ -20,6 +20,10 @@ type operation struct {
 	op     *spec.Operation
 }
 
+type templateModel interface {
+	*importsStruct | *spec.Operation
+}
+
 type importsStruct struct {
 	ModelImportPath   string
 	HandlerImportPath string
@@ -57,11 +61,11 @@ func createRoutes(fHelper fileHelper.FileHelper, importsData importsStruct, ops 
 		return err
 	}
 
-	if err = executeTemplate(importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
+	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
 		return err
 	}
 
-	if err = executeTemplate(importsData, tmpl, &buf, templateHelper.RouteDefine); err != nil {
+	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.RouteDefine); err != nil {
 		return err
 	}
 
@@ -80,7 +84,7 @@ func createHandlers(fHelper fileHelper.FileHelper, importsData importsStruct, op
 		return err
 	}
 
-	if err = executeTemplate(importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
+	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
 		return err
 	}
 	for _, o := range ops {
@@ -110,7 +114,7 @@ func getBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateK
 	return tmpl, nil
 }
 
-func executeTemplate[T any](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
+func executeTemplate[T templateModel](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
 	if err := tmpl.ExecuteTemplate(buf, templateName, data); err != nil {
 		return err
 	}
