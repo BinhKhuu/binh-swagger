@@ -18,9 +18,15 @@ var templatePaths = map[string]string{
 }
 
 const (
-	HandlerTemplateKey = "hander"
+	HandlerTemplateKey = "handler"
 	ModelTemplateKey   = "model"
 	RouteTemplateKey   = "route"
+)
+
+// todo turn this into a struct or dict so you fetch like templatehelper.Templates.Routes.Body
+const (
+	RouteDefine   = "registerRoutes"
+	ImportsDefine = "imports"
 )
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
