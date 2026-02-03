@@ -4,13 +4,14 @@ import (
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 )
 
-func createImportData() importsStruct {
-	return importsStruct{
+func createImportData() importsTemplateModel {
+	return importsTemplateModel{
 		ModelImportPath:   "github.com/example/project/models",
 		HandlerImportPath: "github.com/example/project/handlers",
 	}
@@ -208,6 +209,54 @@ func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
 
 	if err == nil {
 		t.Log("Template handled invalid method gracefully")
+	}
+}
+
+func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
+	path := &spec.PathSpec{
+		Name: "/testPath",
+		Get: &spec.Operation{
+			Summary:     "Test GET operation",
+			OperationID: "getTestPath",
+			Produces:    []string{"application/json"},
+			Responses:   map[int]spec.ResponseSpec{},
+		},
+		Post: &spec.Operation{
+			Summary:     "Test POST operation",
+			OperationID: "postTestPath",
+			Produces:    []string{"application/json"},
+			Responses:   map[int]spec.ResponseSpec{},
+		},
+		Put: &spec.Operation{
+			Summary:     "Test PUT operation",
+			OperationID: "putTestPath",
+			Produces:    []string{"application/json"},
+			Responses:   map[int]spec.ResponseSpec{},
+		},
+	}
+
+	opts := []operation{
+		{method: "GET", op: path.Get},
+		{method: "POST", op: path.Post},
+		{method: "PUT", op: path.Put},
+	}
+
+	routes := createRoutesData(path.Name, opts)
+
+	if len(routes) < 3 || len(routes) > 3 {
+		t.Errorf("Expected 3 routes but go %d", len(routes))
+	}
+
+	// just asserting the first element
+	route := routes[0]
+	if route.Method != http.MethodGet {
+		t.Errorf("Expected method 'GET', got: %s", route.Method)
+	}
+	if route.PathName != path.Name {
+		t.Errorf("Expected path name '%s', got: %s", path.Name, route.PathName)
+	}
+	if route.OperationId != "getTestPath" {
+		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationId)
 	}
 }
 

@@ -21,16 +21,30 @@ type operation struct {
 }
 
 type templateModel interface {
-	*importsStruct | *spec.Operation
+	*importsTemplateModel | *spec.Operation | *routesTemplateModel
 }
 
-type importsStruct struct {
+// todo rename this
+type routesTemplateModel struct {
+	Routes []routeModel
+}
+
+// todo rename this
+type routeModel struct {
+	PathName    string
+	Method      string
+	OperationId string
+}
+
+// todo rename this
+type importsTemplateModel struct {
 	ModelImportPath   string
 	HandlerImportPath string
 }
 
 func Path(cmd *PathCommand, config Config) error {
 	fHelper := config.FileHelper()
+	// should ops contain the PathName e.g. /users this will help with route generation
 	ops := []operation{
 		{"GET", cmd.Get},
 		{"POST", cmd.Post},
@@ -38,7 +52,7 @@ func Path(cmd *PathCommand, config Config) error {
 		{"DELETE", cmd.Delete},
 		{"PATCH", cmd.Patch},
 	}
-	importsData := importsStruct{
+	importsData := importsTemplateModel{
 		ModelImportPath:   cmd.ModelImportPath,
 		HandlerImportPath: cmd.HandlerImportPath,
 	}
@@ -46,7 +60,7 @@ func Path(cmd *PathCommand, config Config) error {
 		return err
 	}
 	// todo could be optimized by looking through ops one and generating both handlers and routes in one pass.
-	if err := createRoutes(fHelper, importsData, ops, cmd.Name+routesFileSuffix); err != nil {
+	if err := createRoutes(cmd, fHelper, importsData, ops, cmd.Name+routesFileSuffix); err != nil {
 		return err
 	}
 
@@ -54,7 +68,7 @@ func Path(cmd *PathCommand, config Config) error {
 }
 
 // todo test this.
-func createRoutes(fHelper fileHelper.FileHelper, importsData importsStruct, ops []operation, routeFileName string) error {
+func createRoutes(cmd *PathCommand, fHelper fileHelper.FileHelper, importsData importsTemplateModel, ops []operation, routeFileName string) error {
 	var buf bytes.Buffer
 	tmpl, err := getBaseTemplate(&buf, fHelper, templateHelper.RouteTemplateKey)
 	if err != nil {
@@ -65,7 +79,12 @@ func createRoutes(fHelper fileHelper.FileHelper, importsData importsStruct, ops 
 		return err
 	}
 
-	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.RouteDefine); err != nil {
+	// todo check if path starts with /
+	routesData := createRoutesData("/"+cmd.Name, ops)
+	routesTemplateModel := routesTemplateModel{
+		Routes: routesData,
+	}
+	if err = executeTemplate(&routesTemplateModel, tmpl, &buf, templateHelper.RouteDefine); err != nil {
 		return err
 	}
 
@@ -73,7 +92,7 @@ func createRoutes(fHelper fileHelper.FileHelper, importsData importsStruct, ops 
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
-func createHandlers(fHelper fileHelper.FileHelper, importsData importsStruct, ops []operation, handlerFilename string) error {
+func createHandlers(fHelper fileHelper.FileHelper, importsData importsTemplateModel, ops []operation, handlerFilename string) error {
 	if _, err := GetProjectStructure(); err != nil {
 		return err
 	}
@@ -98,6 +117,23 @@ func createHandlers(fHelper fileHelper.FileHelper, importsData importsStruct, op
 	}
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(projectStructure["handlers"], handlerFilename)
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
+}
+
+func createRoutesData(pathName string, ops []operation) []routeModel {
+	routes := make([]routeModel, 0, len(ops))
+	for _, o := range ops {
+		if o.op == nil {
+			continue
+		}
+		route := routeModel{
+			Method:      o.method,
+			PathName:    pathName,
+			OperationId: o.op.OperationID,
+		}
+
+		routes = append(routes, route)
+	}
+	return routes
 }
 
 // getBaseTemplate todo unit test this
