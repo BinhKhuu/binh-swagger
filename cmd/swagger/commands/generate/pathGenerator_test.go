@@ -17,13 +17,57 @@ func createImportData() importsTemplateModel {
 	}
 }
 
+func createMockPathCmd() *PathCommand {
+	pathSpec, _ := createMockSpecAndOperation()
+	return &PathCommand{
+		Name: "testPath",
+		Get:  pathSpec.Get,
+		Post: pathSpec.Post,
+	}
+}
+
+func createMockConfig() Config {
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
+	return &mockConfig{
+		fileHelper: mockFileHelper,
+	}
+}
+
+func createPathTestMocks() (*PathCommand, Config, importsTemplateModel) {
+	return createMockPathCmd(), createMockConfig(), createImportData()
+}
+
+func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
+	path := &spec.PathSpec{
+		Name: "testPath",
+		Get: &spec.Operation{
+			Summary:     "Test GET operation",
+			OperationID: "getTestPath",
+			Produces:    []string{"application/json"},
+			Responses:   map[int]spec.ResponseSpec{},
+		},
+		Post: &spec.Operation{
+			Summary:     "Test POST operation",
+			OperationID: "postTestPath",
+			Produces:    []string{"application/json"},
+			Responses:   map[int]spec.ResponseSpec{},
+		},
+		Put: nil,
+	}
+	opts := []operation{
+		{method: "GET", op: path.Get},
+		{method: "POST", op: path.Post},
+		{method: "PUT", op: path.Put}, // nil operation to test skipping
+	}
+	return path, opts
+}
+
 func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
-	path, opt := createMockOperation()
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
-	operations := []operation{opt}
+	pathCommand, config, importData := createPathTestMocks()
+	_, operations := createMockSpecAndOperation()
 
-	err := createHandlers(mockFileHelper, createImportData(), operations, path.Name+handlerFileSuffix)
+	err := createHandlers(pathCommand, config, importData, operations)
 	if err == nil {
 		t.Error("Expected error when project structure not initialized, got nil")
 	}
@@ -34,35 +78,10 @@ func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	}
 }
 
-func createMockOperation() (*spec.PathSpec, operation) {
-	path := &spec.PathSpec{
-		Name: "testPath",
-		Get:  &spec.Operation{},
-	}
-	opt := operation{
-		method: "GET",
-		op:     path.Get,
-	}
-	return path, opt
-}
-
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	InitGenerateTests(t)
-	path := &spec.PathSpec{
-		Name: "testPath",
-		Get: &spec.Operation{
-			Summary:     "Test GET operation",
-			OperationID: "getTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-	}
-	opt := operation{
-		method: "GET",
-		op:     path.Get,
-	}
-	operations := []operation{opt}
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
+	path, operations := createMockSpecAndOperation()
+	pathCommand, config, importData := createPathTestMocks()
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
 		t.Fatalf("Failed to get project structure: %v", err)
@@ -73,12 +92,12 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = createHandlers(mockFileHelper, createImportData(), operations, path.Name+handlerFileSuffix)
+	err = createHandlers(pathCommand, config, importData, operations)
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
 
-	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
+	expectedFilePath := config.FileHelper().GetAbsoluteSanitiseFilePath(
 		handlerDir,
 		path.Name+handlerFileSuffix,
 	)
@@ -103,38 +122,22 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 
 func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	InitGenerateTests(t)
-	path := &spec.PathSpec{
-		Name: "multiPath",
-		Get: &spec.Operation{
-			Summary:     "Get operation",
-			OperationID: "getMultiPath",
-		},
-		Post: &spec.Operation{
-			Summary:     "Post operation",
-			OperationID: "postMultiPath",
-		},
-	}
-
-	operations := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-	}
-
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
+	pathCommand, config, importData := createPathTestMocks()
+	_, operations := createMockSpecAndOperation()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
 	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(mockFileHelper, createImportData(), operations, path.Name+handlerFileSuffix)
+	err := createHandlers(pathCommand, config, importData, operations)
 	if err != nil {
 		t.Errorf("Expected no error for multiple operations, got: %v", err)
 	}
 
-	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
+	expectedFilePath := config.FileHelper().GetAbsoluteSanitiseFilePath(
 		handlerDir,
-		path.Name+handlerFileSuffix,
+		pathCommand.Name+handlerFileSuffix,
 	)
 
 	content, err := os.ReadFile(expectedFilePath)
@@ -143,27 +146,18 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "getMultiPath") {
+	if !strings.Contains(contentStr, "getTestPath") {
 		t.Errorf("Expected handler file to contain GET operation ID 'getMultiPath'")
 	}
-	if !strings.Contains(contentStr, "postMultiPath") {
+	if !strings.Contains(contentStr, "postTestPath") {
 		t.Errorf("Expected handler file to contain POST operation ID 'postMultiPath'")
 	}
 }
 
 func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	InitGenerateTests(t)
-	path := &spec.PathSpec{
-		Name: "skipPath",
-		Get: &spec.Operation{
-			OperationID: "getSkipPath",
-		},
-	}
-
-	operations := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: nil}, // nil operation should be skipped
-	}
+	pathCommand, config, importData := createPathTestMocks()
+	_, operations := createMockSpecAndOperation()
 
 	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
@@ -172,14 +166,14 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(mockFileHelper, createImportData(), operations, path.Name+handlerFileSuffix)
+	err := createHandlers(pathCommand, config, importData, operations)
 	if err != nil {
 		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
 	}
 
 	expectedFilePath := mockFileHelper.GetAbsoluteSanitiseFilePath(
 		handlerDir,
-		path.Name+handlerFileSuffix,
+		pathCommand.Name+handlerFileSuffix,
 	)
 
 	content, err := os.ReadFile(expectedFilePath)
@@ -188,27 +182,8 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "getSkipPath") {
-		t.Errorf("Expected handler file to contain GET operation ID 'getSkipPath'")
-	}
-}
-
-func Test_CreateHandlers_ShouldReturnErrorOnTemplateFailure(t *testing.T) {
-	InitGenerateTests(t)
-	operations := []operation{
-		{method: "INVALID", op: &spec.Operation{}}, // invalid method might cause template error
-	}
-
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
-	testProjectStructure, _ := GetProjectStructure()
-	handlerDir := testProjectStructure["handlers"]
-	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	err := createHandlers(mockFileHelper, createImportData(), operations, "test_handler.go")
-
-	if err == nil {
-		t.Log("Template handled invalid method gracefully")
+	if strings.Contains(contentStr, "PUT") {
+		t.Errorf("Expected to skip NIL PUT operation, but found in handler file")
 	}
 }
 
@@ -260,7 +235,7 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 	}
 }
 
-func Test_GenerateRoutes(t *testing.T) {
-}
+// func Test_GenerateRoutes(t *testing.T) {
+// }
 
-// todo test imports routes
+// // todo test imports routes

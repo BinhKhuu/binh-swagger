@@ -43,7 +43,6 @@ type importsTemplateModel struct {
 }
 
 func Path(cmd *PathCommand, config Config) error {
-	fHelper := config.FileHelper()
 	// should ops contain the PathName e.g. /users this will help with route generation
 	ops := []operation{
 		{"GET", cmd.Get},
@@ -56,11 +55,11 @@ func Path(cmd *PathCommand, config Config) error {
 		ModelImportPath:   cmd.ModelImportPath,
 		HandlerImportPath: cmd.HandlerImportPath,
 	}
-	if err := createHandlers(fHelper, importsData, ops, cmd.Name+handlerFileSuffix); err != nil {
+	if err := createHandlers(cmd, config, importsData, ops); err != nil {
 		return err
 	}
 	// todo could be optimized by looking through ops one and generating both handlers and routes in one pass.
-	if err := createRoutes(cmd, fHelper, importsData, ops, cmd.Name+routesFileSuffix); err != nil {
+	if err := createRoutes(cmd, config, importsData, ops); err != nil {
 		return err
 	}
 
@@ -68,7 +67,9 @@ func Path(cmd *PathCommand, config Config) error {
 }
 
 // todo test this.
-func createRoutes(cmd *PathCommand, fHelper fileHelper.FileHelper, importsData importsTemplateModel, ops []operation, routeFileName string) error {
+func createRoutes(cmd *PathCommand, config Config, importsData importsTemplateModel, ops []operation) error {
+	routeFileName := cmd.Name + routesFileSuffix
+	fHelper := config.FileHelper()
 	var buf bytes.Buffer
 	tmpl, err := getBaseTemplate(&buf, fHelper, templateHelper.RouteTemplateKey)
 	if err != nil {
@@ -92,7 +93,9 @@ func createRoutes(cmd *PathCommand, fHelper fileHelper.FileHelper, importsData i
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
-func createHandlers(fHelper fileHelper.FileHelper, importsData importsTemplateModel, ops []operation, handlerFilename string) error {
+func createHandlers(cmd *PathCommand, config Config, importsData importsTemplateModel, ops []operation) error {
+	fHelper := config.FileHelper()
+	handlerFilename := cmd.Name + handlerFileSuffix
 	if _, err := GetProjectStructure(); err != nil {
 		return err
 	}
