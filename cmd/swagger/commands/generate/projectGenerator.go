@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	projectStructure          map[string]string
-	projectImportPath         string
-	ProjectNotInitilizedError = errors.New("project structure not initialized")
+	projectStructure        map[string]string
+	projectImportPath       string
+	ErrProjectNotInitilized = errors.New("project structure not initialized")
 )
 
 func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error) {
@@ -55,7 +55,7 @@ func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error)
 // GetProjectStructure add error variable export and change new error to that variable.
 func GetProjectStructure() (map[string]string, error) {
 	if projectStructure == nil {
-		return nil, ProjectNotInitilizedError
+		return nil, ErrProjectNotInitilized
 	}
 	return projectStructure, nil
 }

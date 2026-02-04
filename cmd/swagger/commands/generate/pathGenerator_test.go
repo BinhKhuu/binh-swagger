@@ -81,8 +81,8 @@ func Test_Path_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	pathCommand, config, _ := createPathTestMocks()
 	err := Path(pathCommand, config)
 	if err != nil {
-		if err.Error() != ProjectNotInitilizedError.Error() {
-			t.Errorf("Expected error message to contain '%s', got: %v", ProjectNotInitilizedError, err)
+		if err.Error() != ErrProjectNotInitilized.Error() {
+			t.Errorf("Expected error message to contain '%s', got: %v", ErrProjectNotInitilized, err)
 		}
 	} else {
 		t.Error("Expected error when project structure is not set up, got nil")
@@ -250,8 +250,8 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 	if route.PathName != path.Name {
 		t.Errorf("Expected path name '%s', got: %s", path.Name, route.PathName)
 	}
-	if route.OperationId != "getTestPath" {
-		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationId)
+	if route.OperationID != "getTestPath" {
+		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationID)
 	}
 }
 

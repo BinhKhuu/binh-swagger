@@ -31,7 +31,7 @@ type routesTemplateModel struct {
 type routeModel struct {
 	PathName    string
 	Method      string
-	OperationId string
+	OperationID string
 }
 
 type importsTemplateModel struct {
@@ -77,16 +77,16 @@ func createRoutes(cmd *PathCommand, config Config, importsData importsTemplateMo
 		return err
 	}
 
-	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
+	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
 
 	// todo check if path starts with /
-	routesData := createRoutesData("/"+cmd.Name, ops)
-	routesTemplateModel := routesTemplateModel{
-		Routes: routesData,
+	rd := createRoutesData("/"+cmd.Name, ops)
+	rm := routesTemplateModel{
+		Routes: rd,
 	}
-	if err = executeTemplate(&routesTemplateModel, tmpl, &buf, templateHelper.RouteDefine); err != nil {
+	if err = executeTemplate(&rm, tmpl, &buf, templateHelper.Templates.RouteDefine); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func createHandlers(cmd *PathCommand, config Config, importsData importsTemplate
 		return err
 	}
 
-	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.ImportsDefine); err != nil {
+	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
 	for _, o := range ops {
@@ -129,7 +129,7 @@ func createRoutesData(pathName string, ops []operation) []routeModel {
 		route := routeModel{
 			Method:      o.method,
 			PathName:    pathName,
-			OperationId: o.op.OperationID,
+			OperationID: o.op.OperationID,
 		}
 
 		routes = append(routes, route)

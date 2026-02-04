@@ -14,14 +14,7 @@ import (
 func RegisterRoutes(b *gin.RouterGroup) {
 
 	{{ range .Routes }}
-		b.{{ .Method }}("{{ .PathName }}", handlers.{{ .OperationId }})
+		b.{{ .Method }}("{{ .PathName }}", handlers.{{ .OperationID }})
 	{{ end }}
-
-	// sample routes
-	b.GET("/", handlers.GetBooks)
-	b.GET("/:title", handlers.GetBookByTitle)
-	b.POST("/", handlers.CreateBook)
-	b.PUT("/:title", handlers.UpdateBook)
-	b.DELETE("/:title", handlers.DeleteBook)
 }
 {{ end }}
