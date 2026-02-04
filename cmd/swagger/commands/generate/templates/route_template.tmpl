@@ -1,0 +1,20 @@
+{{ define "route" }}
+package routes
+{{ end }}
+
+{{ define "imports" }}
+import (
+	"{{.HandlerImportPath}}"
+
+	"github.com/gin-gonic/gin"
+)
+{{ end }}
+
+{{ define "registerRoutes" }}
+func RegisterRoutes(b *gin.RouterGroup) {
+
+	{{ range .Routes }}
+		b.{{ .Method }}("{{ .PathName }}", handlers.{{ .OperationID }})
+	{{ end }}
+}
+{{ end }}

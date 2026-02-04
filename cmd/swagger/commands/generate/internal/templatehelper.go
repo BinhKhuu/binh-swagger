@@ -14,12 +14,24 @@ var ErrTemplateNotFound = errors.New("template not found")
 var templatePaths = map[string]string{
 	ModelTemplateKey:   "model_template.tmpl",
 	HandlerTemplateKey: "handler_template.tmpl",
+	RouteTemplateKey:   "route_template.tmpl",
 }
 
 const (
-	HandlerTemplateKey = "hander"
+	HandlerTemplateKey = "handler"
 	ModelTemplateKey   = "model"
+	RouteTemplateKey   = "route"
 )
+
+type TemplateDefines struct {
+	RouteDefine   string
+	ImportsDefine string
+}
+
+var Templates = TemplateDefines{
+	RouteDefine:   "registerRoutes",
+	ImportsDefine: "imports",
+}
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
 	templateFilename, err := getTemplatePath(templateName)
