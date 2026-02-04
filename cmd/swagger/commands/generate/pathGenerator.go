@@ -24,19 +24,16 @@ type templateModel interface {
 	*importsTemplateModel | *spec.Operation | *routesTemplateModel
 }
 
-// todo rename this
 type routesTemplateModel struct {
 	Routes []routeModel
 }
 
-// todo rename this
 type routeModel struct {
 	PathName    string
 	Method      string
 	OperationId string
 }
 
-// todo rename this
 type importsTemplateModel struct {
 	ModelImportPath   string
 	HandlerImportPath string
@@ -139,7 +136,6 @@ func createRoutesData(pathName string, ops []operation) []routeModel {
 	return routes
 }
 
-// getBaseTemplate todo unit test this
 func getBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateKey string) (*template.Template, error) {
 	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateKey)
 	if err != nil {

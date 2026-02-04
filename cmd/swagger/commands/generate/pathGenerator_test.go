@@ -4,6 +4,7 @@ import (
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"bytes"
 	"net/http"
 	"os"
 	"strings"
@@ -235,7 +236,39 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 	}
 }
 
-// func Test_GenerateRoutes(t *testing.T) {
-// }
+func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
+	testCases := []struct {
+		templateName  string
+		errorExpected bool
+	}{
+		{"route", false},
+		{"handler", false},
+		{"nonexistent", true},
+	}
 
-// // todo test imports routes
+	for _, tc := range testCases {
+		t.Run(tc.templateName, func(t *testing.T) {
+			buf := bytes.Buffer{}
+			InitGenerateTests(t)
+			_, config, _ := createPathTestMocks()
+
+			tmpl, err := getBaseTemplate(&buf, config.FileHelper(), tc.templateName)
+
+			if tc.errorExpected {
+				if err == nil {
+					t.Errorf("Expected error loading template '%s', got nil", tc.templateName)
+				}
+				if tmpl != nil {
+					t.Error("Expected template to be nil on error")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error loading template, got: %v", err)
+				}
+				if tmpl == nil {
+					t.Error("Expected template to be non-nil")
+				}
+			}
+		})
+	}
+}
