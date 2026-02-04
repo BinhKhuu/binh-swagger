@@ -1,6 +1,8 @@
 package generate
 
-import "testing"
+import (
+	"testing"
+)
 
 func resetProjectStructreForTests() {
 	projectStructure = nil

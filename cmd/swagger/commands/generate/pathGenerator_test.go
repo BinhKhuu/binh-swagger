@@ -38,6 +38,19 @@ func createPathTestMocks() (*PathCommand, Config, importsTemplateModel) {
 	return createMockPathCmd(), createMockConfig(), createImportData()
 }
 
+func createMockTempFolders(t *testing.T) {
+	var err error
+	// Create the Handlers and Routes temporary directories
+	handlerDir := projectStructure["handlers"]
+	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	routesDir := projectStructure["routes"]
+	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 	path := &spec.PathSpec{
 		Name: "testPath",
@@ -63,24 +76,33 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 	return path, opts
 }
 
-func Test_CreateHandlers_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
+func Test_Path_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
-	pathCommand, config, importData := createPathTestMocks()
-	_, operations := createMockSpecAndOperation()
-
-	err := createHandlers(pathCommand, config, importData, operations)
-	if err == nil {
-		t.Error("Expected error when project structure not initialized, got nil")
+	pathCommand, config, _ := createPathTestMocks()
+	err := Path(pathCommand, config)
+	if err != nil {
+		if err.Error() != ProjectNotInitilizedError.Error() {
+			t.Errorf("Expected error message to contain '%s', got: %v", ProjectNotInitilizedError, err)
+		}
+	} else {
+		t.Error("Expected error when project structure is not set up, got nil")
 	}
+}
 
-	// if err is nil and we use err.Error() it will panic
-	if err == nil || !strings.Contains(err.Error(), "project structure not initialized") {
-		t.Errorf("Expected project structure not initialized error, got: %v", err)
+func Test_Path_ShouldGenerateHandlersAndRoutes(t *testing.T) {
+	resetProjectStructreForTests()
+	InitGenerateTests(t)
+	createMockTempFolders(t)
+	pathCommand, config, _ := createPathTestMocks()
+	err := Path(pathCommand, config)
+	if err != nil {
+		t.Errorf("Expected no error when generating path, got: %v", err)
 	}
 }
 
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	InitGenerateTests(t)
+	createMockTempFolders(t)
 	path, operations := createMockSpecAndOperation()
 	pathCommand, config, importData := createPathTestMocks()
 	testProjectStructure, err := GetProjectStructure()
@@ -89,9 +111,6 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	}
 
 	handlerDir := testProjectStructure["handlers"]
-	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
 
 	err = createHandlers(pathCommand, config, importData, operations)
 	if err != nil {
@@ -248,6 +267,7 @@ func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.templateName, func(t *testing.T) {
+			resetProjectStructreForTests()
 			buf := bytes.Buffer{}
 			InitGenerateTests(t)
 			_, config, _ := createPathTestMocks()

@@ -40,6 +40,10 @@ type importsTemplateModel struct {
 }
 
 func Path(cmd *PathCommand, config Config) error {
+	if _, err := GetProjectStructure(); err != nil {
+		return err
+	}
+
 	// should ops contain the PathName e.g. /users this will help with route generation
 	ops := []operation{
 		{"GET", cmd.Get},
@@ -93,9 +97,6 @@ func createRoutes(cmd *PathCommand, config Config, importsData importsTemplateMo
 func createHandlers(cmd *PathCommand, config Config, importsData importsTemplateModel, ops []operation) error {
 	fHelper := config.FileHelper()
 	handlerFilename := cmd.Name + handlerFileSuffix
-	if _, err := GetProjectStructure(); err != nil {
-		return err
-	}
 
 	var buf bytes.Buffer
 	tmpl, err := getBaseTemplate(&buf, fHelper, templateHelper.HandlerTemplateKey)
