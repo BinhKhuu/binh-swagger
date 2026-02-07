@@ -19,7 +19,7 @@ func createImportData() templateHelper.ImportsTemplateModel {
 	}
 }
 
-func createMockOperationMOdel(cmd *PathCommand) []templateHelper.OperationModel {
+func createMockOperationModel(cmd *PathCommand) []templateHelper.OperationModel {
 	ops := createOperationModels(cmd)
 	return ops
 }
@@ -86,6 +86,23 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 	return path, opts
 }
 
+func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
+	pathCommand, _, _ := createPathTestMocks()
+
+	ops := createOperationModels(pathCommand)
+	if len(ops) != 2 {
+		t.Errorf("Expected 2 operations, got %d", len(ops))
+	}
+	for _, op := range ops {
+		if op.MethodType == "DELETE" {
+			t.Error("Did not expect DELETE operation, but found in operations list")
+		}
+		if op.MethodType == "PATCH" {
+			t.Error("Did not expect PATCH operation, but found in operations list")
+		}
+	}
+}
+
 func Test_Path_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
 	pathCommand, config, _ := createPathTestMocks()
@@ -122,7 +139,7 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 
 	handlerDir := testProjectStructure["handlers"]
 
-	err = createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
+	err = createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
@@ -160,7 +177,7 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
+	err := createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for multiple operations, got: %v", err)
 	}
@@ -195,7 +212,7 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
+	err := createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
 	}
