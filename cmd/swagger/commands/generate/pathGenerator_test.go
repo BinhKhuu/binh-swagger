@@ -1,7 +1,7 @@
 package generate
 
 import (
-	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
+	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
