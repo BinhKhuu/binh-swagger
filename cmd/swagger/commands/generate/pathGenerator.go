@@ -20,7 +20,7 @@ type operation struct {
 	op     *spec.Operation
 }
 
-// todo move this to the helper and share between the generators
+// todo move this to the helper and share between the generators.
 type templateModel interface {
 	*importsTemplateModel | *spec.Operation | *routesTemplateModel | *serverTemplateModel
 }
@@ -29,9 +29,9 @@ type routesTemplateModel struct {
 	Routes []routeModel
 }
 
-// todo refine the fields because this matches with ServerCommand
+// todo refine the fields because this matches with ServerCommand.
 type serverTemplateModel struct {
-	Paths        []string
+	Paths            []string
 	RoutesImportPath string
 }
 
@@ -144,7 +144,7 @@ func createRoutesData(pathName string, ops []operation) []routeModel {
 	return routes
 }
 
-// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the tempalte keys
+// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the template keys.
 func GetBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateKey string) (*template.Template, error) {
 	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateKey)
 	if err != nil {
@@ -158,7 +158,7 @@ func GetBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateK
 	return tmpl, nil
 }
 
-// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the tempalte keys
+// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the template keys.
 func ExecuteTemplate[T templateModel](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
 	if err := tmpl.ExecuteTemplate(buf, templateName, data); err != nil {
 		return err

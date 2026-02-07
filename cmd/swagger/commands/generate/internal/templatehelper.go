@@ -18,7 +18,7 @@ var templatePaths = map[string]string{
 	ServerTemplateKey:  "server_template.tmpl",
 }
 
-// todo change this to a type
+// todo change this to a type.
 const (
 	HandlerTemplateKey = "handler"
 	ModelTemplateKey   = "model"

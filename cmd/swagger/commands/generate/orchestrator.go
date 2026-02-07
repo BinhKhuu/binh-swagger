@@ -44,7 +44,7 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	}
 
 	serverCmd := &ServerCommand{
-		RoutesImportPath: filepath.Join(projectImportPath + "/" + projectStructure["routes"]),
+		RoutesImportPath: filepath.Join(projectImportPath, projectStructure["routes"]),
 	}
 	// Generate paths
 	for path, pathSpec := range cfg.Paths {

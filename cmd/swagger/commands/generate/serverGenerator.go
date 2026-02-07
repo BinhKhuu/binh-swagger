@@ -11,7 +11,7 @@ import (
 
 var ErrInvalidPathName = errors.New("invalid path name")
 
-// assuming server command is created by the orchestrator and contains the necessary data for server generation
+// assuming server command is created by the orchestrator and contains the necessary data for server generation.
 func Server(cmd *ServerCommand, cfg Config) error {
 	_, err := GetProjectStructure()
 	if err != nil {

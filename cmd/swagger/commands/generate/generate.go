@@ -27,7 +27,7 @@ type PathCommand struct {
 	Delete            *spec.Operation
 }
 
-// todo refine the fields because this matches with serverTemplateModel
+// todo refine the fields because this matches with serverTemplateModel.
 type ServerCommand struct {
 	PathNames        []string
 	RoutesImportPath string
@@ -40,8 +40,8 @@ func SpecToPathCommand(cfg spec.PathSpec, pathName string) (*PathCommand, error)
 		return nil, err
 	}
 	return &PathCommand{
-		ModelImportPath:   filepath.Join(projectImportPath + "/" + paths["models"]),
-		HandlerImportPath: filepath.Join(projectImportPath + "/" + paths["handlers"]),
+		ModelImportPath:   filepath.Join(projectImportPath, paths["models"]),
+		HandlerImportPath: filepath.Join(projectImportPath, paths["handlers"]),
 		Name:              strings.Replace(pathName, "/", "", 1),
 		Get:               cfg.Get,
 		Post:              cfg.Post,
