@@ -21,7 +21,7 @@ func Server(cmd *ServerCommand, cfg Config) error {
 	}
 	var buf bytes.Buffer
 
-	tmpl, err := GetBaseTemplate(&buf, cfg.FileHelper(), templateHelper.ServerTemplateKey)
+	tmpl, err := templateHelper.GetBaseTemplate(&buf, cfg.FileHelper(), templateHelper.ServerTemplateKey)
 	if err != nil {
 		return err
 	}
@@ -30,20 +30,20 @@ func Server(cmd *ServerCommand, cfg Config) error {
 		return err
 	}
 
-	tmplModel := serverTemplateModel{
+	tmplModel := templateHelper.ServerTemplateModel{
 		Paths:            pathNames,
 		RoutesImportPath: filepath.Join(projectImportPath, projectStructure["routes"]),
 	}
-	importTemplateModel := importsTemplateModel{
+	importTemplateModel := templateHelper.ImportsTemplateModel{
 		RoutesImportPath: tmplModel.RoutesImportPath,
 	}
 
-	err = ExecuteTemplate(&importTemplateModel, tmpl, &buf, templateHelper.Templates.ImportsDefine)
+	err = templateHelper.ExecuteTemplate(&importTemplateModel, tmpl, &buf, templateHelper.Templates.ImportsDefine)
 	if err != nil {
 		return err
 	}
 
-	err = ExecuteTemplate(&tmplModel, tmpl, &buf, templateHelper.Templates.ServerMainDefine)
+	err = templateHelper.ExecuteTemplate(&tmplModel, tmpl, &buf, templateHelper.Templates.ServerMainDefine)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package templatehelper
 
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
+	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -36,6 +37,45 @@ var Templates = TemplateDefines{
 	RouteDefine:      "registerRoutes",
 	ImportsDefine:    "imports",
 	ServerMainDefine: "serverMain",
+}
+
+type TemplateModel interface {
+	*ImportsTemplateModel | *OperationModel | *RoutesTemplateModel | *ServerTemplateModel
+}
+
+type RoutesTemplateModel struct {
+	Routes []RouteModel
+}
+
+type ServerTemplateModel struct {
+	Paths            []string
+	RoutesImportPath string
+}
+
+type RouteModel struct {
+	PathName    string
+	Method      string
+	OperationID string
+}
+
+type OperationModel struct {
+	MethodType  string
+	Summary     string
+	OperationID string
+	Produces    []string
+	Responses   map[int]ResponseModel
+}
+
+type ResponseModel struct {
+	Description string
+	Type        string
+	Ref         string
+}
+
+type ImportsTemplateModel struct {
+	ModelImportPath   string
+	HandlerImportPath string
+	RoutesImportPath  string
 }
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
@@ -79,4 +119,24 @@ func getCurrentFileDir() (string, error) {
 		return "", errors.New("failed to get directory")
 	}
 	return filepath.Dir(file), nil
+}
+
+func GetBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateKey string) (*template.Template, error) {
+	tmpl, err := LoadModelTemplate(fHelper, templateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = tmpl.ExecuteTemplate(buf, templateKey, nil); err != nil {
+		return nil, err
+	}
+
+	return tmpl, nil
+}
+
+func ExecuteTemplate[T TemplateModel](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
+	if err := tmpl.ExecuteTemplate(buf, templateName, data); err != nil {
+		return err
+	}
+	return nil
 }

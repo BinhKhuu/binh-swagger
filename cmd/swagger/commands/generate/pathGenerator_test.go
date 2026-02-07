@@ -1,6 +1,7 @@
 package generate
 
 import (
+	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -11,11 +12,16 @@ import (
 	"testing"
 )
 
-func createImportData() importsTemplateModel {
-	return importsTemplateModel{
+func createImportData() templateHelper.ImportsTemplateModel {
+	return templateHelper.ImportsTemplateModel{
 		ModelImportPath:   "github.com/example/project/models",
 		HandlerImportPath: "github.com/example/project/handlers",
 	}
+}
+
+func createMockOperationMOdel(cmd *PathCommand) []templateHelper.OperationModel {
+	ops := createOperationModels(cmd)
+	return ops
 }
 
 func createMockPathCmd() *PathCommand {
@@ -34,7 +40,7 @@ func createMockConfig() Config {
 	}
 }
 
-func createPathTestMocks() (*PathCommand, Config, importsTemplateModel) {
+func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplateModel) {
 	return createMockPathCmd(), createMockConfig(), createImportData()
 }
 
@@ -107,7 +113,7 @@ func Test_Path_ShouldGenerateHandlersAndRoutes(t *testing.T) {
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	InitGenerateTests(t)
 	createMockTempFolders(t)
-	path, operations := createMockSpecAndOperation()
+	path, _ := createMockSpecAndOperation()
 	pathCommand, config, importData := createPathTestMocks()
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
@@ -116,7 +122,7 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 
 	handlerDir := testProjectStructure["handlers"]
 
-	err = createHandlers(pathCommand, config, importData, operations)
+	err = createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
@@ -147,14 +153,14 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	InitGenerateTests(t)
 	pathCommand, config, importData := createPathTestMocks()
-	_, operations := createMockSpecAndOperation()
+	createMockSpecAndOperation()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
 	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, operations)
+	err := createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for multiple operations, got: %v", err)
 	}
@@ -181,7 +187,6 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	InitGenerateTests(t)
 	pathCommand, config, importData := createPathTestMocks()
-	_, operations := createMockSpecAndOperation()
 
 	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
@@ -190,7 +195,7 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, operations)
+	err := createHandlers(pathCommand, config, importData, createMockOperationMOdel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
 	}
@@ -234,10 +239,10 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 		},
 	}
 
-	opts := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-		{method: "PUT", op: path.Put},
+	opts := []templateHelper.OperationModel{
+		toOperationsModel(*path.Get, "GET"),
+		toOperationsModel(*path.Post, "POST"),
+		toOperationsModel(*path.Put, "PUT"),
 	}
 
 	routes := createRoutesData(path.Name, opts)
@@ -276,7 +281,7 @@ func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
 			InitGenerateTests(t)
 			_, config, _ := createPathTestMocks()
 
-			tmpl, err := GetBaseTemplate(&buf, config.FileHelper(), tc.templateName)
+			tmpl, err := templateHelper.GetBaseTemplate(&buf, config.FileHelper(), tc.templateName)
 
 			if tc.errorExpected {
 				if err == nil {
