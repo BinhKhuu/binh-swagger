@@ -17,20 +17,19 @@ func (m *mockConfig) FileHelper() filehelper.FileHelper {
 
 func Test_FromAPIConfig_Success(t *testing.T) {
 	resetProjectStructreForTests()
-	tmp := fileHelperMock.ChangeCWDAndCreateGoModFile(t)
+	_ = fileHelperMock.ChangeCWDAndCreateGoModFile(t)
 	config := &mockConfig{
 		fileHelper: &filehelper.DefaultFileHelper{},
 	}
-	apiConfig := createMockAPIConfig(tmp)
+	apiConfig := createMockAPIConfig()
 	if err := fromAPIConfig(apiConfig, config); err != nil {
 		t.Fatalf("Error generating from API config: %v", err)
 	}
 }
 
-func createMockAPIConfig(root string) *spec.APIConfig {
+func createMockAPIConfig() *spec.APIConfig {
 	return &spec.APIConfig{
-		ProjectRoot: root,
-		Version:     "1.0.0",
+		Version: "1.0.0",
 		Models: map[string]spec.ModelSpec{
 			"User": {
 				Name: "User",

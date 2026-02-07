@@ -3,6 +3,7 @@ package generate
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"path/filepath"
 	"strings"
 )
 
@@ -26,6 +27,10 @@ type PathCommand struct {
 	Delete            *spec.Operation
 }
 
+type ServerCommand struct {
+	PathNames []string
+}
+
 // SpecToPathCommand todo test this.
 func SpecToPathCommand(cfg spec.PathSpec, pathName string) (*PathCommand, error) {
 	paths, err := GetProjectStructure()
@@ -33,8 +38,8 @@ func SpecToPathCommand(cfg spec.PathSpec, pathName string) (*PathCommand, error)
 		return nil, err
 	}
 	return &PathCommand{
-		ModelImportPath:   projectImportPath + "/" + paths["models"],
-		HandlerImportPath: projectImportPath + "/" + paths["handlers"],
+		ModelImportPath:   filepath.Join(projectImportPath, paths["models"]),
+		HandlerImportPath: filepath.Join(projectImportPath, paths["handlers"]),
 		Name:              strings.Replace(pathName, "/", "", 1),
 		Get:               cfg.Get,
 		Post:              cfg.Post,

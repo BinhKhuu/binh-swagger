@@ -1,6 +1,7 @@
 package generate
 
 import (
+	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
@@ -11,11 +12,16 @@ import (
 	"testing"
 )
 
-func createImportData() importsTemplateModel {
-	return importsTemplateModel{
+func createImportData() templateHelper.ImportsTemplateModel {
+	return templateHelper.ImportsTemplateModel{
 		ModelImportPath:   "github.com/example/project/models",
 		HandlerImportPath: "github.com/example/project/handlers",
 	}
+}
+
+func createMockOperationModel(cmd *PathCommand) []templateHelper.OperationModel {
+	ops := createOperationModels(cmd)
+	return ops
 }
 
 func createMockPathCmd() *PathCommand {
@@ -34,7 +40,7 @@ func createMockConfig() Config {
 	}
 }
 
-func createPathTestMocks() (*PathCommand, Config, importsTemplateModel) {
+func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplateModel) {
 	return createMockPathCmd(), createMockConfig(), createImportData()
 }
 
@@ -47,6 +53,10 @@ func createMockTempFolders(t *testing.T) {
 	}
 	routesDir := projectStructure["routes"]
 	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	serverDir := projectStructure["server"]
+	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -76,6 +86,23 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 	return path, opts
 }
 
+func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
+	pathCommand, _, _ := createPathTestMocks()
+
+	ops := createOperationModels(pathCommand)
+	if len(ops) != 2 {
+		t.Errorf("Expected 2 operations, got %d", len(ops))
+	}
+	for _, op := range ops {
+		if op.MethodType == "DELETE" {
+			t.Error("Did not expect DELETE operation, but found in operations list")
+		}
+		if op.MethodType == "PATCH" {
+			t.Error("Did not expect PATCH operation, but found in operations list")
+		}
+	}
+}
+
 func Test_Path_ShouldThrowErrorWhenProjectNotSetup(t *testing.T) {
 	resetProjectStructreForTests()
 	pathCommand, config, _ := createPathTestMocks()
@@ -103,7 +130,7 @@ func Test_Path_ShouldGenerateHandlersAndRoutes(t *testing.T) {
 func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 	InitGenerateTests(t)
 	createMockTempFolders(t)
-	path, operations := createMockSpecAndOperation()
+	path, _ := createMockSpecAndOperation()
 	pathCommand, config, importData := createPathTestMocks()
 	testProjectStructure, err := GetProjectStructure()
 	if err != nil {
@@ -112,7 +139,7 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 
 	handlerDir := testProjectStructure["handlers"]
 
-	err = createHandlers(pathCommand, config, importData, operations)
+	err = createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for valid operation, got: %v", err)
 	}
@@ -143,14 +170,14 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	InitGenerateTests(t)
 	pathCommand, config, importData := createPathTestMocks()
-	_, operations := createMockSpecAndOperation()
+	createMockSpecAndOperation()
 	testProjectStructure, _ := GetProjectStructure()
 	handlerDir := testProjectStructure["handlers"]
 	if err := os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, operations)
+	err := createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error for multiple operations, got: %v", err)
 	}
@@ -177,7 +204,6 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	InitGenerateTests(t)
 	pathCommand, config, importData := createPathTestMocks()
-	_, operations := createMockSpecAndOperation()
 
 	mockFileHelper := mockFileHelper.CreateMockFileHelper()
 	testProjectStructure, _ := GetProjectStructure()
@@ -186,7 +212,7 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := createHandlers(pathCommand, config, importData, operations)
+	err := createHandlers(pathCommand, config, importData, createMockOperationModel(pathCommand))
 	if err != nil {
 		t.Errorf("Expected no error when skipping nil operations, got: %v", err)
 	}
@@ -230,10 +256,10 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 		},
 	}
 
-	opts := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-		{method: "PUT", op: path.Put},
+	opts := []templateHelper.OperationModel{
+		toOperationsModel(*path.Get, "GET"),
+		toOperationsModel(*path.Post, "POST"),
+		toOperationsModel(*path.Put, "PUT"),
 	}
 
 	routes := createRoutesData(path.Name, opts)
@@ -272,7 +298,7 @@ func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
 			InitGenerateTests(t)
 			_, config, _ := createPathTestMocks()
 
-			tmpl, err := getBaseTemplate(&buf, config.FileHelper(), tc.templateName)
+			tmpl, err := templateHelper.GetBaseTemplate(&buf, config.FileHelper(), tc.templateName)
 
 			if tc.errorExpected {
 				if err == nil {
