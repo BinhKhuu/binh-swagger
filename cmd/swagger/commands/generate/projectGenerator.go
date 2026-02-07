@@ -8,8 +8,8 @@ import (
 
 var (
 	projectStructure        map[string]string
-	projectImportPath       string = ""
-	ErrProjectNotInitilized        = errors.New("project structure not initialized")
+	projectImportPath       string
+	ErrProjectNotInitilized = errors.New("project structure not initialized")
 )
 
 func Project(fHelper fileHelper.FileHelper, rootPath string) (string, error) {
