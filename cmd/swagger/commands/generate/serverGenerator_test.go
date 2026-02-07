@@ -18,16 +18,16 @@ func Test_Server_Success(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 
-	f, err := os.ReadFile(projectStructure["server"] + "/server.go")
+	f, err := os.ReadFile(projectStructure["server"] + "/" + serverGoFileName)
 	if err != nil {
-		t.Fatalf("Expected server.go to be created, got error: %v", err)
+		t.Fatalf("Expected %s to be created, got error: %v", serverGoFileName, err)
 	}
 
 	contentStr := string(f)
 	if !strings.Contains(contentStr, "package main") {
-		t.Errorf("Expected server.go to contain 'package main', got: %s", contentStr)
+		t.Errorf("Expected %s to contain 'package main', got: %s", serverGoFileName, contentStr)
 	}
 	if !strings.Contains(contentStr, "func main()") {
-		t.Errorf("Expected server.go to contain 'func main()', got: %s", contentStr)
+		t.Errorf("Expected %s to contain 'func main()', got: %s", serverGoFileName, contentStr)
 	}
 }
