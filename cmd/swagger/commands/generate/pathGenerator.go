@@ -20,12 +20,19 @@ type operation struct {
 	op     *spec.Operation
 }
 
+// todo move this to the helper and share between the generators
 type templateModel interface {
-	*importsTemplateModel | *spec.Operation | *routesTemplateModel
+	*importsTemplateModel | *spec.Operation | *routesTemplateModel | *serverTemplateModel
 }
 
 type routesTemplateModel struct {
 	Routes []routeModel
+}
+
+// todo refine the fields because this matches with ServerCommand
+type serverTemplateModel struct {
+	Paths        []string
+	RoutesImportPath string
 }
 
 type routeModel struct {
@@ -37,6 +44,7 @@ type routeModel struct {
 type importsTemplateModel struct {
 	ModelImportPath   string
 	HandlerImportPath string
+	RoutesImportPath  string
 }
 
 func Path(cmd *PathCommand, config Config) error {
@@ -67,17 +75,16 @@ func Path(cmd *PathCommand, config Config) error {
 	return nil
 }
 
-// todo test this.
 func createRoutes(cmd *PathCommand, config Config, importsData importsTemplateModel, ops []operation) error {
 	routeFileName := cmd.Name + routesFileSuffix
 	fHelper := config.FileHelper()
 	var buf bytes.Buffer
-	tmpl, err := getBaseTemplate(&buf, fHelper, templateHelper.RouteTemplateKey)
+	tmpl, err := GetBaseTemplate(&buf, fHelper, templateHelper.RouteTemplateKey)
 	if err != nil {
 		return err
 	}
 
-	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
+	if err = ExecuteTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
 
@@ -86,7 +93,7 @@ func createRoutes(cmd *PathCommand, config Config, importsData importsTemplateMo
 	rm := routesTemplateModel{
 		Routes: rd,
 	}
-	if err = executeTemplate(&rm, tmpl, &buf, templateHelper.Templates.RouteDefine); err != nil {
+	if err = ExecuteTemplate(&rm, tmpl, &buf, templateHelper.Templates.RouteDefine); err != nil {
 		return err
 	}
 
@@ -99,19 +106,19 @@ func createHandlers(cmd *PathCommand, config Config, importsData importsTemplate
 	handlerFilename := cmd.Name + handlerFileSuffix
 
 	var buf bytes.Buffer
-	tmpl, err := getBaseTemplate(&buf, fHelper, templateHelper.HandlerTemplateKey)
+	tmpl, err := GetBaseTemplate(&buf, fHelper, templateHelper.HandlerTemplateKey)
 	if err != nil {
 		return err
 	}
 
-	if err = executeTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
+	if err = ExecuteTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
 	for _, o := range ops {
 		if o.op == nil {
 			continue
 		}
-		err := executeTemplate(o.op, tmpl, &buf, o.method)
+		err := ExecuteTemplate(o.op, tmpl, &buf, o.method)
 		if err != nil {
 			return err
 		}
@@ -137,7 +144,8 @@ func createRoutesData(pathName string, ops []operation) []routeModel {
 	return routes
 }
 
-func getBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateKey string) (*template.Template, error) {
+// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the tempalte keys
+func GetBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateKey string) (*template.Template, error) {
 	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateKey)
 	if err != nil {
 		return nil, err
@@ -150,7 +158,8 @@ func getBaseTemplate(buf *bytes.Buffer, fHelper fileHelper.FileHelper, templateK
 	return tmpl, nil
 }
 
-func executeTemplate[T templateModel](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
+// todo move this to a helper for the other generators to use. and change templateKey to the type which holds the tempalte keys
+func ExecuteTemplate[T templateModel](data T, tmpl *template.Template, buf *bytes.Buffer, templateName string) error {
 	if err := tmpl.ExecuteTemplate(buf, templateName, data); err != nil {
 		return err
 	}

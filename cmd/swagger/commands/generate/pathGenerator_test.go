@@ -49,6 +49,10 @@ func createMockTempFolders(t *testing.T) {
 	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
+	serverDir := projectStructure["server"]
+	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
@@ -272,7 +276,7 @@ func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
 			InitGenerateTests(t)
 			_, config, _ := createPathTestMocks()
 
-			tmpl, err := getBaseTemplate(&buf, config.FileHelper(), tc.templateName)
+			tmpl, err := GetBaseTemplate(&buf, config.FileHelper(), tc.templateName)
 
 			if tc.errorExpected {
 				if err == nil {

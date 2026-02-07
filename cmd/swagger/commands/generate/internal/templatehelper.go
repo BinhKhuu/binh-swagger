@@ -15,22 +15,27 @@ var templatePaths = map[string]string{
 	ModelTemplateKey:   "model_template.tmpl",
 	HandlerTemplateKey: "handler_template.tmpl",
 	RouteTemplateKey:   "route_template.tmpl",
+	ServerTemplateKey:  "server_template.tmpl",
 }
 
+// todo change this to a type
 const (
 	HandlerTemplateKey = "handler"
 	ModelTemplateKey   = "model"
 	RouteTemplateKey   = "route"
+	ServerTemplateKey  = "server"
 )
 
 type TemplateDefines struct {
-	RouteDefine   string
-	ImportsDefine string
+	RouteDefine      string
+	ImportsDefine    string
+	ServerMainDefine string
 }
 
 var Templates = TemplateDefines{
-	RouteDefine:   "registerRoutes",
-	ImportsDefine: "imports",
+	RouteDefine:      "registerRoutes",
+	ImportsDefine:    "imports",
+	ServerMainDefine: "serverMain",
 }
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {

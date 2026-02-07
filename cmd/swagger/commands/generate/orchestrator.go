@@ -42,6 +42,9 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 		}
 	}
 
+	serverCmd := &ServerCommand{
+		RoutesImportPath: projectImportPath + "/" + projectStructure["routes"],
+	}
 	// Generate paths
 	for path, pathSpec := range cfg.Paths {
 		pathCmd, err := SpecToPathCommand(pathSpec, path)
@@ -51,7 +54,12 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 		if err := Path(pathCmd, command); err != nil {
 			return err
 		}
+		serverCmd.PathNames = append(serverCmd.PathNames, path)
 	}
 
+	// Generate server
+	if err := Server(serverCmd, command); err != nil {
+		return err
+	}
 	return nil
 }
