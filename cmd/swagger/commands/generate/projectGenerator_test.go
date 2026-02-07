@@ -3,7 +3,6 @@ package generate
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"testing"
 )
 
@@ -14,13 +13,8 @@ func Test_Project(t *testing.T) {
 	// we should mock this instead of creating the actual file consider refactoring the tests.
 	tempDir := mockFileHelper.ChangeCWDAndCreateGoModFile(t)
 	fileHelper := &filehelper.DefaultFileHelper{}
-	cfg := &spec.APIConfig{
-		Version: "1.0.0",
-		Models:  map[string]spec.ModelSpec{},
-		Paths:   map[string]spec.PathSpec{},
-	}
 
-	_, err := Project(cfg, fileHelper, tempDir)
+	_, err := Project(fileHelper, tempDir)
 	if err != nil {
 		t.Fatalf("Project generation failed: %v", err)
 	}

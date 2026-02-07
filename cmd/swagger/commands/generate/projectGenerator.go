@@ -2,7 +2,6 @@ package generate
 
 import (
 	fileHelper "binh-swagger/cmd/swagger/commands/adaptor"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"errors"
 	"os"
 )
@@ -13,7 +12,7 @@ var (
 	ErrProjectNotInitilized        = errors.New("project structure not initialized")
 )
 
-func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper, rootPath string) (string, error) {
+func Project(fHelper fileHelper.FileHelper, rootPath string) (string, error) {
 	importPath, err := fHelper.GetGoModImportPath()
 	if err != nil {
 		return "", err

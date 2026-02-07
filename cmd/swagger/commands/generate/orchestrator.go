@@ -22,7 +22,7 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	}
 
 	// Generate Project Structure
-	if _, err := Project(cfg, fileHelper, ""); err != nil {
+	if _, err := Project(fileHelper, ""); err != nil {
 		return err
 	}
 
