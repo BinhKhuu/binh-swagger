@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -30,10 +31,10 @@ func Server(cmd *ServerCommand, cfg Config) error {
 
 	tmplModel := serverTemplateModel{
 		Paths:            pathNames,
-		RoutesImportPath: cmd.RoutesImportPath,
+		RoutesImportPath: filepath.Join(projectImportPath, projectStructure["routes"]),
 	}
 	importTemplateModel := importsTemplateModel{
-		RoutesImportPath: cmd.RoutesImportPath,
+		RoutesImportPath: tmplModel.RoutesImportPath,
 	}
 
 	err = ExecuteTemplate(&importTemplateModel, tmpl, &buf, templateHelper.Templates.ImportsDefine)

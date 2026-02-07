@@ -10,8 +10,7 @@ func Test_Server_Success(t *testing.T) {
 	_ = InitGenerateTests(t)
 	createMockTempFolders(t)
 	cmd := &ServerCommand{
-		PathNames:        []string{"testPath1", "testPath2"},
-		RoutesImportPath: "github.com/example/project/routes",
+		PathNames: []string{"testPath1", "testPath2"},
 	}
 	cfg := createMockConfig()
 	err := Server(cmd, cfg)

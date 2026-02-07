@@ -27,10 +27,8 @@ type PathCommand struct {
 	Delete            *spec.Operation
 }
 
-// todo refine the fields because this matches with serverTemplateModel.
 type ServerCommand struct {
-	PathNames        []string
-	RoutesImportPath string
+	PathNames []string
 }
 
 // SpecToPathCommand todo test this.
