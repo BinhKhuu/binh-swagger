@@ -4,7 +4,6 @@ import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
-	"path"
 	"testing"
 )
 
@@ -13,25 +12,20 @@ func Test_Project(t *testing.T) {
 	resetProjectStructreForTests()
 
 	// we should mock this instead of creating the actual file consider refactoring the tests.
-	mockFileHelper.ChangeCWDAndCreateGoModFile(t)
-
-	tempDir := t.TempDir()
-	rootDir := path.Join(tempDir, "myproject")
-
+	tempDir := mockFileHelper.ChangeCWDAndCreateGoModFile(t)
 	fileHelper := &filehelper.DefaultFileHelper{}
 	cfg := &spec.APIConfig{
-		ProjectRoot: rootDir,
-		Version:     "1.0.0",
-		Models:      map[string]spec.ModelSpec{},
-		Paths:       map[string]spec.PathSpec{},
+		Version: "1.0.0",
+		Models:  map[string]spec.ModelSpec{},
+		Paths:   map[string]spec.PathSpec{},
 	}
 
-	_, err := Project(cfg, fileHelper)
+	_, err := Project(cfg, fileHelper, tempDir)
 	if err != nil {
 		t.Fatalf("Project generation failed: %v", err)
 	}
 
-	childDirs, err := fileHelper.ReadAllChildDirectoriesRecursive(rootDir)
+	childDirs, err := fileHelper.ReadAllChildDirectoriesRecursive(tempDir)
 	if err != nil {
 		t.Fatalf("Failed to read child directories: %v", err)
 	}

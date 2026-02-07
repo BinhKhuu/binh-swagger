@@ -29,8 +29,7 @@ func Test_FromAPIConfig_Success(t *testing.T) {
 
 func createMockAPIConfig(root string) *spec.APIConfig {
 	return &spec.APIConfig{
-		ProjectRoot: root,
-		Version:     "1.0.0",
+		Version: "1.0.0",
 		Models: map[string]spec.ModelSpec{
 			"User": {
 				Name: "User",

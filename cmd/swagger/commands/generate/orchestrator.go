@@ -2,6 +2,7 @@ package generate
 
 import (
 	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"path/filepath"
 )
 
 type Orchestrator interface {
@@ -22,7 +23,7 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	}
 
 	// Generate Project Structure
-	if _, err := Project(cfg, fileHelper); err != nil {
+	if _, err := Project(cfg, fileHelper, ""); err != nil {
 		return err
 	}
 
@@ -43,7 +44,7 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	}
 
 	serverCmd := &ServerCommand{
-		RoutesImportPath: projectImportPath + "/" + projectStructure["routes"],
+		RoutesImportPath: filepath.Join(projectImportPath + "/" + projectStructure["routes"]),
 	}
 	// Generate paths
 	for path, pathSpec := range cfg.Paths {

@@ -9,18 +9,18 @@ import (
 
 var (
 	projectStructure        map[string]string
-	projectImportPath       string
-	ErrProjectNotInitilized = errors.New("project structure not initialized")
+	projectImportPath       string = ""
+	ErrProjectNotInitilized        = errors.New("project structure not initialized")
 )
 
-func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper) (string, error) {
+func Project(cfg *spec.APIConfig, fHelper fileHelper.FileHelper, rootPath string) (string, error) {
 	importPath, err := fHelper.GetGoModImportPath()
 	if err != nil {
 		return "", err
 	}
 
 	projectImportPath = importPath
-	rootDir, err := fHelper.CreateDirectory(cfg.ProjectRoot)
+	rootDir, err := fHelper.CreateDirectory(rootPath)
 	if err != nil {
 		return "", err
 	}
@@ -76,11 +76,4 @@ func SetProjectStructure(rootDir string) error {
 		"config":     rootDir + "/config",
 	}
 	return nil
-}
-
-func GetImportPath() (string, error) {
-	if projectImportPath == "" {
-		return "", errors.New("project import path not initialized")
-	}
-	return projectImportPath, nil
 }
