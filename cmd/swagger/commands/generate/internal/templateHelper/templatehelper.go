@@ -40,7 +40,11 @@ var Templates = TemplateDefines{
 }
 
 type TemplateModel interface {
-	*ImportsTemplateModel | *OperationModel | *RoutesTemplateModel | *ServerTemplateModel
+	*ImportsTemplateModel |
+		*OperationModel |
+		*RoutesTemplateModel |
+		*ServerTemplateModel |
+		*ModelTemplateModel
 }
 
 type RoutesTemplateModel struct {
@@ -76,6 +80,21 @@ type ImportsTemplateModel struct {
 	ModelImportPath   string
 	HandlerImportPath string
 	RoutesImportPath  string
+}
+
+type ModelTemplateModel struct {
+	Models []Model
+}
+
+type Model struct {
+	ImportPath []string
+	Name       string
+	Fields     []FieldsModel
+}
+
+type FieldsModel struct {
+	Name string
+	Type string
 }
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
@@ -139,4 +158,44 @@ func ExecuteTemplate[T TemplateModel](data T, tmpl *template.Template, buf *byte
 		return err
 	}
 	return nil
+}
+
+func GetModelTemplateImportPaths(models ModelTemplateModel) []string {
+	paths := map[string]string{}
+	for _, m := range models.Models {
+		for _, f := range m.Fields {
+			importPath := getImportPath(f.Type)
+			if importPath != "" {
+				paths[importPath] = importPath
+			}
+		}
+	}
+	return buildImportStringSlice(paths)
+}
+
+func buildImportStringSlice(paths map[string]string) []string {
+	imports := make([]string, 0, len(paths))
+	for _, path := range paths {
+		imports = append(imports, path)
+	}
+	return imports
+}
+
+func getImportPath(fieldType string) string {
+	switch fieldType {
+	case "time.Time", "time.Duration":
+		return "time"
+	case "uuid.UUID":
+		return "github.com/google/uuid"
+	case "decimal.Decimal":
+		return "github.com/shopspring/decimal"
+	case "sql.NullString", "sql.DB", "sql.NullInt64":
+		return "database/sql"
+	case "url.URL":
+		return "net/url"
+	case "http.Request":
+		return "net/http"
+	default:
+		return ""
+	}
 }
