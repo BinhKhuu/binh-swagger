@@ -9,11 +9,10 @@ import (
 {{ end }}
 {{ define "serverMain" }}
 func main() {
-	r := gin.Default()
-    {{ range .Paths }}
-        {{ $pathName := . }}
-	    routes.RegisterRoutes(r.Group("{{ $pathName }}"))
-    {{ end }}
+	r := gin.Default(){{ range .Paths }}
+{{- $pathName := . }} 
+	routes.RegisterRoutes(r.Group("{{ $pathName }}"))
+{{- end }}
 	r.Run(":8080")
 }
 {{ end }}
