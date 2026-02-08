@@ -5,18 +5,18 @@ import (
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
+	"errors"
 	"net/http"
 	"os"
-	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	"unicode"
 )
 
 const (
 	handlerFileSuffix = "_handler.go"
 	routesFileSuffix  = "_routes.go"
 )
+
+var ErrOperationIDNotDefined = errors.New("operationId is not defined for this operation")
 
 type operation struct {
 	method string
@@ -49,26 +49,35 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	var ops []templateHelper.OperationModel
 
 	if cmd.Get != nil {
-		ops = append(ops, toOperationsModel(*cmd.Get, http.MethodGet))
+		if op, err := toOperationsModel(*cmd.Get, http.MethodGet); err == nil {
+			ops = append(ops, op)
+		}
 	}
 	if cmd.Post != nil {
-		ops = append(ops, toOperationsModel(*cmd.Post, http.MethodPost))
+		if op, err := toOperationsModel(*cmd.Post, http.MethodPost); err == nil {
+			ops = append(ops, op)
+		}
 	}
 	if cmd.Put != nil {
-		ops = append(ops, toOperationsModel(*cmd.Put, http.MethodPut))
+		if op, err := toOperationsModel(*cmd.Put, http.MethodPut); err == nil {
+			ops = append(ops, op)
+		}
 	}
 	if cmd.Delete != nil {
-		ops = append(ops, toOperationsModel(*cmd.Delete, http.MethodDelete))
+		if op, err := toOperationsModel(*cmd.Delete, http.MethodDelete); err == nil {
+			ops = append(ops, op)
+		}
 	}
 	if cmd.Patch != nil {
-		ops = append(ops, toOperationsModel(*cmd.Patch, http.MethodPatch))
+		if op, err := toOperationsModel(*cmd.Patch, http.MethodPatch); err == nil {
+			ops = append(ops, op)
+		}
 	}
 
 	return ops
 }
 
-func toOperationsModel(op spec.Operation, methodType string) templateHelper.OperationModel {
-	c := cases.Title(language.English)
+func toOperationsModel(op spec.Operation, methodType string) (templateHelper.OperationModel, error) {
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
 		responseModel[code] = templateHelper.ResponseModel{
@@ -77,14 +86,19 @@ func toOperationsModel(op spec.Operation, methodType string) templateHelper.Oper
 			Ref:         response.Schema.Ref,
 		}
 	}
+	r := []rune(op.OperationID)
+	if len(r) == 0 {
+		return templateHelper.OperationModel{}, ErrOperationIDNotDefined
+	}
 
+	r[0] = unicode.ToUpper(r[0])
 	return templateHelper.OperationModel{
 		MethodType:  methodType,
-		OperationID: strings.ReplaceAll(c.String(op.OperationID), " ", ""),
+		OperationID: string(r),
 		Summary:     op.Summary,
 		Produces:    op.Produces,
 		Responses:   responseModel,
-	}
+	}, nil
 }
 
 func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.ImportsTemplateModel, ops []templateHelper.OperationModel) error {
