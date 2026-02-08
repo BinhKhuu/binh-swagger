@@ -12,7 +12,6 @@ import (
 
 {{ define "registerRoutes" }}
 func RegisterRoutes(b *gin.RouterGroup) {
-
 	{{ range .Routes }}
 		b.{{ .Method }}("{{ .PathName }}", handlers.{{ .OperationID }})
 	{{ end }}

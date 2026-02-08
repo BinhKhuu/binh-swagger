@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"unicode"
 )
 
 func createImportData() templateHelper.ImportsTemplateModel {
@@ -94,6 +95,14 @@ func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
 		t.Errorf("Expected 2 operations, got %d", len(ops))
 	}
 	for _, op := range ops {
+
+		r := []rune(op.OperationID)[0]
+		if !unicode.IsUpper(r) {
+			t.Errorf("Expedted operation ID to be in pascal case but first letter was not uppercase: %s", op.OperationID)
+		}
+		if strings.ContainsAny(op.OperationID, " \t\n\r") {
+			t.Errorf("Expected operation ID to be in pascal case but found whitespace: %s", op.OperationID)
+		}
 		if op.MethodType == "DELETE" {
 			t.Error("Did not expect DELETE operation, but found in operations list")
 		}
@@ -159,10 +168,10 @@ func Test_CreateHandlers_ShouldCreateHandlerFile(t *testing.T) {
 		return
 	}
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "getTestPath") {
+	if !strings.Contains(contentStr, "GetTestPath") {
 		t.Errorf("Expected handler file to contain operation ID 'getTestPath', got: %s", contentStr)
 	}
-	if !strings.Contains(contentStr, "func getTestPath") {
+	if !strings.Contains(contentStr, "func GetTestPath") {
 		t.Errorf("Expected handler file to contain summary 'func getTestPath', got: %s", contentStr)
 	}
 }
@@ -193,10 +202,10 @@ func Test_CreateHandlers_ShouldHandleMultipleOperations(t *testing.T) {
 	}
 
 	contentStr := string(content)
-	if !strings.Contains(contentStr, "getTestPath") {
+	if !strings.Contains(contentStr, "GetTestPath") {
 		t.Errorf("Expected handler file to contain GET operation ID 'getMultiPath'")
 	}
-	if !strings.Contains(contentStr, "postTestPath") {
+	if !strings.Contains(contentStr, "PostTestPath") {
 		t.Errorf("Expected handler file to contain POST operation ID 'postMultiPath'")
 	}
 }
@@ -256,10 +265,15 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 		},
 	}
 
-	opts := []templateHelper.OperationModel{
-		toOperationsModel(*path.Get, "GET"),
-		toOperationsModel(*path.Post, "POST"),
-		toOperationsModel(*path.Put, "PUT"),
+	opts := []templateHelper.OperationModel{}
+	if op, err := toOperationsModel(*path.Get, "GET"); err == nil {
+		opts = append(opts, op)
+	}
+	if op, err := toOperationsModel(*path.Post, "POST"); err == nil {
+		opts = append(opts, op)
+	}
+	if op, err := toOperationsModel(*path.Put, "PUT"); err == nil {
+		opts = append(opts, op)
 	}
 
 	routes := createRoutesData(path.Name, opts)
@@ -276,7 +290,7 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 	if route.PathName != path.Name {
 		t.Errorf("Expected path name '%s', got: %s", path.Name, route.PathName)
 	}
-	if route.OperationID != "getTestPath" {
+	if route.OperationID != "GetTestPath" {
 		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationID)
 	}
 }
