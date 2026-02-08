@@ -5,7 +5,12 @@ import (
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
+	"net/http"
 	"os"
+	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const (
@@ -44,25 +49,26 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	var ops []templateHelper.OperationModel
 
 	if cmd.Get != nil {
-		ops = append(ops, toOperationsModel(*cmd.Get, "GET"))
+		ops = append(ops, toOperationsModel(*cmd.Get, http.MethodGet))
 	}
 	if cmd.Post != nil {
-		ops = append(ops, toOperationsModel(*cmd.Post, "POST"))
+		ops = append(ops, toOperationsModel(*cmd.Post, http.MethodPost))
 	}
 	if cmd.Put != nil {
-		ops = append(ops, toOperationsModel(*cmd.Put, "PUT"))
+		ops = append(ops, toOperationsModel(*cmd.Put, http.MethodPut))
 	}
 	if cmd.Delete != nil {
-		ops = append(ops, toOperationsModel(*cmd.Delete, "DELETE"))
+		ops = append(ops, toOperationsModel(*cmd.Delete, http.MethodDelete))
 	}
 	if cmd.Patch != nil {
-		ops = append(ops, toOperationsModel(*cmd.Patch, "PATCH"))
+		ops = append(ops, toOperationsModel(*cmd.Patch, http.MethodPatch))
 	}
 
 	return ops
 }
 
 func toOperationsModel(op spec.Operation, methodType string) templateHelper.OperationModel {
+	c := cases.Title(language.English)
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
 		responseModel[code] = templateHelper.ResponseModel{
@@ -74,7 +80,7 @@ func toOperationsModel(op spec.Operation, methodType string) templateHelper.Oper
 
 	return templateHelper.OperationModel{
 		MethodType:  methodType,
-		OperationID: op.OperationID,
+		OperationID: strings.ReplaceAll(c.String(op.OperationID), " ", ""),
 		Summary:     op.Summary,
 		Produces:    op.Produces,
 		Responses:   responseModel,

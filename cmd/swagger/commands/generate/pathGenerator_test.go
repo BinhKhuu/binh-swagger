@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"unicode"
 )
 
 func createImportData() templateHelper.ImportsTemplateModel {
@@ -94,6 +95,14 @@ func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
 		t.Errorf("Expected 2 operations, got %d", len(ops))
 	}
 	for _, op := range ops {
+
+		r := []rune(op.OperationID)[0]
+		if !unicode.IsUpper(r) {
+			t.Errorf("Expedted operation ID to be in pascal case but first letter was not uppercase: %s", op.OperationID)
+		}
+		if strings.ContainsAny(op.OperationID, " \t\n\r") {
+			t.Errorf("Expected operation ID to be in pascal case but found whitespace: %s", op.OperationID)
+		}
 		if op.MethodType == "DELETE" {
 			t.Error("Did not expect DELETE operation, but found in operations list")
 		}
