@@ -41,7 +41,6 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
-// unit test these
 func toModelTemplate(cmd *ModelCommand, config Config) templateHelper.ModelTemplateModel {
 	fields := []templateHelper.FieldsModel{}
 	for _, f := range cmd.Fields {
