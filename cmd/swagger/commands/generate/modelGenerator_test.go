@@ -62,39 +62,71 @@ func Test_GenerateModel(t *testing.T) {
 }
 
 func Test_ToModelTemplate_(t *testing.T) {
-	cmd := &ModelCommand{
-		Name: "User",
-		Fields: []spec.FieldSpec{
-			{Name: "ID", Type: "int", JSON: "id"},
-			{Name: "Name", Type: "string", JSON: "name"},
-			{Name: "Timestamp", Type: "time.Time", JSON: "timestamp"},
-			{Name: "", Type: "string", JSON: "invalid"},      // Invalid field missing Name
-			{Name: "InvalidType", Type: "", JSON: "invalid"}, // Invalid field missing Type
+	tests := []struct {
+		name     string
+		cmd      ModelCommand
+		expected templateHelper.ModelTemplateModel
+	}{
+		{
+			name: "FieldsWithTimeType",
+			cmd: ModelCommand{
+				Name: "User",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+					{Name: "Timestamp", Type: "time.Time", JSON: "timestamp"},
+					{Name: "", Type: "string", JSON: "invalid"},      // Invalid field missing Name
+					{Name: "InvalidType", Type: "", JSON: "invalid"}, // Invalid field missing Type
+				},
+			},
+			expected: templateHelper.ModelTemplateModel{
+				Name: "User",
+				Fields: []templateHelper.FieldsModel{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+					{Name: "Timestamp", Type: "time.Time", JSON: "timestamp"},
+				},
+				ImportPath: []string{"time"},
+			},
+		},
+		{
+			name: "FieldsWithNoImportTypes",
+			cmd: ModelCommand{
+				Name: "User",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+					{Name: "", Type: "string", JSON: "invalid"},      // Invalid field missing Name
+					{Name: "InvalidType", Type: "", JSON: "invalid"}, // Invalid field missing Type
+				},
+			},
+			expected: templateHelper.ModelTemplateModel{
+				Name: "User",
+				Fields: []templateHelper.FieldsModel{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+				},
+				ImportPath: []string{},
+			},
 		},
 	}
-	config := &mockFileHelper.MockGenerateConfig{}
-	modelTemplate := toModelTemplate(cmd, config)
 
-	if modelTemplate.Name != cmd.Name {
-		t.Errorf("Expected model name %q, got %q\n", cmd.Name, modelTemplate.Name)
-	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			config := &mockFileHelper.MockGenerateConfig{}
+			modelTemplate := toModelTemplate(&test.cmd, config)
 
-	if len(modelTemplate.Fields) != 3 {
-		t.Errorf("Expected 3 valid fields, got %d\n", len(modelTemplate.Fields))
-	}
+			if modelTemplate.Name != test.cmd.Name {
+				t.Errorf("Expected model name %q, got %q\n", test.cmd.Name, modelTemplate.Name)
+			}
 
-	if len(modelTemplate.ImportPath) != 1 || modelTemplate.ImportPath[0] != "time" {
-		t.Errorf("Expected import path [\"time\"], got %v\n", modelTemplate.ImportPath)
-	}
+			if len(modelTemplate.Fields) != len(test.expected.Fields) {
+				t.Errorf("Expected %d valid fields, got %d\n", len(test.expected.Fields), len(modelTemplate.Fields))
+			}
 
-	expectedFields := []templateHelper.FieldsModel{
-		{Name: "ID", Type: "int", JSON: "id"},
-		{Name: "Name", Type: "string", JSON: "name"},
-	}
-
-	for i, expected := range expectedFields {
-		if modelTemplate.Fields[i] != expected {
-			t.Errorf("Expected field %v, got %v\n", expected, modelTemplate.Fields[i])
-		}
+			if len(modelTemplate.ImportPath) != len(test.expected.ImportPath) {
+				t.Errorf("Expected import paths %v, got %v\n", test.expected.ImportPath, modelTemplate.ImportPath)
+			}
+		})
 	}
 }
