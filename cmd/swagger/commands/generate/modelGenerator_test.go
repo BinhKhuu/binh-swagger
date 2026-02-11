@@ -10,8 +10,10 @@ import (
 	"testing"
 )
 
+// todo fix this test to use temp
 func Test_GenerateModel(t *testing.T) {
 	_ = InitGenerateTests(t)
+	createMockTempFolders(t)
 	config := spec.ModelSpec{
 		Name: "User",
 		Fields: []spec.FieldSpec{
@@ -35,9 +37,7 @@ func Test_GenerateModel(t *testing.T) {
 		t.Fatalf("GenerateModel failed: %v", err)
 	}
 
-	// Verify output file exists
-	outputDir := filepath.Join("..", "testdata/output")
-	outputFile := filepath.Join(outputDir, "models.go")
+	outputFile := filepath.Join(projectStructure["models"], config.Name+".go")
 	if _, err = os.Stat(outputFile); os.IsNotExist(err) {
 		t.Fatalf("Output file %s does not exist\n", outputFile)
 	}

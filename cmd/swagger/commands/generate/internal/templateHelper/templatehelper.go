@@ -28,15 +28,17 @@ const (
 )
 
 type TemplateDefines struct {
-	RouteDefine      string
-	ImportsDefine    string
-	ServerMainDefine string
+	RouteDefine       string
+	ImportsDefine     string
+	ServerMainDefine  string
+	ModelStructDefine string
 }
 
 var Templates = TemplateDefines{
-	RouteDefine:      "registerRoutes",
-	ImportsDefine:    "imports",
-	ServerMainDefine: "serverMain",
+	RouteDefine:       "registerRoutes",
+	ImportsDefine:     "imports",
+	ServerMainDefine:  "serverMain",
+	ModelStructDefine: "modelStruct",
 }
 
 type TemplateModel interface {
@@ -83,10 +85,6 @@ type ImportsTemplateModel struct {
 }
 
 type ModelTemplateModel struct {
-	Models []Model
-}
-
-type Model struct {
 	ImportPath []string
 	Name       string
 	Fields     []FieldsModel
@@ -95,6 +93,7 @@ type Model struct {
 type FieldsModel struct {
 	Name string
 	Type string
+	JSON string
 }
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
@@ -160,17 +159,16 @@ func ExecuteTemplate[T TemplateModel](data T, tmpl *template.Template, buf *byte
 	return nil
 }
 
-func GetModelTemplateImportPaths(models ModelTemplateModel) []string {
+func SetModelTemplateImportPaths(models *ModelTemplateModel) {
 	paths := map[string]string{}
-	for _, m := range models.Models {
-		for _, f := range m.Fields {
-			importPath := getImportPath(f.Type)
-			if importPath != "" {
-				paths[importPath] = importPath
-			}
+	for _, f := range models.Fields {
+		importPath := getImportPath(f.Type)
+		if importPath != "" {
+			paths[importPath] = importPath
 		}
+		models.ImportPath = buildImportStringSlice(paths)
+
 	}
-	return buildImportStringSlice(paths)
 }
 
 func buildImportStringSlice(paths map[string]string) []string {

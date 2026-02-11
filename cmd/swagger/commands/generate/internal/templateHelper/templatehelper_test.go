@@ -3,6 +3,8 @@ package templatehelper
 import (
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"errors"
+	"slices"
+	"strings"
 	"testing"
 )
 
@@ -173,15 +175,11 @@ func Test_GetModelTemplateImportPaths_ReturnsPaths(t *testing.T) {
 				"github.com/google/uuid",
 			},
 			tt: ModelTemplateModel{
-				Models: []Model{
-					{
-						Name: "TestModel",
-						Fields: []FieldsModel{
-							{Name: "CreatedAt", Type: "time.Time"},
-							{Name: "ID", Type: "uuid.UUID"},
-							{Name: "Name", Type: "string"},
-						},
-					},
+				Name: "TestModel",
+				Fields: []FieldsModel{
+					{Name: "CreatedAt", Type: "time.Time"},
+					{Name: "ID", Type: "uuid.UUID"},
+					{Name: "Name", Type: "string"},
 				},
 			},
 		},
@@ -189,14 +187,10 @@ func Test_GetModelTemplateImportPaths_ReturnsPaths(t *testing.T) {
 			testName: "NoImportPathsForStringFields",
 			expected: []string{},
 			tt: ModelTemplateModel{
-				Models: []Model{
-					{
-						Name: "TestModel",
-						Fields: []FieldsModel{
-							{Name: "ID", Type: "int"},
-							{Name: "Name", Type: "string"},
-						},
-					},
+				Name: "TestModel",
+				Fields: []FieldsModel{
+					{Name: "ID", Type: "int"},
+					{Name: "Name", Type: "string"},
 				},
 			},
 		},
@@ -204,21 +198,17 @@ func Test_GetModelTemplateImportPaths_ReturnsPaths(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			result := GetModelTemplateImportPaths(test.tt)
-			if len(result) != len(test.expected) {
-				t.Fatalf("Expected %d import paths, got %d", len(test.expected), len(result))
-			}
-			for _, expectedPath := range test.expected {
-				found := false
-				for _, r := range result {
-					if r == expectedPath {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Fatalf("Expected import path %s not found in result", expectedPath)
-				}
+			SetModelTemplateImportPaths(&test.tt)
+
+			expected := test.expected
+			slices.Sort(expected)
+			expectedStr := strings.Join(expected, ",")
+			actual := test.tt.ImportPath
+			slices.Sort(actual)
+
+			actualStr := strings.Join(actual, ",")
+			if expectedStr != actualStr {
+				t.Fatalf("Expected import paths %s, got %s", expectedStr, actualStr)
 			}
 		})
 	}

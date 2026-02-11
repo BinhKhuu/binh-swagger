@@ -1,7 +1,19 @@
+{{ define "model" }}
 package models
+{{ end }}
 
+{{ define "imports" }}
+import (
+    {{- range .ImportPath }}
+    "{{ . }}"
+    {{- end }}
+)
+{{ end }}
+
+{{ define "modelStruct" }}
 type {{ .Name }} struct {
 {{- range .Fields }}
     {{ .Name }} {{ .Type }} `json:"{{ .JSON }}"`
 {{- end }}
 }
+{{ end }}

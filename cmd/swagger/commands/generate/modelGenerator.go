@@ -9,10 +9,23 @@ import (
 )
 
 func Model(cmd *ModelCommand, generateConfig Config) error {
+	if _, err := GetProjectStructure(); err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
 	fHelper := generateConfig.FileHelper()
-	tmpl, err := templateHelper.LoadModelTemplate(fHelper, templateHelper.ModelTemplateKey)
+	tmpl, err := templateHelper.GetBaseTemplate(&buf, generateConfig.FileHelper(), templateHelper.ModelTemplateKey)
 	if err != nil {
+		return err
+	}
+
+	tModel := toModelTemplate(cmd, generateConfig)
+	if err = templateHelper.ExecuteTemplate(&tModel, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
+		return err
+	}
+
+	if err = templateHelper.ExecuteTemplate(&tModel, tmpl, &buf, templateHelper.Templates.ModelStructDefine); err != nil {
 		return err
 	}
 
@@ -21,19 +34,32 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 		return err
 	}
 
-	// todo think about coupling to GetProjectStructure here
-	_, err = GetProjectStructure()
-	if err != nil {
-		return err
-	}
 	outputPath := projectStructure["models"]
 	outFile := strings.ToLower(cmd.Name) + ".go"
 
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(outputPath, outFile)
-	shouldReturn, err := fHelper.EnsureOutputDirectoryExists(outputPath, os.Stdout, os.Stdin)
-	if shouldReturn {
-		return err
+	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
+}
+
+// unit test these
+func toModelTemplate(cmd *ModelCommand, config Config) templateHelper.ModelTemplateModel {
+	fields := []templateHelper.FieldsModel{}
+	for _, f := range cmd.Fields {
+		if f.Name == "" || f.Type == "" {
+			continue
+		}
+		fm := templateHelper.FieldsModel{
+			Name: f.Name,
+			Type: f.Type,
+			JSON: f.JSON,
+		}
+		fields = append(fields, fm)
+	}
+	models := templateHelper.ModelTemplateModel{
+		Name:   cmd.Name,
+		Fields: fields,
 	}
 
-	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
+	templateHelper.SetModelTemplateImportPaths(&models)
+	return models
 }
