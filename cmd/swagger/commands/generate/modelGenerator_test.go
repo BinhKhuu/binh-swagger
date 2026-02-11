@@ -113,8 +113,7 @@ func Test_ToModelTemplate_(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			config := &mockFileHelper.MockGenerateConfig{}
-			modelTemplate := toModelTemplate(&test.cmd, config)
+			modelTemplate := toModelTemplate(&test.cmd)
 
 			if modelTemplate.Name != test.cmd.Name {
 				t.Errorf("Expected model name %q, got %q\n", test.cmd.Name, modelTemplate.Name)

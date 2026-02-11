@@ -167,7 +167,6 @@ func SetModelTemplateImportPaths(models *ModelTemplateModel) {
 			paths[importPath] = importPath
 		}
 		models.ImportPath = buildImportStringSlice(paths)
-
 	}
 }
 

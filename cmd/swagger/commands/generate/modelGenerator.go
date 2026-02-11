@@ -20,7 +20,7 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 		return err
 	}
 
-	tModel := toModelTemplate(cmd, generateConfig)
+	tModel := toModelTemplate(cmd)
 	if err = templateHelper.ExecuteTemplate(&tModel, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
-func toModelTemplate(cmd *ModelCommand, config Config) templateHelper.ModelTemplateModel {
+func toModelTemplate(cmd *ModelCommand) templateHelper.ModelTemplateModel {
 	fields := []templateHelper.FieldsModel{}
 	for _, f := range cmd.Fields {
 		if f.Name == "" || f.Type == "" {

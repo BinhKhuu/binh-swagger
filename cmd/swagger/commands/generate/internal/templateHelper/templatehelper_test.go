@@ -128,13 +128,7 @@ func Test_buildImportStringSlice_ReturnsImportPaths(t *testing.T) {
 	}
 
 	for _, path := range expected {
-		found := false
-		for _, r := range result {
-			if r == path {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(result, path)
 		if !found {
 			t.Fatalf("Expected import path %s not found in result", path)
 		}
