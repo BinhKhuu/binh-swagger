@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -37,7 +38,7 @@ func Test_GenerateModel(t *testing.T) {
 		t.Fatalf("GenerateModel failed: %v", err)
 	}
 
-	outputFile := filepath.Join(projectStructure["models"], config.Name+".go")
+	outputFile := filepath.Join(projectStructure["models"], strings.ToLower(config.Name+".go"))
 	if _, err = os.Stat(outputFile); os.IsNotExist(err) {
 		t.Fatalf("Output file %s does not exist\n", outputFile)
 	}
