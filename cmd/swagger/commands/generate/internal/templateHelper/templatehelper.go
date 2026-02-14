@@ -28,19 +28,25 @@ const (
 )
 
 type TemplateDefines struct {
-	RouteDefine      string
-	ImportsDefine    string
-	ServerMainDefine string
+	RouteDefine       string
+	ImportsDefine     string
+	ServerMainDefine  string
+	ModelStructDefine string
 }
 
 var Templates = TemplateDefines{
-	RouteDefine:      "registerRoutes",
-	ImportsDefine:    "imports",
-	ServerMainDefine: "serverMain",
+	RouteDefine:       "registerRoutes",
+	ImportsDefine:     "imports",
+	ServerMainDefine:  "serverMain",
+	ModelStructDefine: "modelStruct",
 }
 
 type TemplateModel interface {
-	*ImportsTemplateModel | *OperationModel | *RoutesTemplateModel | *ServerTemplateModel
+	*ImportsTemplateModel |
+		*OperationModel |
+		*RoutesTemplateModel |
+		*ServerTemplateModel |
+		*ModelTemplateModel
 }
 
 type RoutesTemplateModel struct {
@@ -76,6 +82,18 @@ type ImportsTemplateModel struct {
 	ModelImportPath   string
 	HandlerImportPath string
 	RoutesImportPath  string
+}
+
+type ModelTemplateModel struct {
+	ImportPath []string
+	Name       string
+	Fields     []FieldsModel
+}
+
+type FieldsModel struct {
+	Name string
+	Type string
+	JSON string
 }
 
 func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName string) (*template.Template, error) {
@@ -139,4 +157,42 @@ func ExecuteTemplate[T TemplateModel](data T, tmpl *template.Template, buf *byte
 		return err
 	}
 	return nil
+}
+
+func SetModelTemplateImportPaths(models *ModelTemplateModel) {
+	paths := map[string]string{}
+	for _, f := range models.Fields {
+		importPath := getImportPath(f.Type)
+		if importPath != "" {
+			paths[importPath] = importPath
+		}
+		models.ImportPath = buildImportStringSlice(paths)
+	}
+}
+
+func buildImportStringSlice(paths map[string]string) []string {
+	imports := make([]string, 0, len(paths))
+	for _, path := range paths {
+		imports = append(imports, path)
+	}
+	return imports
+}
+
+func getImportPath(fieldType string) string {
+	switch fieldType {
+	case "time.Time", "time.Duration":
+		return "time"
+	case "uuid.UUID":
+		return "github.com/google/uuid"
+	case "decimal.Decimal":
+		return "github.com/shopspring/decimal"
+	case "sql.NullString", "sql.DB", "sql.NullInt64":
+		return "database/sql"
+	case "url.URL":
+		return "net/url"
+	case "http.Request":
+		return "net/http"
+	default:
+		return ""
+	}
 }

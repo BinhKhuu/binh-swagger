@@ -3,6 +3,8 @@ package templatehelper
 import (
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"errors"
+	"slices"
+	"strings"
 	"testing"
 )
 
@@ -109,5 +111,99 @@ func Test_GetCurrentFileDir(t *testing.T) {
 	}
 	if dir == "" {
 		t.Fatalf("Expected non-empty directory path, got empty string")
+	}
+}
+
+func Test_buildImportStringSlice_ReturnsImportPaths(t *testing.T) {
+	inputPaths := map[string]string{
+		"github.com/some/package": "github.com/some/package",
+		"github.com/another/pkg":  "github.com/another/pkg",
+	}
+	expected := []string{"github.com/some/package", "github.com/another/pkg"}
+
+	result := buildImportStringSlice(inputPaths)
+
+	if len(result) != len(expected) {
+		t.Fatalf("Expected %d import paths, got %d", len(expected), len(result))
+	}
+
+	for _, path := range expected {
+		found := slices.Contains(result, path)
+		if !found {
+			t.Fatalf("Expected import path %s not found in result", path)
+		}
+	}
+}
+
+func Test_GetImportPath_ReturnsCorrectImportPath(t *testing.T) {
+	tests := []struct {
+		fieldType string
+		expected  string
+	}{
+		{"time.Time", "time"},
+		{"time.Duration", "time"},
+		{"uuid.UUID", "github.com/google/uuid"},
+		{"string", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.fieldType, func(t *testing.T) {
+			result := getImportPath(tt.fieldType)
+			if result != tt.expected {
+				t.Fatalf("Expected import path %s for field type %s, got %s", tt.expected, tt.fieldType, result)
+			}
+		})
+	}
+}
+
+func Test_GetModelTemplateImportPaths_ReturnsPaths(t *testing.T) {
+	tests := []struct {
+		testName string
+		expected []string
+		tt       ModelTemplateModel
+	}{
+		{
+			testName: "TestTimeGuidAndStringFields",
+			expected: []string{
+				"time",
+				"github.com/google/uuid",
+			},
+			tt: ModelTemplateModel{
+				Name: "TestModel",
+				Fields: []FieldsModel{
+					{Name: "CreatedAt", Type: "time.Time"},
+					{Name: "ID", Type: "uuid.UUID"},
+					{Name: "Name", Type: "string"},
+				},
+			},
+		},
+		{
+			testName: "NoImportPathsForStringFields",
+			expected: []string{},
+			tt: ModelTemplateModel{
+				Name: "TestModel",
+				Fields: []FieldsModel{
+					{Name: "ID", Type: "int"},
+					{Name: "Name", Type: "string"},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			SetModelTemplateImportPaths(&test.tt)
+
+			expected := test.expected
+			slices.Sort(expected)
+			expectedStr := strings.Join(expected, ",")
+			actual := test.tt.ImportPath
+			slices.Sort(actual)
+
+			actualStr := strings.Join(actual, ",")
+			if expectedStr != actualStr {
+				t.Fatalf("Expected import paths %s, got %s", expectedStr, actualStr)
+			}
+		})
 	}
 }

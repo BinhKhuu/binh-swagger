@@ -45,6 +45,7 @@ func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplate
 	return createMockPathCmd(), createMockConfig(), createImportData()
 }
 
+// todo move this to a test mock helper.
 func createMockTempFolders(t *testing.T) {
 	var err error
 	// Create the Handlers and Routes temporary directories
@@ -58,6 +59,10 @@ func createMockTempFolders(t *testing.T) {
 	}
 	serverDir := projectStructure["server"]
 	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	modelDir := projectStructure["models"]
+	if err = os.MkdirAll(modelDir, pkg.FileModeExecutable); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -95,7 +100,6 @@ func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
 		t.Errorf("Expected 2 operations, got %d", len(ops))
 	}
 	for _, op := range ops {
-
 		r := []rune(op.OperationID)[0]
 		if !unicode.IsUpper(r) {
 			t.Errorf("Expedted operation ID to be in pascal case but first letter was not uppercase: %s", op.OperationID)
