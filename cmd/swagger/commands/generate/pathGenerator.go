@@ -47,7 +47,7 @@ func Path(cmd *PathCommand, config Config) error {
 
 func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	var ops []templateHelper.OperationModel
-
+	
 	if cmd.Get != nil {
 		if op, err := toOperationsModel(*cmd.Get, http.MethodGet); err == nil {
 			ops = append(ops, op)
@@ -77,13 +77,13 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	return ops
 }
 
-func toOperationsModel(op spec.Operation, methodType string) (templateHelper.OperationModel, error) {
+func toOperationsModel(op OperationCommand, methodType string) (templateHelper.OperationModel, error) {
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
 		responseModel[code] = templateHelper.ResponseModel{
 			Description: response.Description,
-			Type:        response.Schema.Type,
-			Ref:         response.Schema.Ref,
+			Type:        response.Type,
+			Ref:         response.Ref,
 		}
 	}
 	r := []rune(op.OperationID)
