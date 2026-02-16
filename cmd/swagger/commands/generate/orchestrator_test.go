@@ -27,6 +27,7 @@ func Test_FromAPIConfig_Success(t *testing.T) {
 	}
 }
 
+// todo move this to a mock helper function with the other mock data creation functions (see genearte_testHelpers.go)
 func createMockAPIConfig() *spec.APIConfig {
 	return &spec.APIConfig{
 		Version: "1.0.0",

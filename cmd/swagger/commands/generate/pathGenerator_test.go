@@ -6,6 +6,7 @@ import (
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -109,7 +110,7 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 				},
 			},
 		},
-		Put: nil,
+		Put: nil, // nil operation to test skipping
 	}
 	opts := []operation{
 		{method: "GET", op: path.Get},
@@ -274,59 +275,36 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 	}
 }
 
-// todo fix this test with the new Command models
-// func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
-// 	path := &spec.PathSpec{
-// 		Name: "/testPath",
-// 		Get: &spec.Operation{
-// 			Summary:     "Test GET operation",
-// 			OperationID: "getTestPath",
-// 			Produces:    []string{"application/json"},
-// 			Responses:   map[int]spec.ResponseSpec{},
-// 		},
-// 		Post: &spec.Operation{
-// 			Summary:     "Test POST operation",
-// 			OperationID: "postTestPath",
-// 			Produces:    []string{"application/json"},
-// 			Responses:   map[int]spec.ResponseSpec{},
-// 		},
-// 		Put: &spec.Operation{
-// 			Summary:     "Test PUT operation",
-// 			OperationID: "putTestPath",
-// 			Produces:    []string{"application/json"},
-// 			Responses:   map[int]spec.ResponseSpec{},
-// 		},
-// 	}
+func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
+	InitGenerateTests(t)
+	path := createMockPathCmd()
 
-// 	opts := []templateHelper.OperationModel{}
-// 	if op, err := toOperationsModel(*path.Get, "GET"); err == nil {
-// 		opts = append(opts, op)
-// 	}
-// 	if op, err := toOperationsModel(*path.Post, "POST"); err == nil {
-// 		opts = append(opts, op)
-// 	}
-// 	if op, err := toOperationsModel(*path.Put, "PUT"); err == nil {
-// 		opts = append(opts, op)
-// 	}
+	opts := []templateHelper.OperationModel{}
+	if op, err := toOperationsModel(*path.Get, "GET"); err == nil {
+		opts = append(opts, op)
+	}
+	if op, err := toOperationsModel(*path.Post, "POST"); err == nil {
+		opts = append(opts, op)
+	}
 
-// 	routes := createRoutesData(path.Name, opts)
+	routes := createRoutesData(path.Name, opts)
 
-// 	if len(routes) < 3 || len(routes) > 3 {
-// 		t.Errorf("Expected 3 routes but go %d", len(routes))
-// 	}
+	if len(routes) < 2 || len(routes) > 2 {
+		t.Errorf("Expected 2 routes but go %d", len(routes))
+	}
 
-// 	// just asserting the first element
-// 	route := routes[0]
-// 	if route.Method != http.MethodGet {
-// 		t.Errorf("Expected method 'GET', got: %s", route.Method)
-// 	}
-// 	if route.PathName != path.Name {
-// 		t.Errorf("Expected path name '%s', got: %s", path.Name, route.PathName)
-// 	}
-// 	if route.OperationID != "GetTestPath" {
-// 		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationID)
-// 	}
-// }
+	// just asserting the first element
+	route := routes[0]
+	if route.Method != http.MethodGet {
+		t.Errorf("Expected method 'GET', got: %s", route.Method)
+	}
+	if route.PathName != path.Name {
+		t.Errorf("Expected path name '%s', got: %s", path.Name, route.PathName)
+	}
+	if route.OperationID != "GetTestPath" {
+		t.Errorf("Expected operation ID 'getTestPath', got: %s", route.OperationID)
+	}
+}
 
 func Test_GetBaseTemplate_LoadsTemplateSuccessfully(t *testing.T) {
 	testCases := []struct {
