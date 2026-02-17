@@ -34,7 +34,7 @@ func createMockData() (spec.Operation, map[string]*ModelCommand) {
 	}
 
 	mCommands := map[string]*ModelCommand{
-		"#/definitions/User": &userModel,
+		"User": &userModel,
 	}
 
 	return op, mCommands

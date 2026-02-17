@@ -1,7 +1,7 @@
 version: "1.0"
 
-models:
-  user:
+definitions:
+  User:
     name: "User"
     fields:
       - name: "id"
@@ -14,7 +14,7 @@ models:
         type: "time.Time"
         json: "created_at"
 
-  product: 
+  Product: 
     name: "Product"
     fields:
       - name: "id"

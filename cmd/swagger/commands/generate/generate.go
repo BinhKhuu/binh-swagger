@@ -5,6 +5,7 @@ import (
 	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -49,77 +50,59 @@ type ServerCommand struct {
 	PathNames []string
 }
 
-// func SpecToPathCommand(cfg spec.PathSpec, pathName string) (*PathCommand, error) {
-// 	paths, err := GetProjectStructure()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &PathCommand{
-// 		ModelImportPath:   filepath.Join(projectImportPath, paths["models"]),
-// 		HandlerImportPath: filepath.Join(projectImportPath, paths["handlers"]),
-// 		Name:              strings.Replace(pathName, "/", "", 1),
-// 		Get:               cfg.Get,
-// 		Post:              cfg.Post,
-// 		Put:               cfg.Put,
-// 		Patch:             cfg.Patch,
-// 		Delete:            cfg.Delete,
-// 	}, nil
-// }
-
-// todo this will replace SpecToPathCommand
 func SpecToPathCommand(cfg spec.PathSpec, pathName string, mCmd map[string]*ModelCommand) (*PathCommand, error) {
-    paths, err := GetProjectStructure()
-    if err != nil {
-        return nil, err
-    }
+	paths, err := GetProjectStructure()
+	if err != nil {
+		return nil, err
+	}
 
-    var getCmd, postCmd, putCmd, patchCmd, delCmd *OperationCommand
+	var getCmd, postCmd, putCmd, patchCmd, delCmd *OperationCommand
 
-    if cfg.Get != nil {
-        getCmd, err = SpecToOperation(*cfg.Get, mCmd)
-        if err != nil {
-            return nil, err
-        }
-    }
+	if cfg.Get != nil {
+		getCmd, err = SpecToOperation(*cfg.Get, mCmd)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-    if cfg.Post != nil {
-        postCmd, err = SpecToOperation(*cfg.Post, mCmd)
-        if err != nil {
-            return nil, err
-        }
-    }
+	if cfg.Post != nil {
+		postCmd, err = SpecToOperation(*cfg.Post, mCmd)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-    if cfg.Put != nil {
-        putCmd, err = SpecToOperation(*cfg.Put, mCmd)
-        if err != nil {
-            return nil, err
-        }
-    }
+	if cfg.Put != nil {
+		putCmd, err = SpecToOperation(*cfg.Put, mCmd)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-    if cfg.Patch != nil {
-        patchCmd, err = SpecToOperation(*cfg.Patch, mCmd)
-        if err != nil {
-            return nil, err
-        }
-    }
+	if cfg.Patch != nil {
+		patchCmd, err = SpecToOperation(*cfg.Patch, mCmd)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-    if cfg.Delete != nil {
-        delCmd, err = SpecToOperation(*cfg.Delete, mCmd)
-        if err != nil {
-            return nil, err
-        }
-    }
+	if cfg.Delete != nil {
+		delCmd, err = SpecToOperation(*cfg.Delete, mCmd)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-    return &PathCommand{
-        ModelImportPath:   filepath.Join(projectImportPath, paths["models"]),
-        HandlerImportPath: filepath.Join(projectImportPath, paths["handlers"]),
-        Name:              strings.Replace(pathName, "/", "", 1),
-        Get:               getCmd,
-        Post:              postCmd,
-        Put:               putCmd,
-        Patch:             patchCmd,
-        Delete:            delCmd,
-    }, nil
+	return &PathCommand{
+		ModelImportPath:   filepath.Join(projectImportPath, paths["models"]),
+		HandlerImportPath: filepath.Join(projectImportPath, paths["handlers"]),
+		Name:              strings.Replace(pathName, "/", "", 1),
+		Get:               getCmd,
+		Post:              postCmd,
+		Put:               putCmd,
+		Patch:             patchCmd,
+		Delete:            delCmd,
+	}, nil
 }
 
 func SpecToOperation(cfg spec.Operation, mCmd map[string]*ModelCommand) (*OperationCommand, error) {
@@ -172,12 +155,11 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 }
 
 func getModelSchemaKey(res spec.ResponseSpec) string {
-	// ref := path.Base(res.Schema.Ref)
-	if res.Schema == nil {
+	if res.Schema == nil || res.Schema.Ref == "" {
 		return ""
 	}
 
-	ref := res.Schema.Ref
+	ref := path.Base(res.Schema.Ref)
 	return ref
 }
 

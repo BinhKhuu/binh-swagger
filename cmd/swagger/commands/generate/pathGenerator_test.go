@@ -31,7 +31,7 @@ func createMockPathCmd() *PathCommand {
 	pathSpec, _ := createMockSpecAndOperation()
 	models, _ := createMockModelCmd()
 	modelsMap := make(map[string]*ModelCommand)
-	modelsMap["#/definitions/TestModel"] = &models
+	modelsMap["TestModel"] = &models
 	pathCmd, _ := SpecToPathCommand(*pathSpec, pathSpec.Name, modelsMap)
 	return pathCmd
 }
