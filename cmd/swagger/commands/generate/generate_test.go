@@ -1,44 +1,9 @@
 package generate
 
 import (
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"strings"
 	"testing"
 )
-
-func createMockData() (spec.Operation, map[string]*ModelCommand) {
-	op := spec.Operation{
-		Summary:     "Get user by ID",
-		OperationID: "getUserByID",
-		Produces:    []string{"application/json"},
-		Responses: map[int]spec.ResponseSpec{
-			200: {
-				Description: "Successful response",
-				Schema: &spec.SchemaSpec{
-					Type: "object",
-					Ref:  "#/definitions/User",
-				},
-			},
-			400: {
-				Description: "Bad request",
-			},
-		},
-	}
-
-	userModel := ModelCommand{
-		Name: "User",
-		Fields: []spec.FieldSpec{
-			{Name: "ID", Type: "int", JSON: "id"},
-			{Name: "Name", Type: "string", JSON: "name"},
-		},
-	}
-
-	mCommands := map[string]*ModelCommand{
-		"User": &userModel,
-	}
-
-	return op, mCommands
-}
 
 func Test_SpecToOperationResponse(t *testing.T) {
 	op, mCommands := createMockData()

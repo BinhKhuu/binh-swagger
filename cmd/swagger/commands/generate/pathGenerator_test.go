@@ -4,7 +4,6 @@ import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"net/http"
 	"os"
@@ -12,113 +11,6 @@ import (
 	"testing"
 	"unicode"
 )
-
-// todo merge all the create mock datas into one function that returns all the data needed for the tests. This will make it easier to maintain and update the mock data as needed without having to change multiple functions. It will also make the test setup cleaner and more efficient by reducing the number of separate mock data creation functions.
-
-func createImportData() templateHelper.ImportsTemplateModel {
-	return templateHelper.ImportsTemplateModel{
-		ModelImportPath:   "github.com/example/project/models",
-		HandlerImportPath: "github.com/example/project/handlers",
-	}
-}
-
-func createMockOperationModel(cmd *PathCommand) []templateHelper.OperationModel {
-	ops := createOperationModels(cmd)
-	return ops
-}
-
-func createMockPathCmd() *PathCommand {
-	pathSpec, _ := createMockSpecAndOperation()
-	models, _ := createMockModelCmd()
-	modelsMap := make(map[string]*ModelCommand)
-	modelsMap["TestModel"] = &models
-	pathCmd, _ := SpecToPathCommand(*pathSpec, pathSpec.Name, modelsMap)
-	return pathCmd
-}
-
-func createMockModelCmd() (ModelCommand, string) {
-	model := ModelCommand{
-		Name: "TestModel",
-		Fields: []spec.FieldSpec{
-			{Name: "ID", Type: "int", JSON: "id"},
-			{Name: "Name", Type: "string", JSON: "name"},
-		},
-	}
-	key := "#/definitions/TestModel"
-	return model, key
-}
-
-func createMockConfig() Config {
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
-	return &mockConfig{
-		fileHelper: mockFileHelper,
-	}
-}
-
-func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplateModel) {
-	return createMockPathCmd(), createMockConfig(), createImportData()
-}
-
-// todo move this to a test mock helper.
-func createMockTempFolders(t *testing.T) {
-	var err error
-	// Create the Handlers and Routes temporary directories
-	handlerDir := projectStructure["handlers"]
-	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	routesDir := projectStructure["routes"]
-	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	serverDir := projectStructure["server"]
-	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	modelDir := projectStructure["models"]
-	if err = os.MkdirAll(modelDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
-	_, key := createMockModelCmd()
-	path := &spec.PathSpec{
-		Name: "testPath",
-		Get: &spec.Operation{
-			Summary:     "Test GET operation",
-			OperationID: "getTestPath",
-			Produces:    []string{"application/json"},
-			Responses: map[int]spec.ResponseSpec{
-				200: {
-					Description: "Successful response",
-					Schema: &spec.SchemaSpec{
-						Type: "object",
-						Ref:  key,
-					},
-				},
-			},
-		},
-		Post: &spec.Operation{
-			Summary:     "Test POST operation",
-			OperationID: "postTestPath",
-			Produces:    []string{"application/json"},
-			Responses: map[int]spec.ResponseSpec{
-				201: {
-					Description: "Created response",
-					Schema:      &spec.SchemaSpec{},
-				},
-			},
-		},
-		Put: nil, // nil operation to test skipping
-	}
-	opts := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-		{method: "PUT", op: path.Put}, // nil operation to test skipping
-	}
-	return path, opts
-}
 
 func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
 	InitGenerateTests(t)
