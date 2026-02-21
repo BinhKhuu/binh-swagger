@@ -161,9 +161,9 @@ func setReturnCode(res spec.ResponseSpec, mCdm map[string]*ModelCommand, ref str
 	var code string
 	switch res.Schema.Type {
 	case "array":
-		code = fmt.Sprintf("var result = []models.%s{}", mCdm[ref].Name)
+		code = fmt.Sprintf("c.JSON(200,[]models.%s{})", mCdm[ref].Name)
 	case "object":
-		code = fmt.Sprintf("var result = models.%s{}", mCdm[ref].Name)
+		code = fmt.Sprintf("c.JSON(200, models.%s{})", mCdm[ref].Name)
 	default:
 		code = "// todo add comment on return type, currently only supports array and object types"
 	}

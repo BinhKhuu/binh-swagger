@@ -4,22 +4,20 @@ package handlers
 
 {{ define "imports" }}
 import (
-	"{{.ModelImportPath}}/models"
-	"net/http"
-
+	"{{.ModelImportPath}}"
 	"github.com/gin-gonic/gin"
 )
 {{ end }}
 
 {{ define "GET" }}
 func {{ .OperationID }}(c *gin.Context) {
-	{{- if .Responses }}
-		{{- range $code, $response := .Responses }}
+{{- if .Responses }}
+	{{- range $code, $response := .Responses }}
 		
-			{{ .SuccessReturnCode }}
+	{{.SuccessReturnCode }}
 
-		{{- end }}
 	{{- end }}
+{{- end }}
 }
 {{ end }}
 
