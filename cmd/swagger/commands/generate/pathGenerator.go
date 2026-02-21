@@ -18,6 +18,7 @@ const (
 
 var ErrOperationIDNotDefined = errors.New("operationId is not defined for this operation")
 
+// todo replace this
 type operation struct {
 	method string
 	op     *spec.Operation
@@ -28,7 +29,6 @@ func Path(cmd *PathCommand, config Config) error {
 		return err
 	}
 
-	// should ops contain the PathName e.g. /users this will help with route generation
 	ops := createOperationModels(cmd)
 	importsData := templateHelper.ImportsTemplateModel{
 		ModelImportPath:   cmd.ModelImportPath,
@@ -82,9 +82,10 @@ func toOperationsModel(op OperationCommand, methodType string) (templateHelper.O
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
 		responseModel[code] = templateHelper.ResponseModel{
-			Description: response.Description,
-			Type:        response.Type,
-			Ref:         response.Ref,
+			Description:       response.Description,
+			Type:              response.Type,
+			Ref:               response.Ref,
+			SuccessReturnCode: response.SuccessReturnCode,
 		}
 	}
 	r := []rune(op.OperationID)
@@ -99,6 +100,7 @@ func toOperationsModel(op OperationCommand, methodType string) (templateHelper.O
 		Summary:     op.Summary,
 		Produces:    op.Produces,
 		Responses:   responseModel,
+		ReturnType:  op.ReturnType,
 	}, nil
 }
 

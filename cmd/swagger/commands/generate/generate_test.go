@@ -33,6 +33,9 @@ func Test_SpecToOperationResponse(t *testing.T) {
 				t.Errorf("Expected ref %q, got %q", op.Responses[key].Schema.Ref, res.Schema.Ref)
 			}
 		}
+
+		// todo add check if type is array and check the items ref
+		// todo check ref if type is object
 	}
 }
 
@@ -54,4 +57,10 @@ func Test_SpecToOperation(t *testing.T) {
 	if len(res.Produces) != len(op.Produces) {
 		t.Fatalf("Expected %d produces, got %d", len(op.Produces), len(res.Produces))
 	}
+
+	if res.ReturnType != "models.User" {
+		t.Errorf("Expected no return type, got %q", res.ReturnType)
+	}
+
+	// todo add test if return type is array
 }

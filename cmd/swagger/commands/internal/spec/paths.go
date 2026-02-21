@@ -25,6 +25,16 @@ type ResponseSpec struct {
 }
 
 type SchemaSpec struct {
+	Ref   `yaml:",inline,omitempty"`
+	Items `yaml:"items,omitempty"`
+
 	Type string `yaml:"type,omitempty"`
-	Ref  string `yaml:"$ref,omitempty"`
+}
+
+type Items struct {
+	Ref `yaml:",inline,omitempty"`
+}
+
+type Ref struct {
+	Ref string `yaml:"$ref,omitempty"`
 }

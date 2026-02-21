@@ -12,8 +12,14 @@ import (
 {{ end }}
 
 {{ define "GET" }}
-func {{ .OperationID }}(c *gin.Context) {
+func {{ .OperationID }}(c *gin.Context) {{ if .ReturnType }} {{ .ReturnType }}{{ end }}{
+	{{- if .Responses }}
+		{{- range $code, $response := .Responses }}
+		
+			{{ .SuccessReturnCode }}
 
+		{{- end }}
+	{{- end }}
 }
 {{ end }}
 

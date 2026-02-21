@@ -39,7 +39,6 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	}
 
 	modelCmds := make(map[string]*ModelCommand)
-	// todo this key might not be the correct format #/definitions/ModelName
 	for key, model := range cfg.Models {
 		modelCmd, err := SpecToModelCommand(model)
 		if err != nil {

@@ -69,13 +69,15 @@ type OperationModel struct {
 	Summary     string
 	OperationID string
 	Produces    []string
+	ReturnType  string
 	Responses   map[int]ResponseModel
 }
 
 type ResponseModel struct {
-	Description string
-	Type        string
-	Ref         string
+	Description       string
+	Type              string
+	Ref               string
+	SuccessReturnCode string
 }
 
 type ImportsTemplateModel struct {

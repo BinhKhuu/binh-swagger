@@ -36,14 +36,15 @@ type OperationCommand struct {
 	Summary     string
 	OperationID string
 	Produces    []string
+	ReturnType  string
 	Responses   map[int]ResponseCommand
 }
 
-// combining schema spec struct with responsecommand spec
 type ResponseCommand struct {
-	Description string
-	Type        string
-	Ref         string
+	Description       string
+	Type              string
+	Ref               string
+	SuccessReturnCode string
 }
 
 type ServerCommand struct {
@@ -116,21 +117,14 @@ func SpecToOperation(cfg spec.Operation, mCmd map[string]*ModelCommand) (*Operat
 		return nil, err
 	}
 	opCmd.Responses = resp
+	opCmd.ReturnType = deriveReturnType(cfg)
 	return opCmd, nil
 }
 
-/*
-Look up $ref in the reponses then look up the definitions path and get the model
-IF model is there generate the response
-IF model is not there then return error
-The success response is what is used to generate the return in the body of the handler function the other repsones should be commended out in the handler body.
-*/
 func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand) (map[int]ResponseCommand, error) {
 	responses := make(map[int]ResponseCommand)
 
-	// for each response get the Description, Schema.Type, Schema.Ref
 	for responseKey, res := range cfg.Responses {
-		// if reference is found in ModelCommand then we can generate the response otherwise we return an error
 		resCmd := &ResponseCommand{
 			Type:        "",
 			Ref:         "",
@@ -142,9 +136,15 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 			if mCdm[ref] == nil {
 				return nil, fmt.Errorf("%w: schema %s not found", ErrSchemaNotFound, ref)
 			}
+			if res.Schema.Type == "array" {
+				resCmd.Ref = res.Schema.Items.Ref.Ref
+			} else {
+				resCmd.Ref = res.Schema.Ref.Ref
+			}
 			resCmd.Type = res.Schema.Type
-			resCmd.Ref = res.Schema.Ref
 			resCmd.Description = res.Description
+
+			setReturnCode(res, mCdm, ref, resCmd)
 		}
 		responses[responseKey] = *resCmd
 	}
@@ -154,13 +154,37 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 	return responses, nil
 }
 
+// todo test this
+// coudl combine mCdm and ref into a single parameter since ref is only used to get the model name from mCdm
+// change so it loops through all the possible return types and build one return string contraining all the return paths
+func setReturnCode(res spec.ResponseSpec, mCdm map[string]*ModelCommand, ref string, resCmd *ResponseCommand) {
+	var code string
+	switch res.Schema.Type {
+	case "array":
+		code = fmt.Sprintf("var result = []models.%s{}", mCdm[ref].Name)
+	case "object":
+		code = fmt.Sprintf("var result = models.%s{}", mCdm[ref].Name)
+	default:
+		code = "// todo add comment on return type, currently only supports array and object types"
+	}
+
+	// todo create string where all the return types are defined, then have the template reference that string instead of hardcoding the return code here. This will make it easier to maintain and update the return code in the future.
+	resCmd.SuccessReturnCode = code
+}
+
 func getModelSchemaKey(res spec.ResponseSpec) string {
-	if res.Schema == nil || res.Schema.Ref == "" {
+	if res.Schema == nil {
 		return ""
 	}
 
-	ref := path.Base(res.Schema.Ref)
-	return ref
+	switch res.Schema.Type {
+	case "array":
+		return path.Base(res.Schema.Items.Ref.Ref)
+	case "object":
+		return path.Base(res.Schema.Ref.Ref)
+	default:
+		return ""
+	}
 }
 
 // SpecToModelCommand todo test this.
@@ -169,4 +193,57 @@ func SpecToModelCommand(cfg spec.ModelSpec) (*ModelCommand, error) {
 		Name:   cfg.Name,
 		Fields: cfg.Fields,
 	}, nil
+}
+
+func deriveReturnType(op spec.Operation) string {
+	if op.Responses == nil {
+		return ""
+	}
+
+	// preferred success codes in order
+	successCodes := []int{200, 201, 202, 204}
+
+	var chosen *spec.ResponseSpec
+
+	for _, code := range successCodes {
+		if r, ok := op.Responses[code]; ok {
+			chosen = &r
+			break
+		}
+	}
+
+	if chosen == nil {
+		for code, r := range op.Responses {
+			if code >= 200 && code < 300 {
+				rr := r
+				chosen = &rr
+				break
+			}
+		}
+	}
+
+	if chosen == nil || chosen.Schema == nil {
+		return ""
+	}
+
+	s := chosen.Schema
+
+	switch s.Type {
+	case "array":
+		key := getModelSchemaKey(*chosen)
+		if key == "" {
+			return ""
+		}
+		return "[]models." + key
+
+	case "object", "":
+		key := getModelSchemaKey(*chosen)
+		if key == "" {
+			return ""
+		}
+		return "models." + key
+
+	default:
+		return ""
+	}
 }

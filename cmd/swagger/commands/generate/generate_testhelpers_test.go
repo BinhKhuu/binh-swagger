@@ -33,7 +33,9 @@ func createMockData() (spec.Operation, map[string]*ModelCommand) {
 				Description: "Successful response",
 				Schema: &spec.SchemaSpec{
 					Type: "object",
-					Ref:  "#/definitions/User",
+					Ref: spec.Ref{
+						Ref: "#/definitions/User",
+					},
 				},
 			},
 			400: {
@@ -135,7 +137,9 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 					Description: "Successful response",
 					Schema: &spec.SchemaSpec{
 						Type: "object",
-						Ref:  key,
+						Ref: spec.Ref{
+							Ref: key,
+						},
 					},
 				},
 			},
