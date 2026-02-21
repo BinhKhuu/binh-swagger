@@ -69,7 +69,7 @@ type OperationModel struct {
 	Summary     string
 	OperationID string
 	Produces    []string
-	ReturnType  string
+	ReturnType  string // GIN does not use a return type on handlers Leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
 	Responses   map[int]ResponseModel
 }
 

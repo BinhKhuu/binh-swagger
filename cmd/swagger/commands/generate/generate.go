@@ -36,7 +36,7 @@ type OperationCommand struct {
 	Summary     string
 	OperationID string
 	Produces    []string
-	ReturnType  string
+	ReturnType  string // GIN does not use a return type on handlers Leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
 	Responses   map[int]ResponseCommand
 }
 
@@ -44,7 +44,7 @@ type ResponseCommand struct {
 	Description       string
 	Type              string
 	Ref               string
-	SuccessReturnCode string
+	SuccessReturnCode string // this is the code that will be used in the handler template to generate the return statement for successful responses. It is generated based on the response schema and the model command associated with that schema. It is currently only generated for array and object types, but can be extended to support other types in the future if needed.
 }
 
 type ServerCommand struct {
@@ -195,6 +195,7 @@ func SpecToModelCommand(cfg spec.ModelSpec) (*ModelCommand, error) {
 	}, nil
 }
 
+// GIN does not have a return type Im leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
 func deriveReturnType(op spec.Operation) string {
 	if op.Responses == nil {
 		return ""
