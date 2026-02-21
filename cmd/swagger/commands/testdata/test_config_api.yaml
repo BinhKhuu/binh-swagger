@@ -50,6 +50,7 @@ paths:
           201:
             description: The created user
             schema:
+              type: object
               $ref: "#/definitions/User"
 
 routes:

@@ -23,25 +23,41 @@ func {{ .OperationID }}(c *gin.Context) {
 
 {{ define "POST" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "PUT" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "DELETE" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "PATCH" }}
 
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
