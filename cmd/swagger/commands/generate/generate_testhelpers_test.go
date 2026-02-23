@@ -23,7 +23,7 @@ func InitGenerateTests(t *testing.T) string {
 	return tempDir
 }
 
-func createMockData() (spec.Operation, map[string]*ModelCommand) {
+func createMockDataWithObjectResponse() (spec.Operation, map[string]*ModelCommand) {
 	op := spec.Operation{
 		Summary:     "Get user by ID",
 		OperationID: "getUserByID",
@@ -35,6 +35,44 @@ func createMockData() (spec.Operation, map[string]*ModelCommand) {
 					Type: "object",
 					Ref: spec.Ref{
 						Ref: "#/definitions/User",
+					},
+				},
+			},
+			400: {
+				Description: "Bad request",
+			},
+		},
+	}
+
+	userModel := ModelCommand{
+		Name: "User",
+		Fields: []spec.FieldSpec{
+			{Name: "ID", Type: "int", JSON: "id"},
+			{Name: "Name", Type: "string", JSON: "name"},
+		},
+	}
+
+	mCommands := map[string]*ModelCommand{
+		"User": &userModel,
+	}
+
+	return op, mCommands
+}
+
+func createMockDataWithArrayResponse() (spec.Operation, map[string]*ModelCommand) {
+	op := spec.Operation{
+		Summary:     "Get users",
+		OperationID: "getUsers",
+		Produces:    []string{"application/json"},
+		Responses: map[int]spec.ResponseSpec{
+			200: {
+				Description: "Successful response",
+				Schema: &spec.SchemaSpec{
+					Type: "array",
+					Items: spec.Items{
+						Ref: spec.Ref{
+							Ref: "#/definitions/User",
+						},
 					},
 				},
 			},
