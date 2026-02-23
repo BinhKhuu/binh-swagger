@@ -4,40 +4,60 @@ package handlers
 
 {{ define "imports" }}
 import (
-	"{{.ModelImportPath}}/models"
-	"net/http"
-
+	"{{.ModelImportPath}}"
 	"github.com/gin-gonic/gin"
 )
 {{ end }}
 
 {{ define "GET" }}
 func {{ .OperationID }}(c *gin.Context) {
+{{- if .Responses }}
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
+{{- end }}
 }
 {{ end }}
 
 {{ define "POST" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "PUT" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "DELETE" }}
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}
 
 {{ define "PATCH" }}
 
 func {{ .OperationID }}(c *gin.Context) {
+	{{- range $code, $response := .Responses }}
+		
+	{{.SuccessReturnCode }}
 
+	{{- end }}
 }
 {{ end }}

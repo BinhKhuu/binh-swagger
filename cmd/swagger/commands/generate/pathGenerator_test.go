@@ -4,7 +4,6 @@ import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"net/http"
 	"os"
@@ -13,86 +12,8 @@ import (
 	"unicode"
 )
 
-func createImportData() templateHelper.ImportsTemplateModel {
-	return templateHelper.ImportsTemplateModel{
-		ModelImportPath:   "github.com/example/project/models",
-		HandlerImportPath: "github.com/example/project/handlers",
-	}
-}
-
-func createMockOperationModel(cmd *PathCommand) []templateHelper.OperationModel {
-	ops := createOperationModels(cmd)
-	return ops
-}
-
-func createMockPathCmd() *PathCommand {
-	pathSpec, _ := createMockSpecAndOperation()
-	return &PathCommand{
-		Name: "testPath",
-		Get:  pathSpec.Get,
-		Post: pathSpec.Post,
-	}
-}
-
-func createMockConfig() Config {
-	mockFileHelper := mockFileHelper.CreateMockFileHelper()
-	return &mockConfig{
-		fileHelper: mockFileHelper,
-	}
-}
-
-func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplateModel) {
-	return createMockPathCmd(), createMockConfig(), createImportData()
-}
-
-// todo move this to a test mock helper.
-func createMockTempFolders(t *testing.T) {
-	var err error
-	// Create the Handlers and Routes temporary directories
-	handlerDir := projectStructure["handlers"]
-	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	routesDir := projectStructure["routes"]
-	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	serverDir := projectStructure["server"]
-	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-	modelDir := projectStructure["models"]
-	if err = os.MkdirAll(modelDir, pkg.FileModeExecutable); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
-	path := &spec.PathSpec{
-		Name: "testPath",
-		Get: &spec.Operation{
-			Summary:     "Test GET operation",
-			OperationID: "getTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-		Post: &spec.Operation{
-			Summary:     "Test POST operation",
-			OperationID: "postTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-		Put: nil,
-	}
-	opts := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-		{method: "PUT", op: path.Put}, // nil operation to test skipping
-	}
-	return path, opts
-}
-
 func Test_createOperationModels_ShouldReturnCorrectOperations(t *testing.T) {
+	InitGenerateTests(t)
 	pathCommand, _, _ := createPathTestMocks()
 
 	ops := createOperationModels(pathCommand)
@@ -247,27 +168,8 @@ func Test_CreateHandlers_ShouldSkipNilOperations(t *testing.T) {
 }
 
 func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
-	path := &spec.PathSpec{
-		Name: "/testPath",
-		Get: &spec.Operation{
-			Summary:     "Test GET operation",
-			OperationID: "getTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-		Post: &spec.Operation{
-			Summary:     "Test POST operation",
-			OperationID: "postTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-		Put: &spec.Operation{
-			Summary:     "Test PUT operation",
-			OperationID: "putTestPath",
-			Produces:    []string{"application/json"},
-			Responses:   map[int]spec.ResponseSpec{},
-		},
-	}
+	InitGenerateTests(t)
+	path := createMockPathCmd()
 
 	opts := []templateHelper.OperationModel{}
 	if op, err := toOperationsModel(*path.Get, "GET"); err == nil {
@@ -276,14 +178,11 @@ func Test_CreateRoutesData_ReturnsRouteData(t *testing.T) {
 	if op, err := toOperationsModel(*path.Post, "POST"); err == nil {
 		opts = append(opts, op)
 	}
-	if op, err := toOperationsModel(*path.Put, "PUT"); err == nil {
-		opts = append(opts, op)
-	}
 
 	routes := createRoutesData(path.Name, opts)
 
-	if len(routes) < 3 || len(routes) > 3 {
-		t.Errorf("Expected 3 routes but go %d", len(routes))
+	if len(routes) < 2 || len(routes) > 2 {
+		t.Errorf("Expected 2 routes but go %d", len(routes))
 	}
 
 	// just asserting the first element

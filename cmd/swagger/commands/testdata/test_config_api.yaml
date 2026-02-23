@@ -1,29 +1,29 @@
 version: "1.0"
 
-models:
-  user:
+definitions:
+  User:
     name: "User"
     fields:
-      - name: "id"
+      - name: "Id"
         type: "string"
         json: "id"
-      - name: "email"
+      - name: "Email"
         type: "string"
         json: "email"
-      - name: "created_at"
+      - name: "Created_at"
         type: "time.Time"
         json: "created_at"
 
-  product: 
+  Product: 
     name: "Product"
     fields:
-      - name: "id"
+      - name: "Id"
         type: "string"
         json: "id"
-      - name: "title"
+      - name: "Title"
         type: "string"
         json: "title"
-      - name: "price"
+      - name: "Price"
         type: "float64"
         json: "price"
 
@@ -39,6 +39,8 @@ paths:
             description: A list of users
             schema:
               type: array
+              items:
+                $ref: "#/definitions/User"
       post:
         summary: Create a new user
         operationId: createUser
@@ -48,6 +50,7 @@ paths:
           201:
             description: The created user
             schema:
+              type: object
               $ref: "#/definitions/User"
 
 routes:

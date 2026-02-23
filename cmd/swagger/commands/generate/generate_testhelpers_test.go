@@ -1,0 +1,258 @@
+package generate
+
+import (
+	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
+	mockFileHelper "binh-swagger/cmd/swagger/commands/helpers/mocks"
+	"binh-swagger/cmd/swagger/commands/internal/pkg"
+	"binh-swagger/cmd/swagger/commands/internal/spec"
+	"os"
+	"testing"
+)
+
+func resetProjectStructreForTests() {
+	projectStructure = nil
+}
+
+func InitGenerateTests(t *testing.T) string {
+	tempDir := t.TempDir()
+	resetProjectStructreForTests()
+	err := SetProjectStructure(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to set project structure: %v", err)
+	}
+	return tempDir
+}
+
+func createMockDataWithObjectResponse() (spec.Operation, map[string]*ModelCommand) {
+	op := spec.Operation{
+		Summary:     "Get user by ID",
+		OperationID: "getUserByID",
+		Produces:    []string{"application/json"},
+		Responses: map[int]spec.ResponseSpec{
+			200: {
+				Description: "Successful response",
+				Schema: &spec.SchemaSpec{
+					Type: "object",
+					Ref: spec.Ref{
+						Ref: "#/definitions/User",
+					},
+				},
+			},
+			400: {
+				Description: "Bad request",
+			},
+		},
+	}
+
+	userModel := ModelCommand{
+		Name: "User",
+		Fields: []spec.FieldSpec{
+			{Name: "ID", Type: "int", JSON: "id"},
+			{Name: "Name", Type: "string", JSON: "name"},
+		},
+	}
+
+	mCommands := map[string]*ModelCommand{
+		"User": &userModel,
+	}
+
+	return op, mCommands
+}
+
+func createMockDataWithArrayResponse() (spec.Operation, map[string]*ModelCommand) {
+	op := spec.Operation{
+		Summary:     "Get users",
+		OperationID: "getUsers",
+		Produces:    []string{"application/json"},
+		Responses: map[int]spec.ResponseSpec{
+			200: {
+				Description: "Successful response",
+				Schema: &spec.SchemaSpec{
+					Type: "array",
+					Items: spec.Items{
+						Ref: spec.Ref{
+							Ref: "#/definitions/User",
+						},
+					},
+				},
+			},
+			400: {
+				Description: "Bad request",
+			},
+		},
+	}
+
+	userModel := ModelCommand{
+		Name: "User",
+		Fields: []spec.FieldSpec{
+			{Name: "ID", Type: "int", JSON: "id"},
+			{Name: "Name", Type: "string", JSON: "name"},
+		},
+	}
+
+	mCommands := map[string]*ModelCommand{
+		"User": &userModel,
+	}
+
+	return op, mCommands
+}
+
+func createMockTempFolders(t *testing.T) {
+	var err error
+	// Create the Handlers and Routes temporary directories
+	handlerDir := projectStructure["handlers"]
+	if err = os.MkdirAll(handlerDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	routesDir := projectStructure["routes"]
+	if err = os.MkdirAll(routesDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	serverDir := projectStructure["server"]
+	if err = os.MkdirAll(serverDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+	modelDir := projectStructure["models"]
+	if err = os.MkdirAll(modelDir, pkg.FileModeExecutable); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func createImportData() templateHelper.ImportsTemplateModel {
+	return templateHelper.ImportsTemplateModel{
+		ModelImportPath:   "github.com/example/project/models",
+		HandlerImportPath: "github.com/example/project/handlers",
+	}
+}
+
+func createMockOperationModel(cmd *PathCommand) []templateHelper.OperationModel {
+	ops := createOperationModels(cmd)
+	return ops
+}
+
+func createMockPathCmd() *PathCommand {
+	pathSpec, _ := createMockSpecAndOperation()
+	models, _ := createMockModelCmd()
+	modelsMap := make(map[string]*ModelCommand)
+	modelsMap["TestModel"] = &models
+	pathCmd, _ := SpecToPathCommand(*pathSpec, pathSpec.Name, modelsMap)
+	return pathCmd
+}
+
+func createMockModelCmd() (ModelCommand, string) {
+	model := ModelCommand{
+		Name: "TestModel",
+		Fields: []spec.FieldSpec{
+			{Name: "ID", Type: "int", JSON: "id"},
+			{Name: "Name", Type: "string", JSON: "name"},
+		},
+	}
+	key := "#/definitions/TestModel"
+	return model, key
+}
+
+func createMockConfig() Config {
+	mockFileHelper := mockFileHelper.CreateMockFileHelper()
+	return &mockConfig{
+		fileHelper: mockFileHelper,
+	}
+}
+
+func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplateModel) {
+	return createMockPathCmd(), createMockConfig(), createImportData()
+}
+
+func createMockSpecAndOperation() (*spec.PathSpec, []spec.Operation) {
+	_, key := createMockModelCmd()
+	path := &spec.PathSpec{
+		Name: "testPath",
+		Get: &spec.Operation{
+			Summary:     "Test GET operation",
+			OperationID: "getTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				200: {
+					Description: "Successful response",
+					Schema: &spec.SchemaSpec{
+						Type: "object",
+						Ref: spec.Ref{
+							Ref: key,
+						},
+					},
+				},
+			},
+		},
+		Post: &spec.Operation{
+			Summary:     "Test POST operation",
+			OperationID: "postTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				201: {
+					Description: "Created response",
+					Schema:      &spec.SchemaSpec{},
+				},
+			},
+		},
+		Put: nil, // nil operation to test skipping
+	}
+	opts := []spec.Operation{
+		{
+			Summary:     "Test GET operation",
+			OperationID: "getTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				200: {
+					Description: "Successful response",
+					Schema: &spec.SchemaSpec{
+						Type: "object",
+						Ref:  spec.Ref{Ref: key},
+					},
+				},
+			},
+		},
+		{
+			Summary:     "Test POST operation",
+			OperationID: "postTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				201: {
+					Description: "Created response",
+					Schema:      &spec.SchemaSpec{},
+				},
+			},
+		},
+	}
+	return path, opts
+}
+
+func createMockAPIConfig() *spec.APIConfig {
+	return &spec.APIConfig{
+		Version: "1.0.0",
+		Models: map[string]spec.ModelSpec{
+			"User": {
+				Name: "User",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+				},
+			},
+			"Product": {
+				Name: "Product",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Title", Type: "string", JSON: "title"},
+					{Name: "Price", Type: "float64", JSON: "price"},
+				},
+			},
+		},
+		Paths: map[string]spec.PathSpec{
+			"/users": {
+				Get: &spec.Operation{
+					Summary:     "Get all users",
+					OperationID: "getUsers",
+					Produces:    []string{"application/json"},
+				},
+			},
+		},
+	}
+}

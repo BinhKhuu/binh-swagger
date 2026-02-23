@@ -3,7 +3,6 @@ package generate
 import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"errors"
 	"net/http"
@@ -18,17 +17,11 @@ const (
 
 var ErrOperationIDNotDefined = errors.New("operationId is not defined for this operation")
 
-type operation struct {
-	method string
-	op     *spec.Operation
-}
-
 func Path(cmd *PathCommand, config Config) error {
 	if _, err := GetProjectStructure(); err != nil {
 		return err
 	}
 
-	// should ops contain the PathName e.g. /users this will help with route generation
 	ops := createOperationModels(cmd)
 	importsData := templateHelper.ImportsTemplateModel{
 		ModelImportPath:   cmd.ModelImportPath,
@@ -77,13 +70,14 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	return ops
 }
 
-func toOperationsModel(op spec.Operation, methodType string) (templateHelper.OperationModel, error) {
+func toOperationsModel(op OperationCommand, methodType string) (templateHelper.OperationModel, error) {
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
 		responseModel[code] = templateHelper.ResponseModel{
-			Description: response.Description,
-			Type:        response.Schema.Type,
-			Ref:         response.Schema.Ref,
+			Description:       response.Description,
+			Type:              response.Type,
+			Ref:               response.Ref,
+			SuccessReturnCode: response.SuccessReturnCode,
 		}
 	}
 	r := []rune(op.OperationID)
@@ -98,6 +92,7 @@ func toOperationsModel(op spec.Operation, methodType string) (templateHelper.Ope
 		Summary:     op.Summary,
 		Produces:    op.Produces,
 		Responses:   responseModel,
+		ReturnType:  op.ReturnType,
 	}, nil
 }
 
@@ -114,7 +109,6 @@ func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.Im
 		return err
 	}
 
-	// todo check if path starts with /
 	rd := createRoutesData("/"+cmd.Name, ops)
 	rm := templateHelper.RoutesTemplateModel{
 		Routes: rd,

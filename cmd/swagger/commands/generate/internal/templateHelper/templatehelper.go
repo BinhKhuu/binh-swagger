@@ -19,7 +19,6 @@ var templatePaths = map[string]string{
 	ServerTemplateKey:  "server_template.tmpl",
 }
 
-// todo change this to a type.
 const (
 	HandlerTemplateKey = "handler"
 	ModelTemplateKey   = "model"
@@ -69,13 +68,15 @@ type OperationModel struct {
 	Summary     string
 	OperationID string
 	Produces    []string
+	ReturnType  string // GIN does not use a return type on handlers Leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
 	Responses   map[int]ResponseModel
 }
 
 type ResponseModel struct {
-	Description string
-	Type        string
-	Ref         string
+	Description       string
+	Type              string
+	Ref               string
+	SuccessReturnCode string
 }
 
 type ImportsTemplateModel struct {
