@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+const (
+	schemaTypeArray  = "array"
+	schemaTypeObject = "object"
+)
+
 var ErrSchemaNotFound = errors.New("schema not found for response")
 
 type Config interface {
@@ -138,7 +143,7 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 			if mCdm[ref] == nil {
 				return nil, fmt.Errorf("%w: schema %s not found", ErrSchemaNotFound, ref)
 			}
-			if res.Schema.Type == "array" {
+			if res.Schema.Type == schemaTypeArray {
 				resCmd.Ref = res.Schema.Items.Ref.Ref
 			} else {
 				resCmd.Ref = res.Schema.Ref.Ref
@@ -156,9 +161,9 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 func setReturnCode(res spec.ResponseSpec, mCdm *ModelCommand, resCmd *ResponseCommand, responseKey int) {
 	var code string
 	switch res.Schema.Type {
-	case "array":
+	case schemaTypeArray:
 		code = fmt.Sprintf("c.JSON(%d,[]models.%s{})", responseKey, mCdm.Name)
-	case "object":
+	case schemaTypeObject:
 		code = fmt.Sprintf("c.JSON(%d, models.%s{})", responseKey, mCdm.Name)
 	default:
 		code = "// todo add comment on return type, currently only supports array and object types"
@@ -183,9 +188,9 @@ func getModelSchemaKey(res spec.ResponseSpec) string {
 	}
 
 	switch res.Schema.Type {
-	case "array":
+	case schemaTypeArray:
 		return path.Base(res.Schema.Items.Ref.Ref)
-	case "object":
+	case schemaTypeObject:
 		return path.Base(res.Schema.Ref.Ref)
 	default:
 		return ""
@@ -234,14 +239,14 @@ func deriveReturnType(op spec.Operation) string {
 	s := chosen.Schema
 
 	switch s.Type {
-	case "array":
+	case schemaTypeArray:
 		key := getModelSchemaKey(*chosen)
 		if key == "" {
 			return ""
 		}
 		return "[]models." + key
 
-	case "object", "":
+	case schemaTypeObject, "":
 		key := getModelSchemaKey(*chosen)
 		if key == "" {
 			return ""

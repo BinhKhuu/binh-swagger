@@ -149,9 +149,9 @@ func Test_SetReturnCode(t *testing.T) {
 		expectedCode string
 	}{
 		{
-			name: "array",
+			name: schemaTypeArray,
 			schema: &spec.SchemaSpec{
-				Type: "array",
+				Type: schemaTypeArray,
 				Items: spec.Items{
 					Ref: spec.Ref{Ref: "#/definitions/User"},
 				},
@@ -159,9 +159,9 @@ func Test_SetReturnCode(t *testing.T) {
 			expectedCode: "c.JSON(200,[]models.User{})",
 		},
 		{
-			name: "object",
+			name: schemaTypeObject,
 			schema: &spec.SchemaSpec{
-				Type: "object",
+				Type: schemaTypeObject,
 				Ref:  spec.Ref{Ref: "#/definitions/User"},
 			},
 			expectedCode: "c.JSON(200, models.User{})",
@@ -182,7 +182,7 @@ func Test_SetReturnCode(t *testing.T) {
 				Type:        res.Schema.Type,
 				Description: res.Description,
 			}
-			if res.Schema.Type == "array" {
+			if res.Schema.Type == schemaTypeArray {
 				resCmd.Ref = res.Schema.Items.Ref.Ref
 			} else {
 				resCmd.Ref = res.Schema.Ref.Ref

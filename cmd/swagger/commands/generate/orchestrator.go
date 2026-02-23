@@ -69,10 +69,9 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 }
 
 func ValidateAPISpec(cfg *spec.APIConfig) error {
-	// validate models
-	var err error
 	modelCommands := make(map[string]*ModelCommand)
 	pathCommands := make(map[string]*PathCommand)
+
 	for key, model := range cfg.Models {
 		modelCmd, err := SpecToModelCommand(model)
 		if err != nil {
@@ -81,8 +80,6 @@ func ValidateAPISpec(cfg *spec.APIConfig) error {
 		modelCommands[key] = modelCmd
 	}
 
-	// validate paths
-
 	for key, path := range cfg.Paths {
 		pathCmd, err := SpecToPathCommand(path, key, modelCommands)
 		if err != nil {
@@ -90,5 +87,5 @@ func ValidateAPISpec(cfg *spec.APIConfig) error {
 		}
 		pathCommands[key] = pathCmd
 	}
-	return err
+	return nil
 }
