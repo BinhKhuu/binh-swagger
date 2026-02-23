@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_SpecToOperation_ObjectType(t *testing.T) {
+func Test_SpecToOperationResponses_ObjectType(t *testing.T) {
 	op, mCommands := createMockDataWithObjectResponse()
 
 	res, err := SpecToOperationResponses(op, mCommands)
@@ -37,7 +37,7 @@ func Test_SpecToOperation_ObjectType(t *testing.T) {
 	}
 }
 
-func Test_SpecToOperation_ArrayType(t *testing.T) {
+func Test_SpecToOperationResponses_ArrayType(t *testing.T) {
 	op, mCommands := createMockDataWithArrayResponse()
 
 	res, err := SpecToOperationResponses(op, mCommands)
