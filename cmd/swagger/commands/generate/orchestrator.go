@@ -68,7 +68,6 @@ func fromAPIConfig(cfg *spec.APIConfig, command Config) error {
 	return nil
 }
 
-// todo will return modelcommand, path command and error for now its error in intial stage
 func ValidateAPISpec(cfg *spec.APIConfig) error {
 	// validate models
 	var err error

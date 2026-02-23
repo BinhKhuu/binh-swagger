@@ -77,7 +77,6 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 	return ops
 }
 
-// todo op should be a pointer so we can assert nil on it and avoid the empty operationId error when the operation is not defined for a method type.
 func toOperationsModel(op OperationCommand, methodType string) (templateHelper.OperationModel, error) {
 	responseModel := make(map[int]templateHelper.ResponseModel, len(op.Responses))
 	for code, response := range op.Responses {
@@ -117,7 +116,6 @@ func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.Im
 		return err
 	}
 
-	// todo check if path starts with /
 	rd := createRoutesData("/"+cmd.Name, ops)
 	rm := templateHelper.RoutesTemplateModel{
 		Routes: rd,
