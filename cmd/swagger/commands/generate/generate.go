@@ -192,7 +192,6 @@ func getModelSchemaKey(res spec.ResponseSpec) string {
 	}
 }
 
-// SpecToModelCommand todo test this.
 func SpecToModelCommand(cfg spec.ModelSpec) (*ModelCommand, error) {
 	return &ModelCommand{
 		Name:   cfg.Name,
@@ -200,7 +199,7 @@ func SpecToModelCommand(cfg spec.ModelSpec) (*ModelCommand, error) {
 	}, nil
 }
 
-// GIN does not have a return type Im leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
+// deriveReturnType GIN does not have a return type Im leaving this here for reference if I want to add support for a framework that does require a return type in the future. For now it will be used to generate the return code in the handler template.
 func deriveReturnType(op spec.Operation) string {
 	if op.Responses == nil {
 		return ""
