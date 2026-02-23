@@ -162,7 +162,7 @@ func createPathTestMocks() (*PathCommand, Config, templateHelper.ImportsTemplate
 	return createMockPathCmd(), createMockConfig(), createImportData()
 }
 
-func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
+func createMockSpecAndOperation() (*spec.PathSpec, []spec.Operation) {
 	_, key := createMockModelCmd()
 	path := &spec.PathSpec{
 		Name: "testPath",
@@ -195,10 +195,32 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 		},
 		Put: nil, // nil operation to test skipping
 	}
-	opts := []operation{
-		{method: "GET", op: path.Get},
-		{method: "POST", op: path.Post},
-		{method: "PUT", op: path.Put}, // nil operation to test skipping
+	opts := []spec.Operation{
+		{
+			Summary:     "Test GET operation",
+			OperationID: "getTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				200: {
+					Description: "Successful response",
+					Schema: &spec.SchemaSpec{
+						Type: "object",
+						Ref:  spec.Ref{Ref: key},
+					},
+				},
+			},
+		},
+		{
+			Summary:     "Test POST operation",
+			OperationID: "postTestPath",
+			Produces:    []string{"application/json"},
+			Responses: map[int]spec.ResponseSpec{
+				201: {
+					Description: "Created response",
+					Schema:      &spec.SchemaSpec{},
+				},
+			},
+		},
 	}
 	return path, opts
 }

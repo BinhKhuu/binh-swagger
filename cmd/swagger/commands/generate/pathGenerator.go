@@ -3,7 +3,6 @@ package generate
 import (
 	templateHelper "binh-swagger/cmd/swagger/commands/generate/internal/templateHelper"
 	"binh-swagger/cmd/swagger/commands/internal/pkg"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"bytes"
 	"errors"
 	"net/http"
@@ -17,12 +16,6 @@ const (
 )
 
 var ErrOperationIDNotDefined = errors.New("operationId is not defined for this operation")
-
-// todo replace this
-type operation struct {
-	method string
-	op     *spec.Operation
-}
 
 func Path(cmd *PathCommand, config Config) error {
 	if _, err := GetProjectStructure(); err != nil {
