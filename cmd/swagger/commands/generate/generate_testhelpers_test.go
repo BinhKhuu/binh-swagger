@@ -202,3 +202,35 @@ func createMockSpecAndOperation() (*spec.PathSpec, []operation) {
 	}
 	return path, opts
 }
+
+func createMockAPIConfig() *spec.APIConfig {
+	return &spec.APIConfig{
+		Version: "1.0.0",
+		Models: map[string]spec.ModelSpec{
+			"User": {
+				Name: "User",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Name", Type: "string", JSON: "name"},
+				},
+			},
+			"Product": {
+				Name: "Product",
+				Fields: []spec.FieldSpec{
+					{Name: "ID", Type: "int", JSON: "id"},
+					{Name: "Title", Type: "string", JSON: "title"},
+					{Name: "Price", Type: "float64", JSON: "price"},
+				},
+			},
+		},
+		Paths: map[string]spec.PathSpec{
+			"/users": {
+				Get: &spec.Operation{
+					Summary:     "Get all users",
+					OperationID: "getUsers",
+					Produces:    []string{"application/json"},
+				},
+			},
+		},
+	}
+}

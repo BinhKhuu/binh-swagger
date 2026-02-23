@@ -3,7 +3,6 @@ package generate
 import (
 	filehelper "binh-swagger/cmd/swagger/commands/adaptor"
 	fileHelperMock "binh-swagger/cmd/swagger/commands/helpers/mocks"
-	"binh-swagger/cmd/swagger/commands/internal/spec"
 	"testing"
 )
 
@@ -24,38 +23,5 @@ func Test_FromAPIConfig_Success(t *testing.T) {
 	apiConfig := createMockAPIConfig()
 	if err := fromAPIConfig(apiConfig, config); err != nil {
 		t.Fatalf("Error generating from API config: %v", err)
-	}
-}
-
-// todo move this to a mock helper function with the other mock data creation functions (see genearte_testHelpers.go)
-func createMockAPIConfig() *spec.APIConfig {
-	return &spec.APIConfig{
-		Version: "1.0.0",
-		Models: map[string]spec.ModelSpec{
-			"User": {
-				Name: "User",
-				Fields: []spec.FieldSpec{
-					{Name: "ID", Type: "int", JSON: "id"},
-					{Name: "Name", Type: "string", JSON: "name"},
-				},
-			},
-			"Product": {
-				Name: "Product",
-				Fields: []spec.FieldSpec{
-					{Name: "ID", Type: "int", JSON: "id"},
-					{Name: "Title", Type: "string", JSON: "title"},
-					{Name: "Price", Type: "float64", JSON: "price"},
-				},
-			},
-		},
-		Paths: map[string]spec.PathSpec{
-			"/users": {
-				Get: &spec.Operation{
-					Summary:     "Get all users",
-					OperationID: "getUsers",
-					Produces:    []string{"application/json"},
-				},
-			},
-		},
 	}
 }
