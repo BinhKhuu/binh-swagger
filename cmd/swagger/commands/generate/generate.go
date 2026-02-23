@@ -148,9 +148,6 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 		}
 		responses[responseKey] = *resCmd
 	}
-
-	// maybe store the name of the model so handler can generate the return statement with the correct model name
-
 	return responses, nil
 }
 
@@ -166,6 +163,16 @@ func setReturnCode(res spec.ResponseSpec, mCdm *ModelCommand, resCmd *ResponseCo
 	}
 
 	resCmd.SuccessReturnCode = code
+}
+
+func combineReturnCodes(responses map[int]ResponseCommand) string {
+	var codes []string
+	for _, res := range responses {
+		if res.SuccessReturnCode != "" {
+			codes = append(codes, res.SuccessReturnCode)
+		}
+	}
+	return strings.Join(codes, "\n")
 }
 
 func getModelSchemaKey(res spec.ResponseSpec) string {

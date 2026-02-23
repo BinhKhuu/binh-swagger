@@ -122,3 +122,17 @@ func Test_SetReturnCode(t *testing.T) {
 		})
 	}
 }
+
+func Test_CombineReturnCodes(t *testing.T) {
+	responses := map[int]ResponseCommand{
+		200: {SuccessReturnCode: "c.JSON(200, models.User{})"},
+		400: {SuccessReturnCode: "c.JSON(400, models.Error{})"},
+		500: {SuccessReturnCode: ""},
+	}
+
+	expected := "c.JSON(200, models.User{})\nc.JSON(400, models.Error{})"
+	combined := combineReturnCodes(responses)
+	if combined != expected {
+		t.Errorf("expected %q, got %q", expected, combined)
+	}
+}
