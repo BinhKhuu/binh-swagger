@@ -144,7 +144,7 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 			resCmd.Type = res.Schema.Type
 			resCmd.Description = res.Description
 
-			setReturnCode(res, mCdm, ref, resCmd, responseKey)
+			setReturnCode(res, mCdm[ref], resCmd, responseKey)
 		}
 		responses[responseKey] = *resCmd
 	}
@@ -154,21 +154,17 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 	return responses, nil
 }
 
-// todo test this
-// coudl combine mCdm and ref into a single parameter since ref is only used to get the model name from mCdm
-// change so it loops through all the possible return types and build one return string contraining all the return paths
-func setReturnCode(res spec.ResponseSpec, mCdm map[string]*ModelCommand, ref string, resCmd *ResponseCommand, responseKey int) {
+func setReturnCode(res spec.ResponseSpec, mCdm *ModelCommand, resCmd *ResponseCommand, responseKey int) {
 	var code string
 	switch res.Schema.Type {
 	case "array":
-		code = fmt.Sprintf("c.JSON(%d,[]models.%s{})", responseKey, mCdm[ref].Name)
+		code = fmt.Sprintf("c.JSON(%d,[]models.%s{})", responseKey, mCdm.Name)
 	case "object":
-		code = fmt.Sprintf("c.JSON(%d, models.%s{})", responseKey, mCdm[ref].Name)
+		code = fmt.Sprintf("c.JSON(%d, models.%s{})", responseKey, mCdm.Name)
 	default:
 		code = "// todo add comment on return type, currently only supports array and object types"
 	}
 
-	// todo create string where all the return types are defined, then have the template reference that string instead of hardcoding the return code here. This will make it easier to maintain and update the return code in the future.
 	resCmd.SuccessReturnCode = code
 }
 

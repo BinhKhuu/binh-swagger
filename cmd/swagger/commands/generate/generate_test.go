@@ -68,72 +68,57 @@ func Test_SpecToOperation_ArrayType(t *testing.T) {
 	}
 }
 
-func Test_SetReturnCode_ArrayType(t *testing.T) {
-	res := spec.ResponseSpec{
-		Description: "Successful response",
-		Schema: &spec.SchemaSpec{
-			Type: "array",
-			Items: spec.Items{
-				Ref: spec.Ref{
-					Ref: "#/definitions/User",
+func Test_SetReturnCode(t *testing.T) {
+	tests := []struct {
+		name         string
+		schema       *spec.SchemaSpec
+		expectedCode string
+	}{
+		{
+			name: "array",
+			schema: &spec.SchemaSpec{
+				Type: "array",
+				Items: spec.Items{
+					Ref: spec.Ref{Ref: "#/definitions/User"},
 				},
 			},
+			expectedCode: "c.JSON(200,[]models.User{})",
 		},
-	}
-	mCdm := map[string]*ModelCommand{
-		"User": {
-			Name: "User",
-			Fields: []spec.FieldSpec{
-				{Name: "ID", Type: "int", JSON: "id"},
-				{Name: "Name", Type: "string", JSON: "name"},
+		{
+			name: "object",
+			schema: &spec.SchemaSpec{
+				Type: "object",
+				Ref:  spec.Ref{Ref: "#/definitions/User"},
 			},
+			expectedCode: "c.JSON(200, models.User{})",
 		},
 	}
-	ref := "User"
-	resCmd := &ResponseCommand{
-		Type:        res.Schema.Type,
-		Ref:         res.Schema.Items.Ref.Ref,
-		Description: res.Description,
-	}
-	responseKey := 200
-	setReturnCode(res, mCdm, ref, resCmd, responseKey)
-	code := resCmd.SuccessReturnCode
-	expectedCode := "c.JSON(200,[]models.User{})"
-	if code != expectedCode {
-		t.Errorf("Expected code %q, got %q", expectedCode, code)
-	}
-}
 
-func Test_SetReturnCode_ObjectType(t *testing.T) {
-	res := spec.ResponseSpec{
-		Description: "Successful response",
-		Schema: &spec.SchemaSpec{
-			Type: "object",
-			Ref: spec.Ref{
-				Ref: "#/definitions/User",
-			},
-		},
+	mCdm := &ModelCommand{
+		Name: "User",
 	}
-	mCdm := map[string]*ModelCommand{
-		"User": {
-			Name: "User",
-			Fields: []spec.FieldSpec{
-				{Name: "ID", Type: "int", JSON: "id"},
-				{Name: "Name", Type: "string", JSON: "name"},
-			},
-		},
-	}
-	ref := "User"
-	resCmd := &ResponseCommand{
-		Type:        res.Schema.Type,
-		Ref:         res.Schema.Ref.Ref,
-		Description: res.Description,
-	}
-	responseKey := 200
-	setReturnCode(res, mCdm, ref, resCmd, responseKey)
-	code := resCmd.SuccessReturnCode
-	expectedCode := "c.JSON(200, models.User{})"
-	if code != expectedCode {
-		t.Errorf("Expected code %q, got %q", expectedCode, code)
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			res := spec.ResponseSpec{
+				Description: "Successful response",
+				Schema:      tc.schema,
+			}
+			resCmd := &ResponseCommand{
+				Type:        res.Schema.Type,
+				Description: res.Description,
+			}
+			if res.Schema.Type == "array" {
+				resCmd.Ref = res.Schema.Items.Ref.Ref
+			} else {
+				resCmd.Ref = res.Schema.Ref.Ref
+			}
+
+			setReturnCode(res, mCdm, resCmd, 200)
+
+			if resCmd.SuccessReturnCode != tc.expectedCode {
+				t.Errorf("expected %q, got %q", tc.expectedCode, resCmd.SuccessReturnCode)
+			}
+		})
 	}
 }
