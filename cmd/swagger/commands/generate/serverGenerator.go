@@ -19,12 +19,14 @@ func Server(cmd *ServerCommand, cfg Config) error {
 	if err != nil {
 		return err
 	}
+
 	var buf bytes.Buffer
 
 	tmpl, err := templateHelper.GetBaseTemplate(&buf, cfg.FileHelper(), templateHelper.ServerTemplateKey)
 	if err != nil {
 		return err
 	}
+
 	pathNames := santisePathNames(cmd.PathNames)
 	if err = validatePathNames(pathNames); err != nil {
 		return err
@@ -49,6 +51,7 @@ func Server(cmd *ServerCommand, cfg Config) error {
 	}
 
 	outputFile := cfg.FileHelper().GetAbsoluteSanitiseFilePath(projectStructure["server"], serverGoFileName)
+
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
@@ -57,15 +60,18 @@ func validatePathNames(pathNames []string) error {
 		if path == "" {
 			return ErrInvalidPathName
 		}
+
 		if !strings.HasPrefix(path, "/") {
 			return ErrInvalidPathName
 		}
 	}
+
 	return nil
 }
 
 func santisePathNames(pathNames []string) []string {
 	var santised []string
+
 	for _, path := range pathNames {
 		if !strings.HasPrefix(path, "/") {
 			santised = append(santised, "/"+path)
@@ -73,5 +79,6 @@ func santisePathNames(pathNames []string) []string {
 			santised = append(santised, path)
 		}
 	}
+
 	return santised
 }

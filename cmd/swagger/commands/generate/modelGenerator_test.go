@@ -15,6 +15,7 @@ import (
 func Test_GenerateModel(t *testing.T) {
 	_ = InitGenerateTests(t)
 	createMockTempFolders(t)
+
 	config := spec.ModelSpec{
 		Name: "User",
 		Fields: []spec.FieldSpec{
@@ -22,10 +23,12 @@ func Test_GenerateModel(t *testing.T) {
 			{Name: "Name", Type: "string", JSON: "name"},
 		},
 	}
+
 	modelCmd, err := SpecToModelCommand(config)
 	if err != nil {
 		t.Fatalf("SpecToModelCommand failed: %v", err)
 	}
+
 	helperAdapter := mockFileHelper.CreateMockFileHelper()
 	generateConfig := &mockFileHelper.MockGenerateConfig{
 		FileHelperFunc: func() filehelper.FileHelper {

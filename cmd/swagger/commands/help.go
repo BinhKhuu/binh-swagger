@@ -15,6 +15,7 @@ func writeLines(w io.Writer, lines []string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -23,5 +24,6 @@ func (h *HelpCommand) Execute(_ []string) error {
 		"Available commands:",
 		"  help    Show this help message",
 	}
+
 	return writeLines(h.Out, lines)
 }

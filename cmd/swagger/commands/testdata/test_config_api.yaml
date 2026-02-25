@@ -52,12 +52,3 @@ paths:
             schema:
               type: object
               $ref: "#/definitions/User"
-
-routes:
-  - path: "/users"
-    method: "GET"
-    model: "User"
-
-  - path: "/products"
-    method: "POST"
-    model: "Product"

@@ -72,6 +72,7 @@ func (c *ConfigCommand) Execute(_ []string) error {
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error prasing the file: %v\n", err)
 		}
+
 		err = c.Generate.FromAPIConfig(config, c)
 		if err != nil {
 			fmt.Fprintf(c.Out, "there was an error generating from api config: %v\n", err)
@@ -198,10 +199,12 @@ func parseYAML[T any](file *os.File) (*T, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var v T
 	if err := yaml.Unmarshal(data, &v); err != nil {
 		return nil, err
 	}
+
 	return &v, nil
 }
 
@@ -221,6 +224,7 @@ func validateAndOpenFile(c *ConfigCommand) (*os.File, error) {
 		if os.IsNotExist(err) {
 			message = "config file not found %v"
 		}
+
 		return nil, fmt.Errorf(message, err)
 	}
 

@@ -113,6 +113,7 @@ func LoadModelTemplate(fileHefileHelper fileHelper.FileHelper, templateName stri
 	templatePath := fileHefileHelper.GetAbsoluteSanitiseFilePath(filepath.Join(currentDir, "..", "templates"), templateFilename)
 
 	template := template.Must(template.ParseFiles(templatePath))
+
 	return template, nil
 
 	// old code here as an example of reading file content if needed
@@ -128,6 +129,7 @@ func getTemplatePath(templateName string) (string, error) {
 	if path == "" {
 		return "", fmt.Errorf("%w: %s", ErrTemplateNotFound, templateName)
 	}
+
 	return path, nil
 }
 
@@ -137,6 +139,7 @@ func getCurrentFileDir() (string, error) {
 	if !ok {
 		return "", errors.New("failed to get directory")
 	}
+
 	return filepath.Dir(file), nil
 }
 
@@ -157,16 +160,19 @@ func ExecuteTemplate[T TemplateModel](data T, tmpl *template.Template, buf *byte
 	if err := tmpl.ExecuteTemplate(buf, templateName, data); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func SetModelTemplateImportPaths(models *ModelTemplateModel) {
 	paths := map[string]string{}
+
 	for _, f := range models.Fields {
 		importPath := getImportPath(f.Type)
 		if importPath != "" {
 			paths[importPath] = importPath
 		}
+
 		models.ImportPath = buildImportStringSlice(paths)
 	}
 }
@@ -176,6 +182,7 @@ func buildImportStringSlice(paths map[string]string) []string {
 	for _, path := range paths {
 		imports = append(imports, path)
 	}
+
 	return imports
 }
 

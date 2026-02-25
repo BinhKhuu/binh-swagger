@@ -19,6 +19,7 @@ func Project(fHelper fileHelper.FileHelper, rootPath string) (string, error) {
 	}
 
 	projectImportPath = importPath
+
 	rootDir, err := fHelper.CreateDirectory(rootPath)
 	if err != nil {
 		return "", err
@@ -42,8 +43,10 @@ func Project(fHelper fileHelper.FileHelper, rootPath string) (string, error) {
 			for _, createdDir := range createdDirs {
 				_ = os.RemoveAll(createdDir)
 			}
+
 			return "", err
 		}
+
 		createdDirs = append(createdDirs, dir)
 	}
 
@@ -56,6 +59,7 @@ func GetProjectStructure() (map[string]string, error) {
 	if projectStructure == nil {
 		return nil, ErrProjectNotInitilized
 	}
+
 	return projectStructure, nil
 }
 
@@ -64,6 +68,7 @@ func SetProjectStructure(rootDir string) error {
 	if projectStructure != nil {
 		return errors.New("project structure already initialized")
 	}
+
 	projectStructure = map[string]string{
 		"server":     rootDir + "/cmd/server",
 		"handlers":   rootDir + "/internal/handlers",
@@ -74,5 +79,6 @@ func SetProjectStructure(rootDir string) error {
 		"middleware": rootDir + "/middleware",
 		"config":     rootDir + "/config",
 	}
+
 	return nil
 }

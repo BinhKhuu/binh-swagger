@@ -25,6 +25,7 @@ func main() {
 func configureHelpers() *commands.Helpers {
 	fileHelper := &filehelper.DefaultFileHelper{}
 	generate := &generate.DefaultOrchestrator{}
+
 	return &commands.Helpers{
 		File:     fileHelper,
 		Generate: generate,
@@ -35,6 +36,7 @@ func BuildParser() (*flags.Parser, error) {
 	parser := flags.NewParser(nil, flags.Default)
 	baseCommand := &commands.BaseCommand{Out: os.Stdout}
 	helpers := configureHelpers()
+
 	_, err := parser.AddCommand(
 		"help",
 		"Show help",
@@ -44,6 +46,7 @@ func BuildParser() (*flags.Parser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = parser.AddCommand(
 		"version",
 		"Shows version",
@@ -53,6 +56,7 @@ func BuildParser() (*flags.Parser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = parser.AddCommand(
 		"env",
 		"Shows version",
@@ -62,6 +66,7 @@ func BuildParser() (*flags.Parser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = parser.AddCommand(
 		"echo",
 		"repeats arguments",
@@ -71,6 +76,7 @@ func BuildParser() (*flags.Parser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = parser.AddCommand(
 		"config",
 		"loads config",

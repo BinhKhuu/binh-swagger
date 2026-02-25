@@ -20,6 +20,7 @@ func ValidateFileInfo(fileInfo os.FileInfo) error {
 	if fileInfo.IsDir() {
 		return fmt.Errorf("expected a file but got directory: %s", fileInfo.Name())
 	}
+
 	return nil
 }
 
@@ -27,10 +28,12 @@ func ValidateFileInfo(fileInfo os.FileInfo) error {
 func GetAbsoluteSanitiseFilePath(filelocation string, filename string) string {
 	cleanPath := filepath.Clean(filelocation)
 	cleanFile := filepath.Clean(filename)
+
 	cleanFilePath := filepath.Join(cleanPath, cleanFile)
 	if !filepath.IsAbs(cleanFilePath) {
 		cleanFilePath, _ = filepath.Abs(cleanFilePath)
 	}
+
 	return cleanFilePath
 }
 
@@ -39,9 +42,11 @@ func CheckSymlinks(absFilePath string) error {
 	if err != nil {
 		return err
 	}
+
 	if info.Mode()&os.ModeSymlink != 0 {
 		return errors.New("symlinks not allowed")
 	}
+
 	return nil
 }
 
@@ -50,6 +55,7 @@ func EnsureOutputDirectoryExists(dirPath string, output io.Writer, input io.Read
 		if !promptCreateDirectory(dirPath, output, input) {
 			return true, errors.New("directory creation cancelled by user")
 		}
+
 		if _, err := CreateDirectory(dirPath); err != nil {
 			return true, err
 		}
@@ -58,11 +64,13 @@ func EnsureOutputDirectoryExists(dirPath string, output io.Writer, input io.Read
 			return true, fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
+
 	return false, nil
 }
 
 func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool {
 	reader := bufio.NewReader(input)
+
 	fmt.Fprintf(output, "\nDirectory %s does not exist. Create it? it will be made in the directory relative to where you ran the command [y/N]: ", path)
 
 	response, err := reader.ReadString('\n')
@@ -71,6 +79,7 @@ func promptCreateDirectory(path string, output io.Writer, input io.Reader) bool 
 	}
 
 	response = strings.ToLower(strings.TrimSpace(response))
+
 	return response == "y" || response == "yes"
 }
 
@@ -81,6 +90,7 @@ func CreateDirectory(rootPath string) (string, error) {
 			return "", fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
+
 	return dirPath, nil
 }
 
@@ -102,6 +112,7 @@ func ReadAllChildDirectoriesRecursive(path string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			allDirs = append(allDirs, subDirs...)
 		}
 	}
@@ -114,6 +125,7 @@ func HasGoModFile() error {
 	if os.IsNotExist(err) {
 		return fmt.Errorf("%w", ErrNoGoModFile)
 	}
+
 	return nil
 }
 
@@ -122,12 +134,14 @@ func GetGoModImportPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	reader := bufio.NewReader(data)
 	for {
 		line, err := reader.ReadString('\n')
 		if after, ok := strings.CutPrefix(line, "module "); ok {
 			return strings.TrimSpace(after), nil
 		}
+
 		if err != nil && err == io.EOF {
 			return "", fmt.Errorf("%w: End of file reached", ErrEmptyGoModFile)
 		}

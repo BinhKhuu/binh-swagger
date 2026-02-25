@@ -118,13 +118,16 @@ func SpecToOperation(cfg spec.Operation, mCmd map[string]*ModelCommand) (*Operat
 		OperationID: cfg.OperationID,
 		Produces:    cfg.Produces,
 	}
+
 	resp, err := SpecToOperationResponses(cfg, mCmd)
 	if err != nil {
 		return nil, err
 	}
+
 	opCmd.Responses = resp
 	opCmd.ReturnType = deriveReturnType(cfg)
 	opCmd.ReturnCode = combineReturnCodes(resp)
+
 	return opCmd, nil
 }
 
@@ -139,27 +142,33 @@ func SpecToOperationResponses(cfg spec.Operation, mCdm map[string]*ModelCommand)
 		}
 		ref := getModelSchemaKey(res)
 		resCmd.Description = res.Description
+
 		if ref != "" {
 			if mCdm[ref] == nil {
 				return nil, fmt.Errorf("%w: schema %s not found", ErrSchemaNotFound, ref)
 			}
+
 			if res.Schema.Type == schemaTypeArray {
 				resCmd.Ref = res.Schema.Items.Ref.Ref
 			} else {
 				resCmd.Ref = res.Schema.Ref.Ref
 			}
+
 			resCmd.Type = res.Schema.Type
 			resCmd.Description = res.Description
 
 			setReturnCode(res, mCdm[ref], resCmd, responseKey)
 		}
+
 		responses[responseKey] = *resCmd
 	}
+
 	return responses, nil
 }
 
 func setReturnCode(res spec.ResponseSpec, mCdm *ModelCommand, resCmd *ResponseCommand, responseKey int) {
 	var code string
+
 	switch res.Schema.Type {
 	case schemaTypeArray:
 		code = fmt.Sprintf("c.JSON(%d,[]models.%s{})", responseKey, mCdm.Name)
@@ -174,11 +183,13 @@ func setReturnCode(res spec.ResponseSpec, mCdm *ModelCommand, resCmd *ResponseCo
 
 func combineReturnCodes(responses map[int]ResponseCommand) string {
 	var codes []string
+
 	for _, res := range responses {
 		if res.SuccessReturnCode != "" {
 			codes = append(codes, res.SuccessReturnCode)
 		}
 	}
+
 	return strings.Join(codes, "\n")
 }
 
@@ -227,6 +238,7 @@ func deriveReturnType(op spec.Operation) string {
 			if code >= 200 && code < 300 {
 				rr := r
 				chosen = &rr
+
 				break
 			}
 		}
@@ -244,6 +256,7 @@ func deriveReturnType(op spec.Operation) string {
 		if key == "" {
 			return ""
 		}
+
 		return "[]models." + key
 
 	case schemaTypeObject, "":
@@ -251,6 +264,7 @@ func deriveReturnType(op spec.Operation) string {
 		if key == "" {
 			return ""
 		}
+
 		return "models." + key
 
 	default:

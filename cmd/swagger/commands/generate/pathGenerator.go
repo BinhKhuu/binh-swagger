@@ -23,6 +23,7 @@ func Path(cmd *PathCommand, config Config) error {
 	}
 
 	ops := createOperationModels(cmd)
+
 	importsData := templateHelper.ImportsTemplateModel{
 		ModelImportPath:   cmd.ModelImportPath,
 		HandlerImportPath: cmd.HandlerImportPath,
@@ -46,21 +47,25 @@ func createOperationModels(cmd *PathCommand) []templateHelper.OperationModel {
 			ops = append(ops, op)
 		}
 	}
+
 	if cmd.Post != nil {
 		if op, err := toOperationsModel(*cmd.Post, http.MethodPost); err == nil {
 			ops = append(ops, op)
 		}
 	}
+
 	if cmd.Put != nil {
 		if op, err := toOperationsModel(*cmd.Put, http.MethodPut); err == nil {
 			ops = append(ops, op)
 		}
 	}
+
 	if cmd.Delete != nil {
 		if op, err := toOperationsModel(*cmd.Delete, http.MethodDelete); err == nil {
 			ops = append(ops, op)
 		}
 	}
+
 	if cmd.Patch != nil {
 		if op, err := toOperationsModel(*cmd.Patch, http.MethodPatch); err == nil {
 			ops = append(ops, op)
@@ -80,12 +85,14 @@ func toOperationsModel(op OperationCommand, methodType string) (templateHelper.O
 			SuccessReturnCode: response.SuccessReturnCode,
 		}
 	}
+
 	r := []rune(op.OperationID)
 	if len(r) == 0 {
 		return templateHelper.OperationModel{}, ErrOperationIDNotDefined
 	}
 
 	r[0] = unicode.ToUpper(r[0])
+
 	return templateHelper.OperationModel{
 		MethodType:  methodType,
 		OperationID: string(r),
@@ -99,7 +106,9 @@ func toOperationsModel(op OperationCommand, methodType string) (templateHelper.O
 func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.ImportsTemplateModel, ops []templateHelper.OperationModel) error {
 	routeFileName := cmd.Name + routesFileSuffix
 	fHelper := config.FileHelper()
+
 	var buf bytes.Buffer
+
 	tmpl, err := templateHelper.GetBaseTemplate(&buf, fHelper, templateHelper.RouteTemplateKey)
 	if err != nil {
 		return err
@@ -110,6 +119,7 @@ func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.Im
 	}
 
 	rd := createRoutesData("/"+cmd.Name, ops)
+
 	rm := templateHelper.RoutesTemplateModel{
 		Routes: rd,
 	}
@@ -118,6 +128,7 @@ func createRoutes(cmd *PathCommand, config Config, importsData templateHelper.Im
 	}
 
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(projectStructure["routes"], routeFileName)
+
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
@@ -126,6 +137,7 @@ func createHandlers(cmd *PathCommand, config Config, importsData templateHelper.
 	handlerFilename := cmd.Name + handlerFileSuffix
 
 	var buf bytes.Buffer
+
 	tmpl, err := templateHelper.GetBaseTemplate(&buf, fHelper, templateHelper.HandlerTemplateKey)
 	if err != nil {
 		return err
@@ -134,16 +146,20 @@ func createHandlers(cmd *PathCommand, config Config, importsData templateHelper.
 	if err = templateHelper.ExecuteTemplate(&importsData, tmpl, &buf, templateHelper.Templates.ImportsDefine); err != nil {
 		return err
 	}
+
 	for _, o := range ops {
 		if o.OperationID == "" {
 			continue
 		}
+
 		err := templateHelper.ExecuteTemplate(&o, tmpl, &buf, o.MethodType)
 		if err != nil {
 			return err
 		}
 	}
+
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(projectStructure["handlers"], handlerFilename)
+
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
@@ -153,6 +169,7 @@ func createRoutesData(pathName string, ops []templateHelper.OperationModel) []te
 		if o.OperationID == "" {
 			continue
 		}
+
 		route := templateHelper.RouteModel{
 			Method:      o.MethodType,
 			PathName:    pathName,
@@ -161,5 +178,6 @@ func createRoutesData(pathName string, ops []templateHelper.OperationModel) []te
 
 		routes = append(routes, route)
 	}
+
 	return routes
 }

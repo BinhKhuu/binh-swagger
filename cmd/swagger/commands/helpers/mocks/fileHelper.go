@@ -87,20 +87,24 @@ func (m *MockGenerateConfig) FileHelper() filehelper.FileHelper {
 	if m.FileHelperFunc != nil {
 		return m.FileHelperFunc()
 	}
+
 	return CreateMockFileHelper()
 }
 
 func ChangeTestWorkingDirectory(t *testing.T) string {
 	tmp := t.TempDir()
 	t.Chdir(tmp)
+
 	return tmp
 }
 
 func ChangeCWDAndCreateGoModFile(t *testing.T) string {
 	tmp := ChangeTestWorkingDirectory(t)
+
 	goModPath := filepath.Join(tmp, "go.mod")
 	if err := os.WriteFile(goModPath, []byte("module testmodule"), pkg.FileModeExecutable); err != nil {
 		t.Fatalf("Failed to create go.mod file: %v", err)
 	}
+
 	return tmp
 }
