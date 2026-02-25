@@ -32,4 +32,16 @@ jobs:
         run: go build ./...
 
       - name: Run tests
-        run: go test ./... -v
+        run: go tool cover -func=coverage.out | tee coverage.txt
+
+      - name: Add coverage summary to job summary
+        run: |
+          {
+            echo "## Test Coverage"
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+
+
