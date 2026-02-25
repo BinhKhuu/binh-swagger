@@ -23,5 +23,6 @@ func (e *EchoCommand) Execute(_ []string) error {
 	}
 
 	fmt.Fprintf(e.Out, "%s\n", text)
+
 	return nil
 }

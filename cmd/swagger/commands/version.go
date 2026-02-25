@@ -14,5 +14,6 @@ func (v *VersionCommand) Execute(_ []string) error {
 	if err != nil {
 		fmt.Fprintf(v.Out, "Error Printing version: %v", err)
 	}
+
 	return nil
 }

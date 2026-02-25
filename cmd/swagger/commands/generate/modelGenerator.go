@@ -14,7 +14,9 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 	}
 
 	var buf bytes.Buffer
+
 	fHelper := generateConfig.FileHelper()
+
 	tmpl, err := templateHelper.GetBaseTemplate(&buf, generateConfig.FileHelper(), templateHelper.ModelTemplateKey)
 	if err != nil {
 		return err
@@ -38,15 +40,18 @@ func Model(cmd *ModelCommand, generateConfig Config) error {
 	outFile := strings.ToLower(cmd.Name) + ".go"
 
 	outputFile := fHelper.GetAbsoluteSanitiseFilePath(outputPath, outFile)
+
 	return os.WriteFile(outputFile, buf.Bytes(), pkg.FilePermOwnerReadWrite)
 }
 
 func toModelTemplate(cmd *ModelCommand) templateHelper.ModelTemplateModel {
 	fields := []templateHelper.FieldsModel{}
+
 	for _, f := range cmd.Fields {
 		if f.Name == "" || f.Type == "" {
 			continue
 		}
+
 		fm := templateHelper.FieldsModel{
 			Name: f.Name,
 			Type: f.Type,
@@ -54,11 +59,13 @@ func toModelTemplate(cmd *ModelCommand) templateHelper.ModelTemplateModel {
 		}
 		fields = append(fields, fm)
 	}
+
 	models := templateHelper.ModelTemplateModel{
 		Name:   cmd.Name,
 		Fields: fields,
 	}
 
 	templateHelper.SetModelTemplateImportPaths(&models)
+
 	return models
 }

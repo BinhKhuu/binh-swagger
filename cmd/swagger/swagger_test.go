@@ -21,6 +21,7 @@ func Test_SwaggerCommandsRegistered_HasName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error when creating the parser")
 	}
+
 	commands := parser.Commands()
 
 	existingNames := make(map[string]struct{})
@@ -45,6 +46,7 @@ func Test_SwaggerCommandAllRegistered_ByName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error when creating the parser")
 	}
+
 	commands := parser.Commands()
 
 	got := make([]string, 0, len(commands))

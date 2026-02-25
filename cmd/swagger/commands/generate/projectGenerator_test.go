@@ -49,10 +49,12 @@ func Test_Project(t *testing.T) {
 
 func Test_GetProjectStructure_InitReturnsDiretoryStructure(t *testing.T) {
 	InitGenerateTests(t)
+
 	structure, err := GetProjectStructure()
 	if err != nil {
 		t.Fatalf("Failed to get project structure: %v", err)
 	}
+
 	if structure == nil {
 		t.Fatalf("Expected non-nil project structure, got nil")
 	}
@@ -67,6 +69,7 @@ func Test_GetProjectStructure_InitReturnsDiretoryStructure(t *testing.T) {
 
 func Test_GetProjectStructure_NoInitThrowsError(t *testing.T) {
 	resetProjectStructreForTests()
+
 	_, err := GetProjectStructure()
 	if err == nil {
 		t.Fatalf("Expected error when project structure not initialized, got nil")

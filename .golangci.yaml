@@ -28,7 +28,6 @@ linters:
     - nestif # temporary
     - nonamedreturns # unclear added value
     - nlreturn # unclear added valueß
-    - noinlineerr # unclear added value
     - paralleltest # unclear added value
     - recvcheck  # disagree
     - tagliatelle # false positives, want to impose camel case everywhere => should be disabled sparingly only
@@ -37,7 +36,6 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl # unclear added value
-    - wsl_v5 # unclear added value
   settings:
     depguard:
       rules:

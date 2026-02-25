@@ -47,6 +47,7 @@ func Test_GetTemplatePath(t *testing.T) {
 				if err == nil {
 					t.Fatalf("Expected error for template key %s, got nil", tt.templateKey)
 				}
+
 				if !errors.Is(err, ErrTemplateNotFound) {
 					t.Fatalf("Expected ErrTemplateNotFound, got: %v", err)
 				}
@@ -54,6 +55,7 @@ func Test_GetTemplatePath(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Unexpected error for template key %s: %v", tt.templateKey, err)
 				}
+
 				if path != tt.expectedPath {
 					t.Fatalf("Expected path %s, got %s", tt.expectedPath, path)
 				}
@@ -89,6 +91,7 @@ func Test_LoadModelTemplate(t *testing.T) {
 				if err == nil {
 					t.Fatalf("Expected error for template key %s, got nil", tt.templateKey)
 				}
+
 				if tmpl != nil {
 					t.Fatalf("Expected nil template on error, got: %v", tmpl)
 				}
@@ -96,6 +99,7 @@ func Test_LoadModelTemplate(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Unexpected error loading template %s: %v", tt.templateKey, err)
 				}
+
 				if tmpl == nil {
 					t.Fatalf("Expected valid template, got nil")
 				}
@@ -109,6 +113,7 @@ func Test_GetCurrentFileDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error getting current file directory: %v", err)
 	}
+
 	if dir == "" {
 		t.Fatalf("Expected non-empty directory path, got empty string")
 	}

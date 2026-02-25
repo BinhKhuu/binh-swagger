@@ -13,5 +13,6 @@ func (m *MockOrchestrator) FromAPIConfig(cfg *spec.APIConfig, command generate.C
 	if m.FromAPIConfigFn != nil {
 		return m.FromAPIConfigFn(cfg, command)
 	}
+
 	return nil
 }

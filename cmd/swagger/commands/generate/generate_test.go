@@ -34,9 +34,11 @@ func Test_SpecToModelCommand(t *testing.T) {
 		if strings.Compare(field.Name, res.Fields[i].Name) != 0 {
 			t.Errorf("Expected field name %q at index %d, got %q", field.Name, i, res.Fields[i].Name)
 		}
+
 		if strings.Compare(field.Type, res.Fields[i].Type) != 0 {
 			t.Errorf("Expected field type %q at index %d, got %q", field.Type, i, res.Fields[i].Type)
 		}
+
 		if strings.Compare(field.JSON, res.Fields[i].JSON) != 0 {
 			t.Errorf("Expected field JSON tag %q at index %d, got %q", field.JSON, i, res.Fields[i].JSON)
 		}
@@ -178,6 +180,7 @@ func Test_SetReturnCode(t *testing.T) {
 				Description: "Successful response",
 				Schema:      tc.schema,
 			}
+
 			resCmd := &ResponseCommand{
 				Type:        res.Schema.Type,
 				Description: res.Description,
@@ -205,6 +208,7 @@ func Test_CombineReturnCodes(t *testing.T) {
 	}
 
 	expected := "c.JSON(200, models.User{})\nc.JSON(400, models.Error{})"
+
 	combined := combineReturnCodes(responses)
 	if combined != expected {
 		t.Errorf("expected %q, got %q", expected, combined)
