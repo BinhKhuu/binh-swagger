@@ -1,4 +1,4 @@
-package mocks
+package generatemocks
 
 import (
 	"binh-swagger/cmd/swagger/commands/generate"

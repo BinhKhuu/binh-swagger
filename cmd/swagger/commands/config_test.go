@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"binh-swagger/cmd/swagger/commands/generate/mocks"
+	"binh-swagger/cmd/swagger/commands/generate/generatemocks"
 	fileHelperMock "binh-swagger/cmd/swagger/commands/helpers/mocks"
 	"bytes"
 	"fmt"
@@ -118,7 +118,7 @@ func setupConfigTests(filename string, filePath string) (*ConfigCommand, *bytes.
 	baseCommand := SetupBaseCommand(&buff)
 	helpers := Helpers{
 		File:     &fileHelperMock.MockFileHelper{},
-		Generate: &mocks.MockOrchestrator{},
+		Generate: &generatemocks.MockOrchestrator{},
 	}
 
 	args := ConfigArgs{UserConfigPath: filePath, UserConfigFilename: filename}
