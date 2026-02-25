@@ -32,7 +32,7 @@ jobs:
         run: go build ./...
 
       - name: Run tests
-        run: go tool cover -func=coverage.out | tee coverage.txt
+        run: go test ./... -v -coverprofile=coverage.out -covermode=atomic
 
       - name: Add coverage summary to job summary
         run: |
